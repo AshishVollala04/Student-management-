@@ -1,0 +1,314 @@
+Phase 0 — Frontend Foundation
+Goal: establish the visual language, reusable shell, role-aware navigation and five placeholder dashboards.
+Act as a Senior Software Architect, Senior React Engineer, Senior UI/UX Engineer, Senior TypeScript Developer, and QA 
+Engineer working on FutureSchool.
+TECH STACK- React + TypeScript + Vite- Tailwind CSS- React Router- Lucide React- Recharts where charts add real value- Mock TypeScript data/services only for now
+GLOBAL ENGINEERING RULES- Frontend prototype only. Do not create backend, database, Firebase, Supabase, payment gateway, real AI API, or Spring 
+Boot code.- Preserve the existing scalable architecture and shared design system.- Do not put major functionality into App.tsx.- Use strict TypeScript, functional components, proper interfaces, reusable components, semantic HTML, keyboard 
+accessibility, visible focus states, and responsive layouts.- Keep all mock data centralized. Do not scatter fake values across JSX.- Reuse existing AppShell, PageHeader, StatCard, StatusBadge, DataTable, FilterBar, dialogs, empty/loading states and 
+navigation configuration.- Do not duplicate shared components inside role modules.- Use consistent workflow statuses from centralized types and mappings.- Do not add unnecessary packages or global state libraries.- Build and validate at the end. Fix TypeScript, routing, import, responsive and accessibility issues before stopping.- Do not implement modules outside this phase.
+PHASE 0 SCOPE
+1. If the workspace is empty, initialize a Vite React TypeScript project. If it already exists, preserve it.
+2. Install/configure react-router-dom, lucide-react, recharts and Tailwind CSS using compatible versions.
+3. Create a maintainable structure under src/app, src/components/layout, src/components/common, src/components/ui, 
+src/modules, src/mock, src/types, src/hooks, src/utils and src/styles.
+4. Create UserRole = STUDENT | PARENT | TEACHER | PRINCIPAL | ADMIN.
+5. Build a responsive AppShell with desktop sidebar, mobile drawer, TopBar, search placeholder, notifications, profile 
+menu and language placeholder.
+6. Make navigation configuration-driven. Create placeholder navigation for all five portals.
+7. Prepare Admin permission types: ADMISSIONS, FINANCE, ACADEMIC_OPERATIONS, TRANSPORT, SECURITY, REPORTS.
+8. Add routes: /login, /student/dashboard, /parent/dashboard, /teacher/dashboard, /principal/dashboard and 
+/admin/dashboard.
+9. Add a DEVELOPMENT-ONLY Prototype Role Switcher that changes role and route. Make it easy to remove later.
+10. Build polished placeholder dashboards with Welcome, four StatCards, action section, recent activity and upcoming 
+items.
+11. Build shared components: Button, Card, Input, Select, PageHeader, StatCard, ActionCard, StatusBadge, EmptyState, 
+LoadingState, SearchInput, FilterBar, Modal and ConfirmDialog.
+12. Centralize StatusBadge styles for DRAFT, PENDING, APPROVED, REJECTED, RETURNED, ACTIVE, COMPLETED, OVERDUE and 
+BLOCKED.
+13. Use a professional deep-teal and warm-orange school SaaS visual language. Avoid childish styling and excessive 
+gradients.
+STOP after foundation, routing, shell, role switcher and placeholder dashboards. Do not build real login or business 
+modules.
+FINAL RESPONSE- List files created/modified- List dependencies added- Summarize architecture and routes- Explain how to run- Report npm run build result- State assumptions
+Phase 1 — Authentication Frontend
+Goal: replace the development role switcher as the primary entry with a realistic mock authentication 
+experience
+Act as a Senior Software Architect, Senior React Engineer, Senior UI/UX Engineer, Senior TypeScript Developer, and QA 
+Engineer working on FutureSchool.
+TECH STACK- React + TypeScript + Vite- Tailwind CSS- React Router- Lucide React- Recharts where charts add real value- Mock TypeScript data/services only for now
+GLOBAL ENGINEERING RULES- Frontend prototype only. Do not create backend, database, Firebase, Supabase, payment gateway, real AI API, or Spring 
+Boot code.- Preserve the existing scalable architecture and shared design system.- Do not put major functionality into App.tsx.- Use strict TypeScript, functional components, proper interfaces, reusable components, semantic HTML, keyboard 
+accessibility, visible focus states, and responsive layouts.- Keep all mock data centralized. Do not scatter fake values across JSX.- Reuse existing AppShell, PageHeader, StatCard, StatusBadge, DataTable, FilterBar, dialogs, empty/loading states and 
+navigation configuration.- Do not duplicate shared components inside role modules.- Use consistent workflow statuses from centralized types and mappings.- Do not add unnecessary packages or global state libraries.- Build and validate at the end. Fix TypeScript, routing, import, responsive and accessibility issues before stopping.- Do not implement modules outside this phase.
+PHASE 1 SCOPE — AUTHENTICATION
+Build a polished mock authentication module without backend APIs.
+LOGIN MODEL- Login dropdown contains Student, Parent, Teacher, Principal and Admin.- Student and Parent use the same Student ID, same password and same registered email. The selected dropdown role 
+determines /student or /parent.- Teacher uses Staff ID such as TCH0001.- Principal uses PRN0001 and show a prototype MFA step.- Admin uses ADM0001 and show a prototype MFA step.
+SCREENS
+1. Login page with ID, password, role selector, Remember Me and Forgot Password.
+2. Forgot Password: enter ID, show masked registered email, mock verification-code step, new password and success 
+state.
+3. First-login/change-password mock state.
+4. Principal/Admin MFA mock verification step.
+5. Locked-account and invalid-credential error examples.
+6. Development demo credentials panel that can be hidden/collapsed.
+ARCHITECTURE- Build AuthContext or a small authentication provider using localStorage/sessionStorage for prototype state.- Add ProtectedRoute and role route guards.- Preserve the Prototype Role Switcher only behind a clearly marked development control, not as normal authentication.- Centralize demo users and credentials in mock/users.ts.- Redirect authenticated users to role dashboard.- Sign out clears prototype session and returns to /login.- Do not claim real security. Clearly mark mock authentication in code comments/debug UI.
+DEMO USERS- Student/Parent: Student ID GVS-2027-0001- Teacher: TCH0001- Principal: PRN0001- Admin: ADM0001
+Use a safe prototype password listed only in the demo credentials panel.
+STOP after authentication frontend, guards, password recovery mock and MFA mock. Do not build portal business modules.
+VALIDATE- Each role reaches only its portal- Direct unauthorized route navigation redirects safely- Shared Student ID opens Student or Parent based on selector- Sign out works- Build succeeds
+Phase 2 — Student Portal
+Goal: implement the complete Student V1 prototype using published/read-only academic data and Student 
+learning actions.
+Act as a Senior Software Architect, Senior React Engineer, Senior UI/UX Engineer, Senior TypeScript Developer, and QA 
+Engineer working on FutureSchool.
+TECH STACK- React + TypeScript + Vite- Tailwind CSS- React Router- Lucide React- Recharts where charts add real value- Mock TypeScript data/services only for now
+GLOBAL ENGINEERING RULES- Frontend prototype only. Do not create backend, database, Firebase, Supabase, payment gateway, real AI API, or Spring 
+Boot code.- Preserve the existing scalable architecture and shared design system.- Do not put major functionality into App.tsx.- Use strict TypeScript, functional components, proper interfaces, reusable components, semantic HTML, keyboard 
+accessibility, visible focus states, and responsive layouts.- Keep all mock data centralized. Do not scatter fake values across JSX.- Reuse existing AppShell, PageHeader, StatCard, StatusBadge, DataTable, FilterBar, dialogs, empty/loading states and 
+navigation configuration.- Do not duplicate shared components inside role modules.- Use consistent workflow statuses from centralized types and mappings.- Do not add unnecessary packages or global state libraries.- Build and validate at the end. Fix TypeScript, routing, import, responsive and accessibility issues before stopping.- Do not implement modules outside this phase.
+PHASE 2 SCOPE — STUDENT PORTAL
+Build the Student Portal module using fictional centralized mock data.
+NAVIGATION
+Dashboard, My Academics, Attendance, Homework, Quiz, Study Materials, Digital Library, AI Tutor, Timetable, Exams, Hall 
+Ticket, Calendar, Notifications, My Progress, Profile and Security.
+DASHBOARD- Action Required, Today's Schedule, attendance, homework, quiz, upcoming exam, Hall Ticket and notices.- No fee payment controls.
+FEATURES
+1. Attendance summary, monthly trend and Morning/Afternoon daily history.
+2. Homework list/details, due/overdue filters and mock text/file submission interaction. Student can submit own work 
+only.
+3. Quiz list and MCQ attempt flow with attempts, due date, score and final review according to mock policy.
+4. Teacher-provided Study Materials with subject filters and allowed download state.
+5. Digital Library placeholder with categories/search.
+6. AI Tutor prototype grounded-language experience with clear mock responses and citations to approved Study Materials. 
+It must not imply real AI calls.
+7. Weekly timetable and timetable-change notice.
+8. Exams page with schedule, reminders and released Hall Ticket download/view state.
+9. Marks and Report Cards show only finally published results. Before publication show 'Results are not yet published'.
+10. My Progress with attendance, published exam trends, subject trends, homework and quiz summaries. No class rank or 
+peer comparison.
+11. Notifications, calendar, profile, account security and logout-all-sessions mock controls.
+RESTRICTIONS- No fee payment- No Parent functionality- No unpublished marks- No editing attendance/marks/report cards- No personal GPS- No access to other Students
+INTERACTIONS
+Use dialogs, tabs, filters, status badges, empty states and responsive tables/cards. Persist harmless prototype 
+interactions in localStorage where useful.
+STOP after Student Portal V1. Do not build Parent/Teacher/Principal/Admin modules.
+Phase 3 — Parent Portal
+Goal: implement the separate Student-ID-scoped Parent Portal with academic visibility, finance, communication 
+and safety workflows.
+Act as a Senior Software Architect, Senior React Engineer, Senior UI/UX Engineer, Senior TypeScript Developer, and QA 
+Engineer working on FutureSchool.
+TECH STACK- React + TypeScript + Vite- Tailwind CSS- React Router- Lucide React- Recharts where charts add real value- Mock TypeScript data/services only for now
+GLOBAL ENGINEERING RULES- Frontend prototype only. Do not create backend, database, Firebase, Supabase, payment gateway, real AI API, or Spring 
+Boot code.- Preserve the existing scalable architecture and shared design system.- Do not put major functionality into App.tsx.- Use strict TypeScript, functional components, proper interfaces, reusable components, semantic HTML, keyboard 
+accessibility, visible focus states, and responsive layouts.- Keep all mock data centralized. Do not scatter fake values across JSX.- Reuse existing AppShell, PageHeader, StatCard, StatusBadge, DataTable, FilterBar, dialogs, empty/loading states and 
+navigation configuration.- Do not duplicate shared components inside role modules.- Use consistent workflow statuses from centralized types and mappings.- Do not add unnecessary packages or global state libraries.- Build and validate at the end. Fix TypeScript, routing, import, responsive and accessibility issues before stopping.- Do not implement modules outside this phase.
+PHASE 3 SCOPE — PARENT PORTAL
+Build the Parent Portal scoped to exactly one Student ID. Do not add a sibling switcher.
+NAVIGATION
+Dashboard, Child Overview, Attendance, Academics, Homework, Quiz, Study Materials, Timetable, Exams, Hall Ticket, Fees, 
+Payment History, Transport, Leave, Teacher Messages, Meetings, Complaints, Calendar, Consent & Forms, Pickup/Early 
+Pickup, Notifications, Reports, Profile and Security.
+DASHBOARD
+Build a clean Action Center: urgent fee, overdue homework, upcoming meeting, consent deadline and critical notices 
+first; then Child Today, Academics, Parent Actions, School and Quick Access.
+FEATURES
+1. Detailed Attendance with immediate absence alert examples, final daily result, history and trends.
+2. Read-only Homework tracking and reminders. Parent cannot submit/edit work.
+3. Published Marks, Report Cards, acknowledgement and optional Class Teacher comment. No draft results.
+4. Child Progress with published trends only and no rank.
+5. Quiz activity/final score only, not answers.
+6. Teacher-provided Study Materials only. No AI Tutor or Digital Library.
+7. Fees: four instalments, multi-term selection, partial amount input, fee breakdown, transport fee, credits, 
+concessions, late fees, outstanding and mock checkout. Clearly mark payment as prototype only.
+8. Payment history, detailed receipt, refund status, credit choice and Report Payment Issue flows.
+9. Leave request with type, dates, reason, attachment placeholder and status.
+10. Messages to Class Teacher and assigned Subject Teachers only.
+11. School-controlled meeting slots, reschedule/cancel and Parent-visible meeting summary.
+12. Complaints with category, attachment, status, replies, resolution confirmation and reopen policy. Never show 
+internal notes.
+13. Transport details/change request, route capacity mock check and alerts. No personal GPS.
+14. Pickup contacts, temporary authorization and Early Pickup request.
+15. Consent forms and event consent/payment/cancellation policy.
+16. Profile change request, shared credential recovery/security and reports/statement downloads as prototype actions.
+17. Categorized notifications, preferences and daily summary.
+STOP after Parent Portal V1. Do not implement Teacher/Principal/Admin business modules.
+Phase 4 — Teacher Portal
+Goal: implement assignment-driven Subject Teacher and Class Teacher workspaces.
+VS Code Copilot Agent Mode - Module-by-Module Build Plan
+FutureSchool | Frontend Prototype Phase Prompts
+Act as a Senior Software Architect, Senior React Engineer, Senior UI/UX Engineer, Senior TypeScript Developer, and QA 
+Engineer working on FutureSchool.
+TECH STACK- React + TypeScript + Vite- Tailwind CSS- React Router- Lucide React- Recharts where charts add real value- Mock TypeScript data/services only for now
+GLOBAL ENGINEERING RULES- Frontend prototype only. Do not create backend, database, Firebase, Supabase, payment gateway, real AI API, or Spring 
+Boot code.- Preserve the existing scalable architecture and shared design system.- Do not put major functionality into App.tsx.- Use strict TypeScript, functional components, proper interfaces, reusable components, semantic HTML, keyboard 
+accessibility, visible focus states, and responsive layouts.- Keep all mock data centralized. Do not scatter fake values across JSX.- Reuse existing AppShell, PageHeader, StatCard, StatusBadge, DataTable, FilterBar, dialogs, empty/loading states and 
+navigation configuration.- Do not duplicate shared components inside role modules.- Use consistent workflow statuses from centralized types and mappings.- Do not add unnecessary packages or global state libraries.- Build and validate at the end. Fix TypeScript, routing, import, responsive and accessibility issues before stopping.- Do not implement modules outside this phase.
+PHASE 4 SCOPE — TEACHER PORTAL
+Build the Teacher Portal with a strict separation between My Teaching and My Class Teacher Responsibility.
+DASHBOARD- Severity-based Action Required- My Teaching analytics and tasks- Class Teacher section only when mock teacher has Class Teacher assignment- Complete work calendar and categorized notifications
+SUBJECT TEACHER FEATURES
+1. Assigned classes/subjects directory.
+2. Structured Homework create/publish/review with attachments, submission type, feedback and optional marks.
+3. Formal Marks web grid with Draft, AB, validation, Save, Submit, Returned and Resubmit states.
+4. Excel import prototype UI with template download, staging preview, validation errors and import-version rollback. No 
+real Excel parsing needed unless already supported cleanly.
+5. Marks deadlines, lock and reopening request states.
+6. Re-Exam records after approved request.
+7. Quiz builder, MCQ Question Bank, copy/reuse, attempts and results.
+8. Study Materials with Student/Parent visibility and separate AI-approval request/version status.
+9. Student academic doubts, replies and Publish as Class FAQ with Student identity hidden in FAQ.
+10. Lesson Planner, syllabus progress and blueprint-assisted Question Paper builder.
+11. Grounded Teacher AI draft assistant mock. Teacher must review before save/publish.
+CLASS TEACHER FEATURES
+1. Morning/Afternoon Attendance, Mark All Present, approved-leave context, confirmation, correction reason and 
+deadline/late-entry states.
+2. Parent Leave Requests with conflict detection.
+3. Subject marks completion, validation dashboard, Accept/Return with reason.
+4. Report Card preparation with generated values, conduct/remarks, templates, incomplete filters and Submit to 
+Principal.
+5. Principal returned selected Student cards and class-wide publication only after all approved.
+6. Hall Ticket bulk eligible release with clearance + required outstanding amount only.
+7. Parent messages, meeting availability/PTM slots, Parent-visible summary and restricted internal note.
+8. Classroom Updates without behavior scoring.
+9. Promotion recommendation.
+10. Early Pickup awareness.
+OTHER- Teacher profile, own attendance, leave, account security, reports and read-only Teaching Archive.- No Teacher ranking/performance score.
+STOP after Teacher Portal V1.
+Phase 5 — Principal Portal
+Goal: deliver an executive leadership portal with governed approvals, school-wide exceptions and separate My 
+Teaching.
+VS Code Copilot Agent Mode - Module-by-Module Build Plan
+FutureSchool | Frontend Prototype Phase Prompts
+Act as a Senior Software Architect, Senior React Engineer, Senior UI/UX Engineer, Senior TypeScript Developer, and QA 
+Engineer working on FutureSchool.
+TECH STACK- React + TypeScript + Vite- Tailwind CSS- React Router- Lucide React- Recharts where charts add real value- Mock TypeScript data/services only for now
+GLOBAL ENGINEERING RULES- Frontend prototype only. Do not create backend, database, Firebase, Supabase, payment gateway, real AI API, or Spring 
+Boot code.- Preserve the existing scalable architecture and shared design system.- Do not put major functionality into App.tsx.- Use strict TypeScript, functional components, proper interfaces, reusable components, semantic HTML, keyboard 
+accessibility, visible focus states, and responsive layouts.- Keep all mock data centralized. Do not scatter fake values across JSX.- Reuse existing AppShell, PageHeader, StatCard, StatusBadge, DataTable, FilterBar, dialogs, empty/loading states and 
+navigation configuration.- Do not duplicate shared components inside role modules.- Use consistent workflow statuses from centralized types and mappings.- Do not add unnecessary packages or global state libraries.- Build and validate at the end. Fix TypeScript, routing, import, responsive and accessibility issues before stopping.- Do not implement modules outside this phase.
+PHASE 5 SCOPE — PRINCIPAL PORTAL
+Build the Principal Portal as an executive leadership workspace, not a second Admin console.
+CORE AREAS
+1. Executive Dashboard with School Leadership, Approvals and separate My Teaching.
+2. Severity-based Action Center and Executive Calendar.
+3. Report Card exception-first approval: class validation, attention items, approve selected, return selected with 
+reason. Principal does not publish.
+4. Teacher Leave approval with operational impact and coverage.
+5. Re-Exam approval with AB, policy, document, allocation and schedule validation.
+6. Fee Concession, Refund and Fee Structure approval with policy/financial context but no payment secrets.
+7. Syllabus progress and published-result analytics. No Teacher ranking.
+8. Student Attendance monitoring and Teacher Coverage Control Center.
+9. Marks completion/exception monitoring and marks-entry reopening approvals.
+10. Published Mark Correction with before/after academic impact and Report Card versioning.
+11. Promotion approval after system eligibility and Class Teacher recommendation.
+12. Exam Control Center covering schedule, Hall Tickets, invigilation, incidents, marks, Re-Exams, Report Cards and 
+publication.
+13. Hall Ticket monitoring plus controlled Cleared-only Principal Override with reason.
+14. Complaints escalation, Safety/Incident Center and Emergency Alerts.
+15. Calendar, Exam Schedule, Timetable, Class Teacher/Subject Teacher allocations and major Event approval.
+16. Admissions approval, class-capacity override and Student Exit approval.
+17. Financial overview, Transport Exception Center and PTM monitoring.
+18. Student and Teacher directories with least-privilege detail.
+19. Approval history, School Control Center, Admin Activity Audit, policy/version review and configuration change 
+requests.
+20. Acting Principal delegation with permission/date scope, immutable active delegation and self-approval conflict 
+routing.
+21. MFA/step-up mock, sensitive export confirmation/watermark preview and privileged recovery flow.
+22. Leadership AI mock that summarizes/navigates only and cannot approve anything.
+23. My Teaching uses full Subject Teacher tools only for actual mock allocations.
+RESTRICTIONS- Principal approval does not equal publication/execution.- No direct Admin configuration editing.- No Teacher/Student/Admin ranking or performance scoring.- No payment credentials or secrets.
+STOP after Principal Portal V1.
+Phase 6 — Admin Portal
+Goal: implement a permission-aware School Operations and Administration Control Center.
+
+FutureSchool | Frontend Prototype Phase Prompts
+Act as a Senior Software Architect, Senior React Engineer, Senior UI/UX Engineer, Senior TypeScript Developer, and QA 
+Engineer working on FutureSchool.
+TECH STACK- React + TypeScript + Vite- Tailwind CSS- React Router- Lucide React- Recharts where charts add real value- Mock TypeScript data/services only for now
+GLOBAL ENGINEERING RULES- Frontend prototype only. Do not create backend, database, Firebase, Supabase, payment gateway, real AI API, or Spring 
+Boot code.- Preserve the existing scalable architecture and shared design system.- Do not put major functionality into App.tsx.- Use strict TypeScript, functional components, proper interfaces, reusable components, semantic HTML, keyboard 
+accessibility, visible focus states, and responsive layouts.- Keep all mock data centralized. Do not scatter fake values across JSX.- Reuse existing AppShell, PageHeader, StatCard, StatusBadge, DataTable, FilterBar, dialogs, empty/loading states and 
+navigation configuration.- Do not duplicate shared components inside role modules.- Use consistent workflow statuses from centralized types and mappings.- Do not add unnecessary packages or global state libraries.- Build and validate at the end. Fix TypeScript, routing, import, responsive and accessibility issues before stopping.- Do not implement modules outside this phase.
+PHASE 6 SCOPE — ADMIN PORTAL
+Build the Admin Portal using permission-aware navigation and mock Admin profiles: Full Admin, Admissions Admin, Finance 
+Admin, Transport Admin and Security Admin.
+HOME- Work Center: Urgent, My Actions, Awaiting Principal, Returned for Correction, Scheduled/Upcoming.- Permission-aware Quick Actions, analytics and Operations Calendar.
+MODULES
+1. Academic Year Setup Wizard and readiness checklist.
+2. Academic Structure Manager with classes, sections, subjects, capacity and previous-year structural copy.
+3. Full Admission Wizard with Draft/Approval/Activation and generated Student ID/shared Student-Parent credentials.
+4. Staff Onboarding with TCH/PRN/ADM IDs, permission bundles, Principal MFA state and activation.
+5. Admin Permission Manager with bundles, granular sensitive permissions, approval and audit states.
+6. Teacher Allocation Manager with Class/Teacher views, conflict checks, impact and Principal approval.
+7. Assisted Timetable Generator with constraints, conflict validation, readiness, approval and versioning.
+8. School Calendar Manager with day classification, events, conflicts, major/minor approval and versioning.
+9. Exam Configuration Manager and Exam Schedule Draft workflow.
+10. Fee Structure Manager with four instalments, categories, route transport fee, payment rules, Hall Ticket policy, 
+reminders and approval.
+11. Finance Operations Center: ledger, online/offline payments, allocation, receipts, payment issues, credits, maker
+checker, daily close and reconciliation.
+12. Validated Billing Run with eligibility/blocked preview and duplicate protection.
+13. Late Fee & Due-Date Manager.
+14. Concession Center and approved Refund Processing Center.
+15. Settlement & Reconciliation Center.
+16. Transport Operations Center with routes, stops, vehicles, capacity, assignments, changes, fees, alerts and 
+incidents.
+17. Student Profile Change Manager, Student 360 and Family Relationship Manager.
+18. Promotion Manager and Student Exit/Clearance Manager.
+19. ID Card Manager and internal Documents/Certificates Center.
+20. Attendance Operations and Staff Attendance Center.
+21. Coverage, substitutions and Exam Duty Manager.
+22. Complaint Operations, Communication Center, Events/Consent and PTM Operations.
+23. Identity & Access Center, account lifecycle, session revocation, Principal Recovery and Staff Exit.
+24. Policy Center, School Master/Branding and Secure Integrations.
+25. Approved-for-Execution Queue with fresh validation and Administrative Correction/Reversal.
+26. Bulk Import/Migration staging, validation, errors, preview and batch audit.
+27. Reports/Exports with sensitivity classification and step-up mock.
+28. Audit & Control Center, backup health, recovery request, Retention and Historical Archive.
+29. Permission-grounded Admin AI Assistant mock.
+30. Read-only academic workflow visibility only. No marks/results editing or Principal authority.
+Use realistic but fictional data. Split large modules into route-level screens and reusable domain components. Do not 
+create one giant Admin component.
+STOP after Admin Portal V1.
+Phase 7 — Cross-Role Integration and Demo QA
+Goal: make the prototype coherent, demonstrable and robust across all roles without adding a backend.
+
+FutureSchool | Frontend Prototype Phase Prompts
+Act as a Senior Software Architect, Senior React Engineer, Senior UI/UX Engineer, Senior TypeScript Developer, and QA 
+Engineer working on FutureSchool.
+TECH STACK- React + TypeScript + Vite- Tailwind CSS- React Router- Lucide React- Recharts where charts add real value- Mock TypeScript data/services only for now
+GLOBAL ENGINEERING RULES- Frontend prototype only. Do not create backend, database, Firebase, Supabase, payment gateway, real AI API, or Spring 
+Boot code.- Preserve the existing scalable architecture and shared design system.- Do not put major functionality into App.tsx.- Use strict TypeScript, functional components, proper interfaces, reusable components, semantic HTML, keyboard 
+accessibility, visible focus states, and responsive layouts.- Keep all mock data centralized. Do not scatter fake values across JSX.- Reuse existing AppShell, PageHeader, StatCard, StatusBadge, DataTable, FilterBar, dialogs, empty/loading states and 
+navigation configuration.- Do not duplicate shared components inside role modules.- Use consistent workflow statuses from centralized types and mappings.- Do not add unnecessary packages or global state libraries.- Build and validate at the end. Fix TypeScript, routing, import, responsive and accessibility issues before stopping.- Do not implement modules outside this phase.
+PHASE 7 SCOPE — CROSS-ROLE WORKFLOW SIMULATION AND QA
+Do not add new major features. Connect and polish the existing prototype.
+WORKFLOW SIMULATION
+Create a centralized mock workflow store/service so changes can be demonstrated across roles in one browser session. 
+Support these demo journeys:
+1. Parent submits Leave -> Teacher sees pending -> Teacher approves -> Parent sees approved -> Attendance shows leave 
+context.
+2. Subject Teacher submits marks -> Class Teacher accepts/returns -> Report Cards prepared -> Principal 
+approves/returns -> Class Teacher publishes -> Student/Parent see result.
+3. Finance Admin creates invoice/payment state -> Parent sees fees -> mock payment verified -> receipt appears -> Hall 
+Ticket clearance changes -> Class Teacher releases -> Parent/Student see released Hall Ticket.
+4. Parent Transport Change -> Admin validates/approves -> Parent sees new assignment and financial adjustment.
+5. Parent Complaint -> policy owner response -> Principal escalation -> Parent sees resolution/reopen state.
+6. Teacher Leave -> Principal approves -> Admin assigns substitute -> Teacher/Student/Parent timetable reflects 
+temporary change.
+7. Admin Draft configuration -> Principal approves -> Admin Approved-for-Execution -> Admin publishes.
+QUALITY WORK- Add a Demo Scenario Selector and Reset Demo Data control available only in development/demo mode.- Standardize status names, dates, currency, empty/loading/error states and notifications.- Verify route guards and permission-aware Admin navigation.- Remove duplicated UI patterns and consolidate shared components.- Check mobile, tablet, laptop and desktop layouts.- Check keyboard navigation, labels, focus states, modal focus and contrast.- Fix overflow, clipped tables, awkward sidebars and unreadable charts.- Add friendly not-found and unauthorized pages.- Ensure charts have textual summaries and do not rely only on color.- Ensure sensitive prototype screens do not display passwords, hashes, tokens, MFA secrets, full card data or personal 
+GPS.- Add a README with architecture, demo credentials, role routes, prototype limitations and workflow scenarios.
+FINAL VALIDATION- npm run build succeeds- no TypeScript errors- no broken imports/routes- all five portals load- each cross-role scenario works with mock state- reset demo data works- responsive and accessibility checks completed
+FINAL RESPONSE
+Provide files changed, scenarios implemented, defects fixed, build result and remaining prototype limitations.
+
+Recommended Execution Checklist
+1.Create a Git commit after each completed phase.
+2.Run npm run build before moving to the next phase.
+3.Capture screenshots of each role at desktop and mobile widths.
+4.Do not let Copilot rewrite finalized requirements without an explicit new decision.
+5.Treat prototype payments, AI and authentication as simulations until the backend phase.
+6.After Phase 7, freeze frontend V1 and start API contracts/backend implementation.

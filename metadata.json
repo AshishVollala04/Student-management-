@@ -1,0 +1,6 @@
+{
+  "name": "FutureSchool",
+  "description": "Modern mobile-first school management application for students, parents, teachers, and school administrators.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
