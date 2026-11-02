@@ -1,0 +1,1025 @@
+Act as my complete senior product-engineering team for FutureSchool.
+
+You must act as:
+
+- Senior Software Architect
+- Senior React and TypeScript Engineer
+- Senior Java and Spring Boot Engineer
+- Database Architect
+- Security Architect
+- DevOps Engineer
+- QA Automation Engineer
+- UI/UX Engineer
+- SaaS Product Engineer
+
+I am the product owner.
+
+I have finalized the business requirements, but I need you to help me build the complete application correctly.
+
+IMPORTANT:
+
+The current project already contains code generated through AI Studio and pushed to GitHub.
+
+Do not delete or regenerate the entire project automatically.
+
+First inspect the existing code and classify it as:
+
+KEEP
+Code that is clean, reusable and suitable for the architecture.
+
+REFACTOR
+Code that works but needs restructuring or quality improvement.
+
+REMOVE
+Dead, duplicated, insecure or unnecessary generated code.
+
+MISSING
+Required FutureSchool functionality that has not been implemented.
+
+==================================================
+PRODUCT
+==================================================
+
+Product Name:
+
+FutureSchool
+
+FutureSchool is a commercial multi-school School Management SaaS platform.
+
+The application has these layers:
+
+1. FutureSchool Platform Layer
+2. Individual School/Tenant Layer
+3. Student Portal
+4. Parent Portal
+5. Teacher Portal
+6. Principal Portal
+7. Admin Portal
+
+FutureSchool is intended to become a real-world product, not only a visual prototype.
+
+==================================================
+PLATFORM HIERARCHY
+==================================================
+
+FutureSchool Platform
+    |
+    +-- School A
+    |    +-- Principal
+    |    +-- Admins
+    |    +-- Teachers
+    |    +-- Students
+    |    +-- Parents
+    |
+    +-- School B
+    |
+    +-- School C
+
+The FutureSchool Platform Admin is different from a School Admin.
+
+PLATFORM ADMIN manages:
+
+- School tenant onboarding
+- School verification
+- School activation
+- School suspension
+- Subscription plans
+- Feature entitlements
+- Student-capacity limits
+- Platform health
+- Platform integrations
+- Platform support
+- Platform audit
+
+SCHOOL ADMIN manages only the assigned school.
+
+A School Admin must never access another school or Platform Admin functions.
+
+==================================================
+PORTALS
+==================================================
+
+FutureSchool has:
+
+- Student Portal
+- Parent Portal
+- Teacher Portal
+- Principal Portal
+- Admin Portal
+- Platform Admin Portal
+
+Each portal must have separate navigation, permissions, workflows and dashboards.
+
+Do not create one dashboard and rename it for every role.
+
+==================================================
+FRONTEND STACK
+==================================================
+
+Use:
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+- Lucide React
+- Recharts where charts add genuine value
+
+Use:
+
+- Functional components
+- Strict TypeScript
+- Reusable components
+- Responsive design
+- Accessible controls
+- Centralized mock data/services
+- Route-based feature modules
+- Permission-aware navigation
+
+Do not create giant files such as a 5,000-line App.tsx.
+
+Preferred concept:
+
+src/
+  app/
+  components/
+    ui/
+    common/
+    layout/
+  modules/
+    auth/
+    platformAdmin/
+    student/
+    parent/
+    teacher/
+    principal/
+    admin/
+  services/
+  mock/
+  hooks/
+  types/
+  utils/
+  styles/
+
+==================================================
+BACKEND STACK
+==================================================
+
+Production backend target:
+
+- Java 21
+- Spring Boot
+- Spring Security
+- Spring Data JPA
+- Bean Validation
+- Flyway
+- PostgreSQL
+- OpenAPI / Swagger
+- Maven
+
+Use a modular monolith initially.
+
+Do not start with microservices.
+
+Suggested backend modules:
+
+auth
+security
+platform
+school
+subscription
+user
+student
+staff
+academic
+attendance
+homework
+quiz
+exam
+reportcard
+finance
+transport
+communication
+notification
+document
+audit
+
+==================================================
+LOGIN MODEL
+==================================================
+
+STUDENT AND PARENT:
+
+Student and Parent use:
+
+- Same Student ID
+- Same password
+- Same registered email
+
+The role selector determines the portal.
+
+Example:
+
+Student ID:
+GVS-2027-0001
+
+Login As Student:
+Open Student Portal
+
+Login As Parent:
+Open Parent Portal
+
+A Parent session is scoped to exactly one Student ID.
+
+There is no sibling switcher.
+
+Another child requires another Student-ID login.
+
+STAFF:
+
+Teacher:
+TCHxxxx
+
+Principal:
+PRNxxxx
+
+Admin:
+ADMxxxx
+
+Platform Admin:
+Platform-managed privileged account
+
+Principal, Admin and Platform Admin require MFA in production.
+
+==================================================
+STUDENT PORTAL
+==================================================
+
+Build:
+
+- Dashboard
+- Attendance
+- Homework
+- Quiz
+- Study Materials
+- Digital Library
+- AI Tutor
+- Timetable
+- Exams
+- Hall Ticket
+- Published Marks
+- Published Report Cards
+- My Progress
+- Calendar
+- Notifications
+- Profile
+- Account Security
+
+A Student must never see unpublished formal marks.
+
+==================================================
+PARENT PORTAL
+==================================================
+
+Build:
+
+- Action-Center Dashboard
+- Child Overview
+- Attendance
+- Homework Tracking
+- Published Marks
+- Report Cards
+- Report Card Acknowledgement
+- Child Progress
+- Quiz Visibility
+- Study Materials
+- Timetable
+- Exams
+- Hall Ticket
+- Fees and Payments
+- Receipts
+- Refunds
+- Credits
+- Leave Requests
+- Teacher Messages
+- Parent-Teacher Meetings
+- Complaints
+- Transport
+- Transport Change Requests
+- Consent Forms
+- Events
+- Pickup Authorization
+- Early Pickup
+- Emergency Notices
+- Notifications
+- Reports
+- Profile Change Requests
+- Account Security
+
+Do not add:
+
+- Sibling switcher
+- Parent access to Student AI Tutor
+- Parent Homework submission
+- Personal Student GPS tracking
+- Unpublished marks
+
+==================================================
+TEACHER PORTAL
+==================================================
+
+Separate:
+
+MY TEACHING
+
+from:
+
+MY CLASS TEACHER RESPONSIBILITY
+
+SUBJECT TEACHER:
+
+- Assigned classes and subjects
+- Homework
+- Homework review
+- Formal Marks
+- Excel Marks import
+- Quiz
+- Question Bank
+- Study Materials
+- AI-material approval request
+- Student Academic Doubts
+- Class FAQ
+- Lesson Planner
+- Syllabus Progress
+- Question Paper Generator
+- Teacher AI Assistant
+
+CLASS TEACHER:
+
+- Morning Attendance
+- Afternoon Attendance
+- Leave Approval
+- Parent Communication
+- Parent Meetings
+- Subject Marks Review
+- Report Card Preparation
+- Hall Ticket Release
+- Classroom Updates
+- Promotion Recommendation
+- Early Pickup Awareness
+
+A Subject Teacher must access only the assigned Class and Subject.
+
+==================================================
+ACADEMIC APPROVAL FLOW
+==================================================
+
+Use this workflow:
+
+Subject Teacher enters Marks
+        ↓
+Class Teacher reviews each Subject
+        ↓
+Class Teacher returns or accepts
+        ↓
+Report Cards generated
+        ↓
+Conduct and Remarks completed
+        ↓
+Principal reviews
+        ↓
+Principal approves or returns selected Students
+        ↓
+All required Report Cards approved
+        ↓
+Class Teacher publishes whole Class
+        ↓
+Student and Parent see Results
+
+Principal approval does not publish results.
+
+Admin cannot edit formal marks.
+
+==================================================
+PUBLISHED RESULT CORRECTION
+==================================================
+
+Never overwrite a published result silently.
+
+Use:
+
+Subject Teacher Correction Request
+        ↓
+Class Teacher Verification
+        ↓
+Principal Approval
+        ↓
+New Report Card Version
+        ↓
+Class Teacher Republishes
+
+Example:
+
+Version 1:
+SUPERSEDED
+
+Version 2:
+CURRENT
+
+Keep complete history.
+
+==================================================
+PRINCIPAL PORTAL
+==================================================
+
+Build:
+
+- Executive Dashboard
+- Action Center
+- Executive Calendar
+- Report Card Approvals
+- Teacher Leave Approval
+- Re-Exam Approval
+- Marks Reopening
+- Published Mark Corrections
+- Promotion Approval
+- Fee Concession Approval
+- Refund Approval
+- Fee Structure Approval
+- Academic Analytics
+- Syllabus Monitoring
+- Student Attendance Monitoring
+- Teacher Coverage
+- Exam Control Center
+- Hall Ticket Monitoring
+- Exceptional Hall Ticket Override
+- Complaints and Escalations
+- Safety and Incident Center
+- Emergency Notices
+- Student Directory
+- Teacher Directory
+- Transport Monitoring
+- Events and PTM Monitoring
+- Audit and Governance
+- Reports
+- Leadership AI
+- My Teaching
+
+MY TEACHING exists only for actual Subject Allocations.
+
+Principal must not approve protected academic work created by the same Principal when segregation-of-duties policy blocks self-approval.
+
+==================================================
+ADMIN PORTAL
+==================================================
+
+Build permission-based Admin operations:
+
+- Admin Dashboard
+- Work Center
+- Operations Calendar
+- Admissions
+- Student 360
+- Family Relationships
+- Staff Onboarding
+- Teacher Allocations
+- Classes
+- Sections
+- Subjects
+- Academic Year
+- Timetable
+- School Calendar
+- Exam Configuration
+- Exam Schedule
+- Attendance Operations
+- Staff Attendance
+- Promotion Execution
+- Student Exit
+- Staff Exit
+- Finance
+- Fee Structures
+- Billing Runs
+- Payments
+- Offline Payments
+- Payment Issues
+- Concessions
+- Late Fees
+- Credits
+- Refunds
+- Daily Finance Closing
+- Settlement and Reconciliation
+- Transport
+- Complaints
+- Events
+- PTM
+- Communication
+- Accounts
+- Permissions
+- Policies
+- Integrations
+- Reports
+- Imports
+- Audit
+- Backup Health
+- Data Retention
+- Historical Archive
+
+Admin permissions include combinations such as:
+
+- ADMISSIONS
+- FINANCE
+- ACADEMIC_OPERATIONS
+- TRANSPORT
+- SECURITY
+- REPORTS
+
+Admin does not inherit Principal academic authority.
+
+==================================================
+ADMIN AND PRINCIPAL GOVERNANCE
+==================================================
+
+Use this model:
+
+Admin prepares Draft
+        ↓
+FutureSchool validates
+        ↓
+Principal approves when required
+        ↓
+Approved-for-Execution Queue
+        ↓
+FutureSchool performs fresh validation
+        ↓
+Admin publishes or activates
+        ↓
+Audit record created
+
+If dependencies changed after approval:
+
+Block execution.
+
+Require updated validation and approval.
+
+==================================================
+FEES AND PAYMENTS
+==================================================
+
+Regular fees have four instalments:
+
+1. School Opening
+2. Before SA-1
+3. Before SA-2
+4. Before Pre-Final
+
+Support:
+
+- Partial payment
+- Multi-term payment
+- Full-year payment
+- Route-based Transport fees
+- Concessions
+- Late fees
+- Credits
+- Refunds
+- Event fees
+- Offline payments
+
+Production online payment flow:
+
+Parent selects invoices
+        ↓
+Backend loads authoritative invoices
+        ↓
+Backend calculates amount
+        ↓
+Backend creates provider order
+        ↓
+Hosted checkout
+        ↓
+Provider/bank authentication
+        ↓
+Verified server webhook
+        ↓
+Payment stored transactionally
+        ↓
+Allocations stored
+        ↓
+Receipt generated
+        ↓
+Reconciliation
+
+Never store:
+
+- Full card number
+- CVV
+- UPI PIN
+- OTP
+- Banking password
+
+For frontend prototype, simulate payment and clearly label it as mock.
+
+==================================================
+HALL TICKET
+==================================================
+
+Admin configures required fee categories.
+
+FutureSchool calculates:
+
+CLEARED
+or
+PENDING
+
+Class Teacher releases eligible Hall Tickets.
+
+Payment does not automatically release the Hall Ticket.
+
+Principal monitors and may use a controlled exceptional override only for a Cleared Student.
+
+==================================================
+TRANSPORT
+==================================================
+
+Support:
+
+- School Transport
+- Walk
+- Public Transport
+- Bicycle
+- Routes
+- Vehicles
+- Pickup Points
+- Capacity
+- Student Assignments
+- Transport fees
+- Change Requests
+- Alerts
+- Incidents
+
+Future enhancement:
+
+School-bus GPS
+
+Never track Student personal GPS.
+
+==================================================
+STUDENT SAFETY
+==================================================
+
+Support:
+
+- Permanent pickup contacts
+- Temporary pickup authorization
+- Early Pickup
+- School-Initiated Pickup
+- School Incident
+- Emergency Contact
+- Actual release record
+
+Workflow:
+
+Parent Authorization
+        ↓
+Class Teacher Awareness
+        ↓
+School Office/Admin Verification
+        ↓
+Student Release
+        ↓
+Audit History
+
+Early release does not silently rewrite attendance.
+
+==================================================
+COMPLAINTS
+==================================================
+
+Categories:
+
+- Academic
+- Attendance
+- Teacher Communication
+- Transport
+- Fees / Payment
+- Facilities
+- Student Safety
+- Other
+
+Statuses:
+
+SUBMITTED
+ASSIGNED
+IN_PROGRESS
+RESOLVED
+CLOSED
+REOPENED
+
+Use policy-driven routing.
+
+Parents never see internal school notes.
+
+==================================================
+EVENTS AND CONSENT
+==================================================
+
+Support:
+
+- Free Event
+- Payment Required
+- Optional Contribution
+- Parent Consent
+- Event Transport
+- Cancellation Policy
+- Refund Policy
+- Participation Confirmation
+
+Admin cannot rewrite Parent consent.
+
+==================================================
+PLATFORM ADMIN
+==================================================
+
+Build a separate Platform Admin module for:
+
+- School applications
+- School verification
+- Tenant creation
+- Tenant activation
+- Tenant suspension
+- Initial Principal creation
+- Initial School Admin creation
+- Subscription plans
+- Student-capacity entitlement
+- Feature entitlements
+- Platform integration health
+- Platform audit
+- School support cases
+- Platform security operations
+
+School Admin must never access Platform Admin features.
+
+==================================================
+SUBSCRIPTION MODEL
+==================================================
+
+Prepare the architecture for tiered school subscriptions:
+
+- STARTER
+- STANDARD
+- PRO
+- ENTERPRISE
+
+A plan may control:
+
+- Student capacity
+- Core modules
+- AI features
+- Advanced reports
+- Integrations
+- SMS / WhatsApp
+- Transport GPS
+- Support level
+
+Do not invent final INR pricing yet.
+
+Pricing will be finalized later.
+
+Platform-level subscription controls must not be editable by School Admin.
+
+==================================================
+SECURITY
+==================================================
+
+Production must enforce:
+
+- HTTPS
+- Secure password hashing
+- MFA
+- Step-up verification
+- Backend authorization
+- Tenant isolation
+- Object-level authorization
+- Validation
+- Rate limiting
+- Session revocation
+- Password recovery security
+- Audit logs
+- Secrets management
+- Protected file access
+- Sensitive export control
+- Payment webhook verification
+- Idempotency
+- Database transactions
+- Encrypted backups
+- Restore testing
+- Monitoring and alerts
+
+Frontend-hidden buttons are not security.
+
+==================================================
+HISTORICAL INTEGRITY
+==================================================
+
+Do not design destructive business workflows.
+
+Use:
+
+- Versioning
+- Effective dates
+- Corrections
+- Adjustments
+- Credits
+- Refunds
+- Audit events
+
+Do not add ordinary actions such as:
+
+- Delete Payment
+- Delete Published Report Card
+- Delete Audit Event
+- Delete Historical Attendance
+
+Exited or transferred users are deactivated while history remains.
+
+==================================================
+AI RULES
+==================================================
+
+Student AI:
+Academic Tutor
+
+Teacher AI:
+Academic drafting assistant
+
+Principal AI:
+Leadership summary assistant
+
+Admin AI:
+Operations summary assistant
+
+AI may:
+
+- Summarize
+- Explain
+- Draft
+- Navigate
+
+AI must never independently:
+
+- Change marks
+- Change attendance
+- Approve Report Cards
+- Approve refunds
+- Process payments
+- Change permissions
+- Reset credentials
+- Release Hall Tickets
+- Close Academic Year
+- Complete Student Exit
+- Complete Staff Exit
+- Make disciplinary decisions
+
+==================================================
+IMPLEMENTATION PHASES
+==================================================
+
+Build the application in this exact sequence:
+
+PHASE 0
+Existing Code Audit
+
+PHASE 1
+Frontend Foundation
+
+PHASE 2
+Authentication Frontend
+
+PHASE 3
+Student Portal
+
+PHASE 4
+Parent Portal
+
+PHASE 5
+Teacher Portal
+
+PHASE 6
+Principal Portal
+
+PHASE 7
+Admin Portal
+
+PHASE 8
+Platform Admin Portal
+
+PHASE 9
+Cross-Role Mock Workflows
+
+PHASE 10
+Security Architecture
+
+PHASE 11
+Database and Tenant Architecture
+
+PHASE 12
+Authorization Matrix
+
+PHASE 13
+API Contract
+
+PHASE 14
+Audit Model and Threat Model
+
+PHASE 15
+Spring Boot Backend Foundation
+
+PHASE 16
+Real Authentication and Authorization
+
+PHASE 17
+Backend Business Modules
+
+PHASE 18
+External Integrations
+
+PHASE 19
+Testing and Security Validation
+
+PHASE 20
+Staging
+
+PHASE 21
+Pilot School
+
+PHASE 22
+Production Deployment
+
+==================================================
+WORKING RULE
+==================================================
+
+Do not implement all phases in one uncontrolled operation.
+
+You own the complete roadmap, but implement only one approved phase at a time.
+
+For every phase:
+
+1. Explain what you found.
+2. Explain what will be implemented.
+3. Show the architecture.
+4. List files to create/change.
+5. Implement the phase.
+6. Run available build/tests.
+7. Fix failures.
+8. Give manual testing instructions.
+9. Give DONE / NOT DONE / NEXT.
+10. Stop.
+
+Do not move to the next phase until I instruct:
+
+CONTINUE TO NEXT PHASE
+
+==================================================
+FIRST TASK
+==================================================
+
+Start with PHASE 0: EXISTING CODE AUDIT.
+
+Inspect the current AI Studio-generated repository.
+
+Do not rewrite the application yet.
+
+Report:
+
+1. Current framework and versions
+2. Existing dependencies
+3. Current folder structure
+4. Current routes
+5. Existing role portals
+6. Existing screens
+7. Reusable components
+8. Mock-data architecture
+9. State-management approach
+10. Authentication implementation
+11. Major business workflows already present
+12. TypeScript/build errors
+13. Security risks
+14. Hardcoded secrets or credentials
+15. Duplicate/dead code
+16. Responsiveness issues
+17. Accessibility issues
+18. Requirements currently missing
+19. Code to keep
+20. Code to refactor
+21. Code to remove
+22. Recommended target architecture
+23. Migration/refactoring plan
+24. Exact first implementation task after audit
+
+Run the available build and report the exact result.
+
+Do not claim the project is production-ready based only on UI appearance.
+
+Stop after the audit and recommendation.
