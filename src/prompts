@@ -1023,3 +1023,6188 @@ Run the available build and report the exact result.
 Do not claim the project is production-ready based only on UI appearance.
 
 Stop after the audit and recommendation.
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+PHASE 10
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+Proceed to Phase 10 only: FutureSchool Production Security Architecture.
+
+IMPORTANT:
+
+Do not implement the Spring Boot business backend yet.
+
+The frontend prototype and cross-role workflows are now established.
+
+We are moving from prototype architecture to production architecture.
+
+Act as:
+
+- Senior Security Architect
+- Senior SaaS Architect
+- Senior Spring Security Engineer
+- Senior Application Security Engineer
+- Senior Database Security Architect
+
+FutureSchool is a multi-school SaaS platform.
+
+The objective of this phase is to design the complete production security model BEFORE backend business APIs are implemented.
+
+==================================================
+1. TRUST BOUNDARIES
+==================================================
+
+Document the trust boundaries between:
+
+Browser
+React Frontend
+Spring Boot Backend
+PostgreSQL
+Object/File Storage
+Payment Provider
+Email Provider
+AI Provider
+SMS/WhatsApp Provider
+Platform Admin
+School Tenant
+
+Clearly identify which systems are trusted to make which decisions.
+
+Frontend must never be treated as a security boundary.
+
+==================================================
+2. MULTI-TENANT SECURITY
+==================================================
+
+Design tenant isolation.
+
+Every school-owned domain record must be associated with the correct school/tenant where appropriate.
+
+Define how:
+
+school_id / tenant_id
+
+is established from authenticated identity.
+
+Do not trust arbitrary school IDs supplied by the browser.
+
+Design authorization to prevent:
+
+School A Student
+accessing School B
+
+School A Teacher
+accessing School B
+
+School A Admin
+accessing School B
+
+School Admin
+accessing Platform Admin APIs
+
+Include object-level authorization rules.
+
+==================================================
+3. AUTHENTICATION
+==================================================
+
+Design production authentication for:
+
+Student
+Parent
+Teacher
+Principal
+Admin
+Platform Admin
+
+Student and Parent share the finalized Student credential model but use separate portal context.
+
+Staff use individual Staff IDs.
+
+Design:
+
+Password hashing
+Login
+Logout
+Session/token strategy
+Refresh strategy if applicable
+Credential reset
+Password recovery
+Session revocation
+Account lock
+Login throttling
+MFA
+Step-up authentication
+
+Do not implement yet.
+
+==================================================
+4. AUTHORIZATION
+==================================================
+
+FutureSchool authorization must use:
+
+Role
++
+Permission
++
+Tenant
++
+Resource Relationship
++
+Workflow State
+
+Create examples for:
+
+Student
+Parent
+Subject Teacher
+Class Teacher
+Principal
+School Admin
+Finance Admin
+Transport Admin
+Security Admin
+Platform Admin
+
+Example:
+
+Teacher + MARKS_ENTRY
+must additionally have an active
+Class + Subject allocation.
+
+A role check alone is insufficient.
+
+==================================================
+5. PRINCIPAL / ADMIN SEGREGATION
+==================================================
+
+Formalize:
+
+Admin
+→ Configures / prepares / executes
+
+Principal
+→ Reviews / approves academic and governance decisions
+
+Protect:
+
+Principal self-approval
+Admin bypassing Principal approval
+Expired Acting Principal delegation
+Modified approved configuration
+Permission escalation
+
+==================================================
+6. HIGH-RISK OPERATIONS
+==================================================
+
+Identify operations requiring step-up authentication.
+
+Include at minimum:
+
+Principal Recovery
+Admin Permission Changes
+Sensitive Exports
+Academic Year Close
+Published Mark Correction
+Refund Approval/Processing
+Hall Ticket Override
+Emergency Communication
+Delegation Changes
+Staff Reactivation
+Critical Policy Publication
+
+==================================================
+7. PAYMENT SECURITY
+==================================================
+
+Design:
+
+Backend authoritative amount calculation
+Provider order creation
+Hosted checkout
+Webhook verification
+Signature validation
+Idempotency
+Unique provider reference
+Database transactions
+Payment allocation
+Refund verification
+Settlement reconciliation
+
+Never rely on browser payment success.
+
+Never store:
+
+Card Number
+CVV
+UPI PIN
+OTP
+Bank Password
+
+==================================================
+8. FILE SECURITY
+==================================================
+
+Design secure handling for:
+
+Student photos
+Homework attachments
+Study Materials
+Leave attachments
+Complaint evidence
+Report Card PDFs
+Receipts
+Certificates
+
+Define:
+
+Storage metadata
+Tenant scope
+Upload validation
+File size/type policy
+Authorization
+Private downloads
+Future malware scanning
+Retention
+
+Do not expose private files using unrestricted public URLs.
+
+==================================================
+9. AUDIT ARCHITECTURE
+==================================================
+
+Design immutable audit events.
+
+Include:
+
+school_id
+actor
+role
+action
+entity type
+entity id
+previous state
+new state
+reason
+approval reference
+policy version
+timestamp
+request/correlation identifier where appropriate
+
+Identify which actions must always be audited.
+
+Normal application users must not edit/delete audit history.
+
+==================================================
+10. SECURITY FOR HISTORICAL DATA
+==================================================
+
+Formalize correction rather than deletion.
+
+Published Marks
+→ Correction Workflow
+
+Report Card
+→ Versioning
+
+Payment
+→ Adjustment / Refund
+
+Student Exit
+→ Status transition
+
+Staff Exit
+→ Status transition
+
+Academic Year
+→ CLOSED / Read Only
+
+Audit
+→ Append Only
+
+==================================================
+11. API SECURITY
+==================================================
+
+Define API security standards:
+
+Authentication required by default
+Authorization checks
+Tenant validation
+Resource ownership validation
+Input validation
+Pagination
+Rate limiting
+Idempotency for financial/high-risk mutations
+Safe error responses
+API versioning
+CORS policy
+CSRF strategy appropriate to chosen auth design
+Security headers
+Request/correlation IDs
+
+==================================================
+12. SECRETS MANAGEMENT
+==================================================
+
+Identify secrets such as:
+
+Database credentials
+Token signing material
+Payment-provider credentials
+Email credentials
+AI provider credentials
+Object-storage credentials
+SMS/WhatsApp credentials
+
+Define how production secrets are stored and injected.
+
+Never store production secrets in React source or Git.
+
+==================================================
+13. DATA CLASSIFICATION
+==================================================
+
+Create classifications such as:
+
+Public
+Internal
+Confidential
+Restricted
+
+Classify examples:
+
+School notices
+Student profile
+Marks
+Attendance
+Payments
+Complaints
+Safety incidents
+Audit logs
+Authentication/security data
+
+Use classification to drive access/export decisions.
+
+==================================================
+14. EXPORT SECURITY
+==================================================
+
+Define normal versus sensitive exports.
+
+Sensitive exports should require:
+
+Dedicated permission
+Tenant scope validation
+Step-up authentication
+Audit event
+Appropriate watermark/identification
+
+No export may contain:
+
+Passwords
+Hashes
+MFA secrets
+Auth tokens
+Payment secrets
+
+==================================================
+15. PLATFORM ADMIN SECURITY
+==================================================
+
+Platform Admin is separate from School Admin.
+
+Design strict controls for:
+
+Tenant creation
+Tenant activation
+Tenant suspension
+Subscription management
+Feature entitlement changes
+Platform Support access
+Platform Audit
+
+Platform Support must not get unlimited school data access by default.
+
+==================================================
+16. THIRD-PARTY INTEGRATION SECURITY
+==================================================
+
+Define adapter boundaries for:
+
+PaymentGateway
+EmailProvider
+FileStorageProvider
+AIProvider
+SMSProvider
+WhatsAppProvider
+GPSProvider
+BiometricProvider
+
+Business modules should depend on internal interfaces, not provider-specific SDKs directly.
+
+Secrets remain server-side.
+
+Third-party failure must not corrupt FutureSchool's authoritative records.
+
+==================================================
+17. BACKUP AND RECOVERY
+==================================================
+
+Design production requirements for:
+
+Encrypted backups
+Backup monitoring
+Tenant-aware recovery
+Restore testing
+Recovery authorization
+Recovery audit
+Database migration rollback strategy
+
+Normal School Admin cannot restore the entire tenant directly.
+
+==================================================
+18. MONITORING AND SECURITY ALERTS
+==================================================
+
+Define monitoring for:
+
+Authentication failures
+Account lockouts
+Permission changes
+Principal recovery
+Payment webhook failures
+Refund failures
+Cross-tenant authorization failures
+Sensitive exports
+Database failures
+Integration failures
+Backup failures
+
+==================================================
+19. THREAT MODEL INPUT
+==================================================
+
+Identify threats including:
+
+Broken Object Level Authorization
+Cross-Tenant Data Leakage
+Credential Stuffing
+Session Theft
+Privilege Escalation
+Forged Payment Success
+Webhook Replay
+Duplicate Payment Processing
+Unsafe File Upload
+Sensitive Export Leakage
+Mass Assignment
+SQL Injection
+XSS
+CSRF according to auth architecture
+Secrets Exposure
+Unsafe Admin Actions
+AI Data Leakage
+
+For each threat provide:
+
+Asset
+Threat
+Attack Scenario
+Preventive Control
+Detection Control
+Recovery Control
+
+==================================================
+20. OUTPUT REQUIRED
+==================================================
+
+Do not write business APIs yet.
+
+Produce:
+
+1. Security Architecture overview
+2. Trust Boundary diagram
+3. Authentication model
+4. Authorization model
+5. Tenant Isolation model
+6. High-Risk Action matrix
+7. Payment Security architecture
+8. File Security architecture
+9. Secrets architecture
+10. Audit architecture
+11. Export Security architecture
+12. Platform Admin Security architecture
+13. Backup/Recovery architecture
+14. Monitoring/Alert architecture
+15. Threat inventory
+16. Security implementation backlog
+17. Open architecture decisions requiring Product Owner approval
+
+Clearly distinguish:
+
+DESIGN DECISION
+from
+IMPLEMENTATION TODO
+
+Do not claim a security control exists merely because it has been designed.
+
+Do not modify the application extensively in this phase.
+
+Stop after Phase 10 Security Architecture is documented.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+PHASE 11
+---------------------------------------------------------------------------------------------------------------------------------------------------
+Proceed to Phase 11 only:
+
+FUTURESCHOOL DATABASE + MULTI-TENANT ARCHITECTURE
+
+Phase 10 Security Architecture is complete.
+
+Do NOT implement Spring Boot business modules yet.
+
+Act as:
+
+- Senior Database Architect
+- Senior PostgreSQL Engineer
+- Senior SaaS Architect
+- Senior Spring Boot Architect
+- Senior Data Security Architect
+
+Your objective is to design the production database architecture for FutureSchool before JPA entities and Flyway migrations are created.
+
+==================================================
+1. DATABASE TECHNOLOGY
+==================================================
+
+Target database:
+
+PostgreSQL
+
+Backend:
+
+Java 21
+Spring Boot
+Spring Data JPA
+Flyway
+
+Architecture:
+
+Multi-school SaaS
+Modular Monolith initially
+
+==================================================
+2. IDENTIFIER STRATEGY
+==================================================
+
+Design internal and business identifiers separately.
+
+Examples:
+
+Internal:
+UUID
+
+Business IDs:
+
+School Code
+Student ID
+Admission Number
+Teacher ID
+Principal ID
+Admin ID
+Invoice Number
+Receipt Number
+Payment Reference
+Complaint ID
+Import Batch ID
+Billing Run ID
+
+Do not use visible business IDs as the only database primary keys.
+
+Explain:
+
+- Primary-key strategy
+- UUID strategy
+- Human-readable ID strategy
+- Uniqueness scopes
+- Indexing implications
+
+==================================================
+3. TENANT / SCHOOL MODEL
+==================================================
+
+Design:
+
+platform
+    ↓
+schools / tenants
+    ↓
+school-owned records
+
+Every school-owned record must be tenant-scoped where appropriate.
+
+Design the School entity including:
+
+school internal ID
+school code
+school name
+status
+branding reference
+subscription reference
+created timestamp
+updated timestamp
+
+Define:
+
+ACTIVE
+SETUP
+SUSPENDED
+CLOSED
+
+or recommend the final tenant states.
+
+Explain how school_id is propagated through domain records.
+
+==================================================
+4. PLATFORM ADMIN MODEL
+==================================================
+
+Platform Admin is separate from School users.
+
+Design database boundaries for:
+
+Platform User
+School/Tenant
+Subscription
+Feature Entitlement
+School Activation
+School Suspension
+Platform Audit
+
+School Admin must not become Platform Admin.
+
+==================================================
+5. SUBSCRIPTION MODEL
+==================================================
+
+FutureSchool commercial pricing is based approximately on:
+
+₹30–₹50 per billable Student per month.
+
+Do not hardcode actual price values.
+
+Design database concepts for:
+
+School Subscription
+Contracted Students
+Active Students
+Billable Students
+Price Per Student
+Billing Frequency
+Subscription Start
+Subscription End
+Renewal Date
+Subscription Status
+Feature Entitlements
+Add-ons
+Billing Reconciliation
+
+Keep:
+
+FutureSchool SaaS Subscription
+
+completely separate from:
+
+Parent / School Fee Payments.
+
+==================================================
+6. USER / IDENTITY MODEL
+==================================================
+
+Design production identity records for:
+
+Student / Parent shared credential context
+
+Teacher
+
+Principal
+
+Admin
+
+Platform Admin
+
+Student and Parent use:
+
+Student ID
+same password
+same registered email
+
+but operate under different portal contexts.
+
+Staff use individual Staff accounts.
+
+Design:
+
+users
+credentials
+roles
+permissions
+user_permissions where needed
+sessions / refresh-session metadata if appropriate
+MFA metadata
+account status
+
+Never store plaintext passwords or MFA secrets unsafely.
+
+==================================================
+7. STUDENT IDENTITY VS ENROLLMENT
+==================================================
+
+This is critical.
+
+A Student identity is long-lived.
+
+Academic enrollment changes every academic year.
+
+Example:
+
+Aanya
+
+2026-27
+Class 9-A
+
+2027-28
+Class 10-A
+
+Do NOT overwrite historical class information.
+
+Design separately:
+
+student
+student_enrollment
+academic_year
+class
+section
+roll_number
+
+Student ID remains stable.
+
+Enrollment stores year-specific academic placement.
+
+==================================================
+8. FAMILY RELATIONSHIP MODEL
+==================================================
+
+Design:
+
+family
+family_student_relationship
+
+Support:
+
+Sibling relationship validation
+Sibling concession eligibility
+
+But:
+
+No Parent sibling-dashboard access.
+
+Family relationship is internal administrative data.
+
+==================================================
+9. STAFF MODEL
+==================================================
+
+Separate:
+
+Staff Identity
+
+from:
+
+Academic Assignments
+
+Design:
+
+staff
+staff_employment
+teacher_subject_allocation
+class_teacher_assignment
+staff_attendance
+staff_leave
+temporary_coverage
+exam_duty
+
+Historical Teacher ownership must remain intact after assignment changes or Staff exit.
+
+==================================================
+10. ACADEMIC STRUCTURE
+==================================================
+
+Design:
+
+academic_year
+class
+section
+subject
+class_subject
+teacher_subject_allocation
+class_teacher_assignment
+timetable
+timetable_version
+timetable_period
+school_calendar
+calendar_version
+
+Define effective dates and history where required.
+
+==================================================
+11. STUDENT ATTENDANCE
+==================================================
+
+Design Morning / Afternoon attendance.
+
+Support:
+
+PRESENT
+ABSENT
+LEAVE
+
+and derived daily status:
+
+FULL_DAY
+HALF_DAY
+ABSENT
+LEAVE
+or recommended equivalent.
+
+Design correction history.
+
+Do not overwrite historical correction evidence.
+
+==================================================
+12. HOMEWORK
+==================================================
+
+Design:
+
+homework
+homework_attachment
+homework_submission
+submission_attachment
+homework_review
+
+Support:
+
+Draft
+Published
+Submitted
+Reviewed
+Overdue
+
+Homework marks remain separate from formal exam marks unless explicitly configured later.
+
+==================================================
+13. QUIZ AND QUESTION BANK
+==================================================
+
+Design:
+
+question_bank
+questions
+options
+quiz
+quiz_question
+quiz_assignment
+quiz_attempt
+quiz_answer
+
+Support:
+
+Class
+Subject
+Chapter
+Difficulty
+Attempts
+Scores
+Availability
+Due Date
+
+==================================================
+14. STUDY MATERIALS
+==================================================
+
+Design:
+
+study_material
+material_version
+publication status
+AI approval status
+
+New material versions do not inherit AI approval automatically.
+
+Design storage references rather than storing large files directly in PostgreSQL.
+
+==================================================
+15. EXAMS
+==================================================
+
+Design:
+
+assessment / exam
+exam_subject_configuration
+exam_schedule
+exam_schedule_version
+marks_entry_window
+re_exam_request
+re_exam_schedule
+exam_duty
+exam_incident
+
+Keep:
+
+Exam Configuration
+
+separate from:
+
+Exam Schedule.
+
+==================================================
+16. MARKS
+==================================================
+
+Design marks carefully.
+
+Support:
+
+ATTENDED
+ABSENT (AB)
+RE_EXAM
+
+0 marks must remain different from AB.
+
+Design:
+
+marks
+marks_submission
+marks_review
+marks_correction_request
+marks_import_batch
+
+Support workflow:
+
+DRAFT
+SUBMITTED
+RETURNED
+RESUBMITTED
+ACCEPTED
+
+Preserve correction history.
+
+==================================================
+17. REPORT CARDS
+==================================================
+
+Design:
+
+report_card
+report_card_subject_result
+report_card_version
+report_card_approval
+report_card_publication
+parent_acknowledgement
+
+Support:
+
+Class Teacher generation
+Principal approval
+Partial return
+Class-wide publication
+Published correction
+Versioning
+
+Never silently overwrite published Report Cards.
+
+==================================================
+18. PROMOTION
+==================================================
+
+Design:
+
+promotion_recommendation
+promotion_decision
+promotion_execution / next enrollment
+
+Support:
+
+Class Teacher Recommendation
+Principal Academic Decision
+Admin Execution
+
+Promotion creates new academic enrollment rather than overwriting the old enrollment.
+
+==================================================
+19. FEES
+==================================================
+
+Design:
+
+fee_structure
+fee_structure_version
+fee_category
+fee_installment
+student_invoice
+invoice_line
+financial_adjustment
+late_fee
+concession
+student_credit
+
+Regular fees use four primary periods:
+
+School Opening
+Before SA-1
+Before SA-2
+Before Pre-Final
+
+Support Transport and other approved fees separately.
+
+==================================================
+20. PAYMENTS
+==================================================
+
+Design a robust financial ledger.
+
+Include:
+
+payment_order
+payment
+payment_allocation
+receipt
+offline_payment_verification
+refund
+refund_allocation
+credit_application
+settlement
+reconciliation_record
+payment_issue
+
+Keep:
+
+Payment Status
+Refund Status
+Settlement Status
+
+separate.
+
+Do NOT model payment as:
+
+student.paid = true
+
+Support:
+
+Partial payments
+Multi-invoice allocation
+Duplicate protection
+Idempotency
+Provider references
+Offline payments
+Maker-checker
+Refunds
+Credits
+Adjustments
+Reconciliation
+
+==================================================
+21. HALL TICKETS
+==================================================
+
+Design:
+
+hall_ticket_policy
+hall_ticket_clearance_snapshot
+hall_ticket_release
+principal_override
+
+Eligibility should be calculated from financial state.
+
+Do not store only:
+
+cleared = true
+
+without historical context.
+
+Preserve the policy/version and financial snapshot used for release.
+
+==================================================
+22. TRANSPORT
+==================================================
+
+Design:
+
+transport_route
+route_stop
+vehicle
+route_vehicle_assignment
+transport_fee_plan
+student_transport_assignment
+transport_change_request
+transport_incident
+
+Student transport assignments must be effective-dated.
+
+Never track Student personal GPS.
+
+Future vehicle GPS should map to Vehicle, not Student identity.
+
+==================================================
+23. COMMUNICATION
+==================================================
+
+Design:
+
+notification
+notification_delivery
+message_thread
+message
+notice
+notice_version
+
+Support:
+
+In-App
+Email
+future SMS
+future WhatsApp
+
+Keep Provider-specific fields out of core business entities where possible.
+
+==================================================
+24. PTM
+==================================================
+
+Design:
+
+ptm_event
+teacher_availability
+meeting_slot
+meeting_booking
+meeting_summary
+internal_meeting_note
+
+Separate Parent-visible summary from restricted internal note.
+
+==================================================
+25. COMPLAINTS
+==================================================
+
+Design:
+
+complaint
+complaint_assignment
+complaint_response
+complaint_internal_note
+complaint_escalation
+complaint_status_history
+
+Parent's original complaint must remain immutable.
+
+==================================================
+26. EVENTS AND CONSENT
+==================================================
+
+Design:
+
+school_event
+event_version
+event_participant
+parent_consent
+event_payment_reference
+event_transport_requirement
+
+Admin cannot rewrite Parent consent.
+
+==================================================
+27. STUDENT SAFETY / PICKUP
+==================================================
+
+Design:
+
+pickup_contact
+temporary_pickup_authorization
+early_pickup_request
+student_release
+student_incident
+
+Record:
+
+requested time
+actual release time
+released to
+authorization used
+verified by
+released by
+
+Attendance remains separate.
+
+==================================================
+28. DOCUMENTS AND FILES
+==================================================
+
+Design file metadata for:
+
+Student Photos
+Homework Attachments
+Study Materials
+Leave Documents
+Complaint Evidence
+Report Card PDFs
+Receipts
+Certificates
+
+PostgreSQL stores metadata.
+
+Actual file binary should use object/file storage.
+
+Design:
+
+file_asset
+school_id
+storage_key
+mime_type
+size
+owner/reference
+uploaded_by
+created_at
+retention metadata
+
+==================================================
+29. POLICIES
+==================================================
+
+Design versioned policies.
+
+Examples:
+
+Attendance Policy
+Marks Deadline
+Re-Exam Policy
+Refund Threshold
+Hall Ticket Policy
+Admission Policy
+Capacity Policy
+Complaint Escalation
+AI Material Approval
+Retention Policy
+
+Support:
+
+Draft
+Approved
+Future Effective
+Active
+Historical
+
+Historical workflows must reference the policy version used at that time.
+
+==================================================
+30. AUDIT
+==================================================
+
+Design append-only audit storage.
+
+Include fields such as:
+
+audit_event_id
+school_id
+actor_user_id
+actor_role
+action
+entity_type
+entity_id
+old_state / previous reference
+new_state / new reference
+reason
+approval_reference
+policy_version
+timestamp
+correlation_id
+
+Do not allow normal business code to casually update/delete audit events.
+
+==================================================
+31. SOFT DELETE VS STATUS
+==================================================
+
+Define when to use:
+
+ACTIVE / INACTIVE
+EXITED
+TRANSFERRED
+CLOSED
+SUPERSEDED
+CANCELLED
+
+instead of database deletion.
+
+Identify any records where actual deletion may be technically/practically allowed before downstream usage exists.
+
+==================================================
+32. VERSIONING
+==================================================
+
+Define versioning strategy for:
+
+Report Cards
+Policies
+Fee Structures
+Timetable
+Exam Schedule
+School Calendar
+Study Materials
+Issued Documents
+School Master
+
+Do not create inconsistent versioning designs independently for every module.
+
+==================================================
+33. INDEXES
+==================================================
+
+Recommend important PostgreSQL indexes.
+
+Include common scopes such as:
+
+school_id
+
+school_id + external/business identifier
+
+school_id + academic_year
+
+school_id + student_id
+
+school_id + class/section
+
+payment provider reference
+
+invoice number
+
+receipt number
+
+status + date
+
+Do not over-index.
+
+Explain the important query patterns each index serves.
+
+==================================================
+34. DATABASE CONSTRAINTS
+==================================================
+
+Identify constraints that must be enforced at database level where appropriate:
+
+Unique Student IDs per defined scope
+Unique Staff IDs
+Unique Provider Transaction Reference
+No duplicate invoice for same Student/category/term
+Valid allocation references
+Non-negative financial values where applicable
+Referential integrity
+Version uniqueness
+
+Application validation alone is not sufficient for critical invariants.
+
+==================================================
+35. TRANSACTION BOUNDARIES
+==================================================
+
+Define operations that must be atomic.
+
+Examples:
+
+Verified Payment + Allocations
+Refund Processing State
+Promotion Execution
+Admission Activation
+Student Exit
+Staff Exit
+Academic Year Close
+Teacher Allocation Activation
+Report Card Publication
+
+Explain which records must commit or rollback together.
+
+==================================================
+36. CONCURRENCY
+==================================================
+
+Identify concurrent-operation risks:
+
+Two Admins generating same invoice
+Two Teachers editing marks
+Duplicate payment webhook
+Two Hall Ticket release attempts
+Two Parents booking same PTM slot
+Two Admins assigning same transport seat
+
+Recommend:
+
+Unique constraints
+Optimistic locking/version fields
+Row locks only where appropriate
+Idempotency keys
+
+==================================================
+37. DATA CLASSIFICATION
+==================================================
+
+Classify major database data:
+
+Public
+Internal
+Confidential
+Restricted
+
+Examples:
+
+School notice
+Student profile
+Attendance
+Marks
+Payments
+Complaints
+Safety records
+Audit
+Credentials
+
+Explain how this affects export/retention/access architecture.
+
+==================================================
+38. RETENTION AND ARCHIVE
+==================================================
+
+Design:
+
+Active data
+Closed Academic Year
+Historical Archive
+Retention category
+
+Archived does not mean deleted.
+
+Historical records remain queryable according to authorization.
+
+==================================================
+39. SCHEMA MIGRATION
+==================================================
+
+Design Flyway conventions.
+
+Recommend:
+
+Migration naming
+Immutable migrations
+Seed/reference data strategy
+Environment-specific migration rules
+
+Never modify an already-applied production migration casually.
+
+==================================================
+40. OUTPUT REQUIRED
+==================================================
+
+Do NOT generate all JPA entities yet.
+
+First produce:
+
+1. Database Architecture Overview
+2. Tenant Model
+3. Identity Model
+4. Entity Catalog grouped by module
+5. Relationship map
+6. ER diagram in Mermaid or supported text format
+7. Primary/Foreign Key strategy
+8. Student Identity/Enrollment design
+9. Staff/Assignment design
+10. Academic design
+11. Finance Ledger design
+12. File metadata design
+13. Policy/versioning design
+14. Audit schema
+15. Important constraints
+16. Important indexes
+17. Transaction boundaries
+18. Concurrency strategy
+19. Retention/archive strategy
+20. Flyway migration strategy
+21. Open decisions requiring Product Owner approval
+22. Recommended implementation order
+
+Classify every item as:
+
+DESIGN DECISION
+
+or
+
+IMPLEMENTATION TODO
+
+Do not claim the database has been implemented.
+
+Stop after Phase 11 architecture/design documentation.
+---------------------------------------------------------------------------------------------------------------------------------------------------
+PHASE 12
+---------------------------------------------------------------------------------------------------------------------------------------------------
+Proceed with PHASE 12 ONLY:
+
+FUTURESCHOOL PRODUCTION AUTHORIZATION MATRIX
+
+Phase 10 Security Architecture is complete.
+Phase 11 Database + Multi-Tenant Architecture is complete.
+
+Do NOT implement Spring Security yet.
+Do NOT create controllers yet.
+Do NOT create business APIs yet.
+
+Act as:
+
+- Senior Security Architect
+- Senior Spring Security Architect
+- Senior SaaS Authorization Architect
+- Senior Backend Architect
+- Senior Application Security Engineer
+
+The goal of Phase 12 is to define exactly:
+
+WHO can perform
+WHAT action
+on WHICH resource
+under WHICH school/tenant
+under WHICH relationship
+and under WHICH workflow state.
+
+==================================================
+1. CORE AUTHORIZATION MODEL
+==================================================
+
+FutureSchool authorization must use:
+
+ROLE
++
+PERMISSION
++
+TENANT / SCHOOL
++
+RESOURCE RELATIONSHIP
++
+WORKFLOW STATE
++
+FEATURE ENTITLEMENT where applicable
+
+A role alone is NOT sufficient.
+
+For example:
+
+Role:
+TEACHER
+
+Permission:
+MARKS_ENTRY
+
+Tenant:
+School A
+
+Relationship:
+Assigned to Class 10-A Mathematics
+
+Workflow:
+Marks Entry Window OPEN
+
+Then:
+
+Class 10-A Mathematics Marks
+→ ALLOW
+
+Class 10-A Physics Marks
+→ DENY
+
+School B Mathematics Marks
+→ DENY
+
+Class 9-B Mathematics without allocation
+→ DENY
+
+Marks after locked window
+→ DENY unless authorized reopening exists
+
+==================================================
+2. ROLES
+==================================================
+
+Define authorization for:
+
+STUDENT
+PARENT
+TEACHER
+PRINCIPAL
+ADMIN
+PLATFORM_ADMIN
+
+Also account for:
+
+SUBJECT TEACHER
+CLASS TEACHER
+
+as relationships/responsibilities rather than creating unnecessary duplicate login accounts.
+
+Principal may also have:
+
+MY TEACHING
+
+through actual Subject Allocations.
+
+==================================================
+3. ADMIN PERMISSION BUNDLES
+==================================================
+
+Admin remains:
+
+ROLE = ADMIN
+
+but permissions may include:
+
+ADMISSIONS
+FINANCE
+ACADEMIC_OPERATIONS
+TRANSPORT
+SECURITY
+REPORTS
+COMMUNICATION
+STAFF_ADMINISTRATION
+
+And sensitive permissions such as:
+
+RECORD_OFFLINE_PAYMENT
+VERIFY_OFFLINE_PAYMENT
+PROCESS_APPROVED_REFUND
+MANAGE_FEE_STRUCTURE
+RESET_STUDENT_CREDENTIAL
+RESET_STAFF_CREDENTIAL
+MANAGE_ADMIN_PERMISSIONS
+PRINCIPAL_RECOVERY
+MANAGE_DELEGATION
+ACADEMIC_YEAR_CLOSE
+SENSITIVE_EXPORT
+MANAGE_INTEGRATIONS
+
+Construct the authorization matrix accordingly.
+
+==================================================
+4. STUDENT AUTHORIZATION
+==================================================
+
+Define Student permissions for:
+
+Dashboard
+Own Attendance
+Own Homework
+Own Homework Submission
+Own Quiz
+Own Quiz Attempt
+Study Materials
+Digital Library
+AI Tutor
+Timetable
+Exams
+Released Hall Ticket
+Published Marks
+Published Report Cards
+Own Progress
+Calendar
+Notifications
+Own Profile
+Own Security
+
+Student must be denied:
+
+Other Students
+Parent data
+Teacher data beyond allowed display
+Unpublished Marks
+Draft Report Cards
+Payment administration
+Attendance editing
+Marks editing
+Hall Ticket release
+Admin APIs
+Principal APIs
+
+==================================================
+5. PARENT AUTHORIZATION
+==================================================
+
+Parent session belongs to exactly one Student ID.
+
+Define access for:
+
+Child Attendance
+Homework tracking
+Published Marks
+Published Report Cards
+Acknowledgement
+Fees
+Payments
+Receipts
+Refund Status
+Credits
+Transport
+Leave Requests
+Teacher Messages
+PTM
+Complaints
+Events
+Consent
+Pickup Contacts
+Temporary Pickup
+Early Pickup
+Notifications
+Profile Changes
+Security
+
+Parent must never access another Student merely by changing:
+
+studentId
+URL
+request body
+query parameter
+
+No sibling access from Family Relationship alone.
+
+==================================================
+6. SUBJECT TEACHER
+==================================================
+
+Authorization must require active Subject Allocation.
+
+Define:
+
+Homework Create
+Homework Review
+Marks Entry
+Marks Import
+Quiz
+Question Bank
+Study Material
+Student Doubt
+Class FAQ
+Lesson Plan
+Syllabus Progress
+Question Paper
+Teacher AI
+
+All must be scoped to:
+
+school
+academic year
+assigned class
+assigned subject
+assignment effective dates
+workflow state
+
+==================================================
+7. CLASS TEACHER
+==================================================
+
+Define additional authorization for assigned Class Teacher:
+
+Morning Attendance
+Afternoon Attendance
+Attendance Corrections
+Leave Review
+Parent Communication
+PTM
+Subject Marks Review
+Report Card Generation
+Conduct / Remarks
+Submit Report Cards to Principal
+Publish fully approved Report Cards
+Hall Ticket Release
+Classroom Updates
+Promotion Recommendation
+Early Pickup Awareness
+
+Class Teacher authorization must apply only to the assigned Class and valid assignment period.
+
+==================================================
+8. PRINCIPAL
+==================================================
+
+Define Principal permissions for:
+
+Executive Dashboard
+Report Card Approval
+Teacher Leave Approval
+Re-Exam Approval
+Promotion Approval
+Published Mark Correction Approval
+Fee Concession Approval
+Refund Approval
+Fee Structure Approval
+Marks Reopening
+Academic Analytics
+Syllabus Monitoring
+Attendance Monitoring
+Teacher Coverage
+Exam Control Center
+Hall Ticket Monitoring
+Controlled Hall Ticket Override
+Complaints
+Safety Incidents
+Emergency Notices
+Admissions Approval when policy requires
+Student Exit Approval
+Teacher Allocation Approval
+Class Teacher Assignment Approval
+Timetable Approval
+Exam Schedule Approval
+School Calendar Approval
+Major Event Approval
+Academic Year Close Approval
+Policy Approval
+Reports
+Audit / Governance
+
+Principal must NOT automatically gain:
+
+Subject Marks Entry for all classes
+Class Teacher powers
+Admin configuration editing
+Platform Administration
+
+==================================================
+9. PRINCIPAL MY TEACHING
+==================================================
+
+If Principal has Subject Allocation:
+
+Allow normal Subject Teacher permissions
+ONLY for the assigned Class + Subject.
+
+Example:
+
+Principal teaches:
+Class 10-A Mathematics
+
+ALLOW:
+10-A Maths Homework
+10-A Maths Marks
+
+DENY:
+10-A Physics Marks
+
+If Principal is not Class Teacher:
+
+DENY:
+Normal Class Teacher Attendance
+Report Card Generation
+Hall Ticket Release
+
+Also define self-approval conflicts.
+
+==================================================
+10. SELF-APPROVAL / SEGREGATION OF DUTIES
+==================================================
+
+Define rules preventing protected self-approval.
+
+Examples:
+
+Principal entered Marks via My Teaching
+→ Principal may be blocked from approving dependent Report Card.
+
+Principal raised Re-Exam request as Teacher
+→ Same Principal may be blocked from approving it.
+
+Principal uploaded AI material
+→ Same Principal may be blocked from approving it.
+
+Finance Admin recorded payment
+→ Same Finance Admin may be blocked from verification when maker-checker requires independence.
+
+Admin must not approve own protected permission escalation.
+
+Admin must not approve own leave where policy forbids it.
+
+==================================================
+11. SCHOOL ADMIN
+==================================================
+
+Define Admin permissions for:
+
+Admissions
+Student Administration
+Staff Administration
+Academic Setup
+Attendance Operations
+Finance
+Transport
+Communication
+Accounts
+Policies
+Reports
+Imports
+Audit
+Integrations
+Archive
+
+School Admin authorization requires:
+
+Authenticated School
++
+Admin Permission
+
+Admin must never inherit:
+
+Principal academic approval
+Teacher formal Marks Entry
+Class Teacher Report Card preparation
+Platform Admin privileges
+
+==================================================
+12. PLATFORM ADMIN
+==================================================
+
+Platform Admin is above School tenants.
+
+Define permissions for:
+
+School Application Review
+Tenant Creation
+Tenant Activation
+Tenant Suspension
+Subscription
+Billable Student Configuration
+Feature Entitlements
+Platform Integration Health
+Platform Support
+Platform Audit
+
+Platform Admin must not casually receive unrestricted School Student data merely because the role is platform-wide.
+
+Design controlled support access separately.
+
+==================================================
+13. TENANT AUTHORIZATION
+==================================================
+
+Define rules for all school-owned endpoints.
+
+Conceptually:
+
+authenticatedUser.schoolId
+must match
+resource.schoolId
+
+unless an explicitly authorized Platform workflow exists.
+
+Never authorize based only on:
+
+request.schoolId
+
+submitted by browser.
+
+Define handling for:
+
+Nested resources
+Indirect relationships
+Archived records
+Closed academic years
+Cross-school identifiers
+Files
+Exports
+
+==================================================
+14. ACADEMIC YEAR SCOPE
+==================================================
+
+Define access for:
+
+ACTIVE academic year
+CLOSED academic year
+Future academic year
+
+Examples:
+
+Normal marks modification:
+ACTIVE only
+
+Historical view:
+CLOSED allowed according to permission
+
+Historical correction:
+Dedicated correction permission/workflow only
+
+==================================================
+15. WORKFLOW STATE AUTHORIZATION
+==================================================
+
+Authorization must depend on state.
+
+Examples:
+
+Teacher Marks:
+DRAFT → Teacher may edit
+SUBMITTED → Teacher cannot freely edit
+RETURNED → Teacher may correct
+ACCEPTED → locked
+PUBLISHED → formal correction workflow only
+
+Report Card:
+DRAFT
+SUBMITTED
+RETURNED
+APPROVED
+PUBLISHED
+SUPERSEDED
+
+Refund:
+REQUESTED
+APPROVED
+PROCESSING
+SUCCEEDED
+FAILED
+
+Define who may transition every important workflow state.
+
+==================================================
+16. FINANCE AUTHORIZATION
+==================================================
+
+Define permissions for:
+
+View Student Ledger
+Create Fee Structure
+Publish approved Fee Structure
+Generate Billing Run
+Record Offline Payment
+Verify Offline Payment
+View Payment
+Create Adjustment
+Create Concession Request
+Apply Approved Concession
+Apply Credit
+Create Refund Request
+Approve Refund where policy permits
+Process Approved Refund
+Reconciliation
+Daily Finance Closing
+Settlement
+
+Define maker-checker constraints.
+
+No Finance permission exposes:
+
+CVV
+UPI PIN
+OTP
+Bank password
+Provider secrets
+
+==================================================
+17. HALL TICKET AUTHORIZATION
+==================================================
+
+Define:
+
+Admin
+→ Configure Policy
+
+FutureSchool
+→ Calculate Eligibility
+
+Class Teacher
+→ Release Cleared Student
+
+Principal
+→ Monitor
+
+Principal
+→ Exceptional controlled override
+
+Finance Admin must not simply set:
+
+CLEARED = true
+
+Class Teacher must not release PENDING Student.
+
+==================================================
+18. TRANSPORT AUTHORIZATION
+==================================================
+
+Define:
+
+Parent
+→ Request Transport Change
+
+Transport Admin
+→ Validate/Approve operational change
+
+Principal
+→ View exceptions / policy-sensitive escalations
+
+Teacher
+→ Minimal operational awareness only when needed
+
+No role receives Student personal GPS.
+
+==================================================
+19. COMPLAINT AUTHORIZATION
+==================================================
+
+Define by category:
+
+Academic
+Attendance
+Teacher Communication
+Finance
+Transport
+Facilities
+Safety
+
+Determine:
+
+Owner
+Viewer
+Responder
+Escalation Authority
+Closure Authority
+
+Internal notes must remain hidden from Parent.
+
+==================================================
+20. STUDENT SAFETY AUTHORIZATION
+==================================================
+
+Define restricted permissions for:
+
+Emergency Information
+Pickup Contacts
+Temporary Pickup
+Early Pickup
+Student Release
+Incident
+
+Use least privilege.
+
+Finance-only Admin must not automatically see safety records.
+
+==================================================
+21. FILE AUTHORIZATION
+==================================================
+
+Define authorization for:
+
+Student Photo
+Homework Attachment
+Study Material
+Leave Attachment
+Complaint Evidence
+Report Card
+Receipt
+Certificate
+
+File access must inherit:
+
+school
+resource
+role
+relationship
+visibility
+workflow state
+
+Do not authorize solely because someone knows the storage key/file ID.
+
+==================================================
+22. EXPORT AUTHORIZATION
+==================================================
+
+Define:
+
+VIEW permission
+versus
+EXPORT permission
+
+They are not always identical.
+
+Sensitive exports may require:
+
+SENSITIVE_EXPORT
++
+Step-Up MFA
++
+Tenant scope
++
+Audit
+
+==================================================
+23. FEATURE ENTITLEMENTS
+==================================================
+
+FutureSchool commercial model is per billable Student.
+
+Some schools may have different enabled features.
+
+Authorization sequence should include:
+
+Is Feature Enabled for School?
+        ↓
+Does User Role/Permission allow?
+        ↓
+Does Relationship allow?
+        ↓
+Does Workflow State allow?
+
+A hidden premium menu alone is not sufficient.
+
+Backend must enforce entitlement.
+
+==================================================
+24. DELEGATION
+==================================================
+
+Define Acting Principal authorization.
+
+Delegation has:
+
+Principal
+Acting User
+Permission Scope
+Valid From
+Valid Until
+Status
+
+Delegated permission automatically expires.
+
+Active delegation cannot be silently expanded.
+
+New authority requires a new delegation/version.
+
+==================================================
+25. ACCOUNT STATUS
+==================================================
+
+Define behavior for:
+
+DRAFT
+ACTIVE
+LOCKED
+INACTIVE
+EXITED
+RECOVERY_REQUIRED
+
+Example:
+
+EXITED Teacher
+→ authentication denied
+→ historical authored records preserved
+
+SUSPENDED School
+→ define tenant access behavior separately
+
+==================================================
+26. AUTHORIZATION FAILURE RESPONSES
+==================================================
+
+Recommend consistent handling:
+
+401
+Unauthenticated
+
+403
+Authenticated but unauthorized
+
+404
+Where non-disclosure of resource existence is safer
+
+Do not leak:
+
+Student exists
+School exists
+Payment exists
+
+to unauthorized callers unnecessarily.
+
+==================================================
+27. BACKEND ENFORCEMENT DESIGN
+==================================================
+
+Recommend how authorization should later be implemented in Spring Boot.
+
+Do not code it yet.
+
+Discuss architecture such as:
+
+Request Authentication
+        ↓
+Security Context
+        ↓
+Tenant Context
+        ↓
+Permission Evaluation
+        ↓
+Domain Relationship Evaluation
+        ↓
+Workflow Validation
+        ↓
+Service Method
+        ↓
+Repository
+
+Avoid controllers performing all authorization manually.
+
+Recommend reusable authorization services/policies.
+
+==================================================
+28. AUTHORIZATION TEST MATRIX
+==================================================
+
+For every critical permission create:
+
+ALLOW test
+
+and
+
+DENY tests.
+
+Examples:
+
+School A Admin
+→ School B Student
+DENY
+
+Teacher
+→ Assigned Maths
+ALLOW
+
+Teacher
+→ Unassigned Physics
+DENY
+
+Parent
+→ Own Student
+ALLOW
+
+Parent
+→ Sibling Student
+DENY
+
+Principal
+→ Report Card Approval
+ALLOW
+
+Principal
+→ Admin permission reassignment
+DENY unless explicitly authorized
+
+Admin
+→ Report Card Approval
+DENY
+
+Platform Admin
+→ Direct Student marks edit
+DENY
+
+==================================================
+29. OUTPUT
+==================================================
+
+Do NOT implement authorization code yet.
+
+Produce:
+
+1. Authorization Architecture
+2. Role Catalog
+3. Permission Catalog
+4. Admin Permission Bundles
+5. Student Matrix
+6. Parent Matrix
+7. Subject Teacher Matrix
+8. Class Teacher Matrix
+9. Principal Matrix
+10. Admin Matrix
+11. Platform Admin Matrix
+12. Finance Matrix
+13. Transport Matrix
+14. Safety Matrix
+15. File Matrix
+16. Export Matrix
+17. Feature Entitlement Rules
+18. Workflow-State Transition Matrix
+19. Self-Approval / Segregation Rules
+20. Delegation Matrix
+21. Account-State Rules
+22. Tenant Authorization Rules
+23. Closed-Year Rules
+24. Minimum Required Spring Security Architecture
+25. Authorization Test Plan
+26. Open Product Decisions
+
+For every rule specify:
+
+ACTOR
+
+ACTION
+
+RESOURCE
+
+TENANT REQUIREMENT
+
+PERMISSION
+
+RELATIONSHIP REQUIREMENT
+
+WORKFLOW STATE
+
+FEATURE ENTITLEMENT
+
+STEP-UP REQUIRED?
+
+ALLOW / DENY
+
+AUDIT REQUIRED?
+
+Where useful, present matrices.
+
+Clearly distinguish:
+
+DESIGN DECISION
+
+from:
+
+IMPLEMENTATION TODO
+
+Do not claim authorization is implemented.
+
+Stop after Phase 12 documentation.
+---------------------------------------------------------------------------------------------------------------------------------------------------
+PHASE 13
+---------------------------------------------------------------------------------------------------------------------------------------------------
+Proceed with PHASE 13 ONLY:
+
+FUTURESCHOOL PRODUCTION API CONTRACT
+
+The following architecture phases are complete:
+
+Phase 10:
+Security Architecture
+
+Phase 11:
+Database + Multi-Tenant Architecture
+
+Phase 12:
+Authorization Matrix
+
+Do NOT implement Spring Boot controllers yet.
+
+Do NOT implement repositories, services, JPA entities, authentication code, payment integrations, or frontend API calls yet.
+
+This phase is for API CONTRACT DESIGN ONLY.
+
+Act as:
+
+- Senior REST API Architect
+- Senior Spring Boot Architect
+- Senior SaaS Architect
+- Senior Security Architect
+- Senior React Integration Architect
+- Senior API Governance Engineer
+- Senior QA Automation Architect
+
+The objective is to define a secure, consistent, versioned and production-oriented API contract for FutureSchool before backend implementation begins.
+
+==================================================
+1. API DESIGN PRINCIPLES
+==================================================
+
+Design the API using consistent REST conventions.
+
+Use a versioned API base path such as:
+
+/api/v1
+
+Recommend the final convention.
+
+Use resource-oriented endpoints.
+
+Avoid action-heavy URLs where a resource or state-transition endpoint is clearer.
+
+Examples:
+
+Preferred:
+
+GET /api/v1/students/me
+
+GET /api/v1/homework
+
+POST /api/v1/leave-requests
+
+POST /api/v1/report-cards/{reportCardId}/approvals
+
+Not preferred:
+
+GET /getStudentData
+
+POST /doApproveReportCard
+
+POST /updateEverything
+
+Use:
+
+- JSON request and response bodies
+- ISO-8601 date/time formats
+- Consistent pagination
+- Consistent sorting
+- Consistent filtering
+- Consistent errors
+- Consistent validation messages
+- Correlation/request identifiers
+- Idempotency where required
+
+==================================================
+2. MULTI-TENANT API RULE
+==================================================
+
+For normal school users, do NOT design APIs that trust arbitrary schoolId values supplied by the browser.
+
+Avoid normal endpoints such as:
+
+GET /api/v1/students?schoolId=123
+
+if the authenticated identity already determines the school.
+
+Preferred concept:
+
+GET /api/v1/students
+
+The backend determines:
+
+Authenticated User
+        ↓
+School/Tenant Context
+        ↓
+Role and Permission
+        ↓
+Authorized Resource Scope
+        ↓
+Response
+
+Platform Admin APIs may explicitly reference tenant/school identifiers when managing tenants.
+
+Clearly separate:
+
+School-scoped APIs
+
+from:
+
+Platform Admin APIs
+
+==================================================
+3. API NAMESPACES
+==================================================
+
+Recommend and define namespaces such as:
+
+/api/v1/auth
+
+/api/v1/me
+
+/api/v1/students
+
+/api/v1/parents
+
+/api/v1/staff
+
+/api/v1/academic-years
+
+/api/v1/classes
+
+/api/v1/sections
+
+/api/v1/subjects
+
+/api/v1/teacher-allocations
+
+/api/v1/attendance
+
+/api/v1/homework
+
+/api/v1/quizzes
+
+/api/v1/study-materials
+
+/api/v1/exams
+
+/api/v1/marks
+
+/api/v1/report-cards
+
+/api/v1/hall-tickets
+
+/api/v1/fees
+
+/api/v1/invoices
+
+/api/v1/payments
+
+/api/v1/refunds
+
+/api/v1/credits
+
+/api/v1/concessions
+
+/api/v1/transport
+
+/api/v1/leave-requests
+
+/api/v1/messages
+
+/api/v1/meetings
+
+/api/v1/complaints
+
+/api/v1/events
+
+/api/v1/consents
+
+/api/v1/pickup-authorizations
+
+/api/v1/incidents
+
+/api/v1/notifications
+
+/api/v1/reports
+
+/api/v1/files
+
+/api/v1/audit
+
+/api/v1/policies
+
+/api/v1/integrations
+
+/api/v1/platform
+
+Recommend improved grouping where necessary.
+
+Do not create excessively deep or inconsistent paths.
+
+==================================================
+4. AUTHENTICATION APIs
+==================================================
+
+Design API contracts for:
+
+Login
+
+Logout
+
+Refresh session/token if the selected architecture uses refresh tokens
+
+Current User Context
+
+Password recovery request
+
+Password recovery verification
+
+Password reset
+
+Change password
+
+MFA enrollment
+
+MFA verification
+
+MFA recovery/reset through authorized workflow
+
+Session list
+
+Revoke one session
+
+Revoke all sessions
+
+Account-lock response
+
+For Student and Parent login:
+
+Same Student ID
++
+Same Password
++
+Portal Context
+
+The portal context must be validated by the server.
+
+Example request concept:
+
+POST /api/v1/auth/login
+
+{
+  "loginId": "GVS-2027-0001",
+  "password": "...",
+  "portal": "STUDENT"
+}
+
+or:
+
+{
+  "loginId": "GVS-2027-0001",
+  "password": "...",
+  "portal": "PARENT"
+}
+
+Design the final request and response structure.
+
+Never return:
+
+- Password
+- Password hash
+- MFA secret
+- Reset token
+- Private signing key
+- Raw session secret
+
+==================================================
+5. CURRENT USER CONTEXT
+==================================================
+
+Design:
+
+GET /api/v1/me
+
+Response should provide only authorized frontend context such as:
+
+User identity
+
+Portal role/context
+
+School branding/context
+
+Permissions
+
+Feature entitlements
+
+Current Academic Year
+
+Account-security summary
+
+Actual Subject Allocations where applicable
+
+Class Teacher assignment where applicable
+
+Do not return unrestricted school data.
+
+Do not make the frontend decode authorization solely from a token if a secure current-user endpoint is more appropriate.
+
+==================================================
+6. SCHOOL CONTEXT
+==================================================
+
+Design the school-context response required by the frontend.
+
+Include appropriate fields such as:
+
+School internal/public reference
+
+School code
+
+School name
+
+Logo reference
+
+Brand colors
+
+Academic year
+
+Supported languages
+
+Enabled features
+
+Subscription/entitlement summary appropriate for the user
+
+Do not expose Platform subscription-commercial details to ordinary Students, Parents or Teachers unless required.
+
+==================================================
+7. STANDARD RESPONSE DESIGN
+==================================================
+
+Decide whether successful APIs return:
+
+Direct resources
+
+or:
+
+A consistent response envelope
+
+Recommend one approach and apply it consistently.
+
+Example envelope concept:
+
+{
+  "data": {},
+  "meta": {},
+  "requestId": "..."
+}
+
+For collections:
+
+{
+  "data": [],
+  "meta": {
+    "page": 0,
+    "size": 20,
+    "totalElements": 100,
+    "totalPages": 5
+  },
+  "requestId": "..."
+}
+
+Do not wrap responses unnecessarily if direct resources are cleaner.
+
+Explain the chosen convention.
+
+==================================================
+8. STANDARD ERROR CONTRACT
+==================================================
+
+Create a consistent error model.
+
+Example concept:
+
+{
+  "timestamp": "...",
+  "status": 422,
+  "code": "VALIDATION_FAILED",
+  "message": "The request contains invalid values.",
+  "fieldErrors": [
+    {
+      "field": "fromDate",
+      "code": "INVALID_DATE_RANGE",
+      "message": "From date must not be after the to date."
+    }
+  ],
+  "requestId": "..."
+}
+
+Define handling for:
+
+400
+Invalid request
+
+401
+Unauthenticated
+
+403
+Authenticated but unauthorized
+
+404
+Resource unavailable or not found
+
+409
+State conflict / duplicate / concurrency conflict
+
+422
+Business or validation failure
+
+429
+Rate limited
+
+500
+Unexpected internal failure
+
+502 / 503
+External provider unavailable where appropriate
+
+Avoid leaking:
+
+- SQL errors
+- Stack traces
+- Internal class names
+- Tenant existence
+- Student existence
+- Payment secrets
+- Security configuration
+
+==================================================
+9. PAGINATION, FILTERING AND SORTING
+==================================================
+
+Define one consistent convention.
+
+For example:
+
+page
+
+size
+
+sort
+
+status
+
+academicYear
+
+classId
+
+subjectId
+
+fromDate
+
+toDate
+
+search
+
+Define maximum page size.
+
+Define default page size.
+
+Define allowed sorting fields per endpoint.
+
+Do not allow arbitrary database-field sorting.
+
+Use cursor pagination where justified for logs or high-volume activity, but do not overcomplicate normal lists.
+
+==================================================
+10. IDENTIFIER RULES
+==================================================
+
+Define API identifier behavior.
+
+The frontend may use opaque UUID/public identifiers.
+
+Do not expose sequential database IDs where avoidable.
+
+Differentiate:
+
+Internal database identifier
+
+Human-readable Student ID
+
+Admission Number
+
+Staff ID
+
+Invoice Number
+
+Receipt Number
+
+Payment Reference
+
+Complaint Number
+
+Never use a business identifier as authorization proof.
+
+==================================================
+11. CONCURRENCY AND VERSION FIELDS
+==================================================
+
+For resources vulnerable to concurrent edits, design optimistic concurrency.
+
+Examples:
+
+Marks Draft
+
+Timetable Draft
+
+Fee Structure Draft
+
+Policy Draft
+
+Student Profile Change
+
+Teacher Allocation Draft
+
+Report Card Draft
+
+Use:
+
+version
+
+ETag / If-Match
+
+or another recommended strategy.
+
+Define expected conflict response:
+
+409 CONFLICT
+
+or:
+
+412 PRECONDITION_FAILED
+
+Recommend one consistent approach.
+
+==================================================
+12. IDEMPOTENCY
+==================================================
+
+Define endpoints requiring idempotency keys.
+
+Include at minimum:
+
+Payment order creation
+
+Payment webhook processing
+
+Refund processing
+
+Billing run
+
+Admission activation
+
+Promotion execution
+
+Student Exit execution
+
+Staff Exit execution
+
+Academic Year closure
+
+Bulk import execution
+
+Hall Ticket bulk release
+
+Notification batch execution where needed
+
+Recommend request header such as:
+
+Idempotency-Key
+
+Define:
+
+Scope
+
+Retention
+
+Duplicate response behavior
+
+Conflict behavior
+
+==================================================
+13. FILE UPLOAD CONTRACT
+==================================================
+
+Design APIs for:
+
+Student photos
+
+Homework attachments
+
+Homework submissions
+
+Study Materials
+
+Leave attachments
+
+Complaint evidence
+
+Report Card PDFs
+
+Receipts
+
+Certificates
+
+Recommend upload process:
+
+Direct multipart upload through backend
+
+or:
+
+Authorized pre-signed upload workflow
+
+Explain the recommended V1 approach.
+
+Define:
+
+Allowed MIME types
+
+Maximum size
+
+File metadata
+
+Tenant scope
+
+Upload status
+
+Future malware scanning status
+
+Download authorization
+
+Do not expose permanent unrestricted public URLs.
+
+==================================================
+14. STUDENT APIs
+==================================================
+
+Design contracts for:
+
+Student's own profile
+
+Student attendance
+
+Student homework
+
+Homework submission
+
+Quiz assignments
+
+Quiz attempts
+
+Study Materials
+
+Digital Library
+
+AI Tutor request contract
+
+Timetable
+
+Exam schedule
+
+Released Hall Tickets
+
+Published Marks
+
+Published Report Cards
+
+Progress summary
+
+Calendar
+
+Notifications
+
+Security summary
+
+All Student APIs must be scoped to the authenticated Student.
+
+Do not require the normal Student frontend to send another Student ID for own-resource APIs.
+
+Prefer:
+
+GET /api/v1/students/me/attendance
+
+or another clean convention.
+
+==================================================
+15. PARENT APIs
+==================================================
+
+Design APIs for the authenticated Parent context.
+
+Because Parent and Student share Student credentials, the Parent context still belongs to one Student.
+
+Design:
+
+Child overview
+
+Attendance
+
+Homework tracking
+
+Published Marks
+
+Published Report Cards
+
+Report Card acknowledgement
+
+Fees
+
+Invoices
+
+Payment orders
+
+Payment history
+
+Receipts
+
+Refund status
+
+Credits
+
+Transport
+
+Leave requests
+
+Teacher-message threads
+
+Meeting booking
+
+Complaints
+
+Events
+
+Consent
+
+Pickup contacts
+
+Temporary pickup authorization
+
+Early pickup
+
+Notifications
+
+Profile change requests
+
+Security
+
+The Parent frontend must never supply another Student ID to access a sibling or unrelated Student.
+
+==================================================
+16. TEACHER APIs
+==================================================
+
+Separate API authorization by actual relationship:
+
+Assigned Subject Teacher
+
+Assigned Class Teacher
+
+Design Subject Teacher contracts for:
+
+My allocations
+
+Homework
+
+Homework review
+
+Marks Draft
+
+Marks submission
+
+Marks import batch
+
+Quiz
+
+Question Bank
+
+Study Materials
+
+Material versions
+
+AI approval requests
+
+Student doubts
+
+Class FAQ
+
+Lesson Plans
+
+Syllabus progress
+
+Question Papers
+
+Teacher AI requests
+
+Design Class Teacher contracts for:
+
+Morning Attendance
+
+Afternoon Attendance
+
+Attendance correction
+
+Leave reviews
+
+Subject marks review
+
+Report Card preparation
+
+Conduct and remarks
+
+Principal submission
+
+Returned Report Cards
+
+Publication
+
+Hall Ticket release
+
+Parent messages
+
+Meeting availability
+
+Meeting summaries
+
+Classroom updates
+
+Promotion recommendations
+
+Early pickup awareness
+
+==================================================
+17. MARKS WORKFLOW API
+==================================================
+
+Design explicit state-transition APIs for:
+
+Create/edit Draft
+
+Save Draft
+
+Submit to Class Teacher
+
+Return with reason
+
+Correct
+
+Resubmit
+
+Accept
+
+Request reopening
+
+Import Excel staging
+
+Import validation
+
+Import rollback while Draft
+
+Published correction request
+
+Avoid one unrestricted endpoint such as:
+
+PATCH /marks/{id}
+
+that can perform every transition.
+
+Define the required permission and valid source state for every transition.
+
+==================================================
+18. REPORT CARD APIs
+==================================================
+
+Design contracts for:
+
+Class validation summary
+
+Report Card generation
+
+Conduct/remark update
+
+Submit class to Principal
+
+Principal class summary
+
+Attention items
+
+Approve selected Students
+
+Return selected Students with reason
+
+Check all-approved status
+
+Class Teacher final publication
+
+Report Card acknowledgement
+
+Published correction
+
+Report Card versions
+
+Do not allow Principal approval endpoint to publish automatically.
+
+==================================================
+19. PRINCIPAL APIs
+==================================================
+
+Design APIs for:
+
+Executive Dashboard
+
+Action Center
+
+Executive Calendar
+
+Report Card approvals
+
+Teacher Leave approvals
+
+Re-Exam approvals
+
+Published Mark Correction approvals
+
+Promotion approvals
+
+Fee Concession approvals
+
+Refund approvals
+
+Fee Structure approvals
+
+Marks reopening
+
+Academic results analytics
+
+Syllabus monitoring
+
+Student Attendance monitoring
+
+Teacher coverage
+
+Exam Control Center
+
+Hall Ticket monitoring
+
+Hall Ticket override
+
+Complaints/escalations
+
+Safety incidents
+
+Emergency notices
+
+Admissions approval
+
+Student Exit approval
+
+Teacher allocation approval
+
+Class Teacher assignment approval
+
+Timetable approval
+
+Exam Schedule approval
+
+School Calendar approval
+
+Major Event approval
+
+Policy approval
+
+Academic Year close approval
+
+Audit/history
+
+Leadership AI
+
+My Teaching
+
+Keep approval endpoints separate from Admin execution endpoints.
+
+==================================================
+20. ADMIN APIs
+==================================================
+
+Design permission-scoped APIs for:
+
+Dashboard / Work Center
+
+Admissions
+
+Student activation
+
+Student 360
+
+Profile change requests
+
+Family relationships
+
+Staff onboarding
+
+Teacher allocation proposals
+
+Academic Year
+
+Classes / Sections / Subjects
+
+Timetable Draft
+
+School Calendar Draft
+
+Exam configuration
+
+Exam Schedule Draft
+
+Attendance operations
+
+Staff Attendance
+
+Promotion execution
+
+Student Exit execution
+
+Staff Exit execution
+
+ID cards
+
+Certificates
+
+Finance
+
+Transport
+
+Communication
+
+Complaints
+
+Events
+
+PTM
+
+Accounts
+
+Permissions
+
+Policies
+
+Integrations
+
+Reports
+
+Imports
+
+Audit
+
+Data Protection
+
+Archive
+
+Approved-for-Execution Queue
+
+Administrative corrections
+
+Every Admin endpoint must identify required permission.
+
+==================================================
+21. PLATFORM ADMIN APIs
+==================================================
+
+Design a clearly separate Platform API namespace.
+
+For example:
+
+/api/v1/platform/schools
+
+/api/v1/platform/subscriptions
+
+/api/v1/platform/entitlements
+
+/api/v1/platform/support
+
+/api/v1/platform/audit
+
+Design:
+
+School application review
+
+Tenant creation
+
+Initial Principal/Admin provisioning
+
+Tenant activation
+
+Tenant suspension
+
+Subscription
+
+Billable Students
+
+Per-Student rate configuration
+
+Feature entitlements
+
+Renewal
+
+Platform integration health
+
+Support access
+
+Platform audit
+
+Do not expose these APIs to School Admin.
+
+Support access to school data must use an explicit controlled support workflow.
+
+==================================================
+22. ADMISSIONS API
+==================================================
+
+Design:
+
+Create Admission Draft
+
+Update Draft Step
+
+Validate Draft
+
+Submit for approval
+
+Principal approve / return / reject
+
+Fresh validation
+
+Admin activate
+
+Bulk activation where appropriate
+
+Admission activation must be idempotent and transactional.
+
+Draft must not create active login, invoices, attendance eligibility, Hall Ticket eligibility or active transport seat.
+
+==================================================
+23. ATTENDANCE APIs
+==================================================
+
+Design:
+
+Teacher attendance sheet
+
+Morning submission
+
+Afternoon submission
+
+Correction request/reason
+
+Late-entry reopening request
+
+Approve reopening
+
+Administrative exceptional correction
+
+Student attendance view
+
+Parent attendance view
+
+Principal monitoring
+
+Admin operations
+
+Use explicit attendance/session statuses.
+
+Preserve correction history.
+
+==================================================
+24. HOMEWORK APIs
+==================================================
+
+Design:
+
+Create Draft
+
+Update Draft
+
+Publish
+
+List assignments
+
+Student detail
+
+Student submission
+
+Teacher review
+
+Teacher feedback
+
+Close/Archive where appropriate
+
+Prevent Parent submission.
+
+==================================================
+25. QUIZ APIs
+==================================================
+
+Design:
+
+Question Bank
+
+Quiz Draft
+
+Question assignment
+
+Publish
+
+Start attempt
+
+Submit answer
+
+Complete attempt
+
+Score/result
+
+Attempt history
+
+Prevent answer leakage before valid review state.
+
+==================================================
+26. STUDY MATERIAL AND AI APIs
+==================================================
+
+Design:
+
+Material Draft
+
+Version Upload
+
+Student publication
+
+Parent publication
+
+AI approval request
+
+Principal/authorized approval
+
+Version retirement
+
+Student AI Tutor request
+
+Teacher AI draft request
+
+Principal AI summary request
+
+Admin AI summary request
+
+AI endpoints must not perform consequential workflow mutation.
+
+Include authorized context and source-reference structures.
+
+==================================================
+27. EXAM AND RE-EXAM APIs
+==================================================
+
+Design:
+
+Exam Configuration Draft
+
+Exam Schedule Draft
+
+Validation
+
+Principal approval
+
+Admin publication
+
+Re-Exam request
+
+Re-Exam validation
+
+Approval
+
+Schedule
+
+Teacher marks entry
+
+Exam incident
+
+Exam duty
+
+Control Center summary
+
+==================================================
+28. FEES AND INVOICE APIs
+==================================================
+
+Design:
+
+Fee Structure Draft
+
+Fee Structure validation
+
+Principal approval
+
+Admin publication
+
+Billing Run Draft
+
+Billing preview
+
+Billing execution
+
+Student invoices
+
+Parent invoices
+
+Late-fee review
+
+Late-fee application
+
+Waiver
+
+Due-date extension
+
+Financial adjustment
+
+Use explicit immutable financial events.
+
+==================================================
+29. PAYMENT APIs
+==================================================
+
+Design:
+
+Create Payment Order
+
+Get Payment Order Status
+
+Provider Webhook
+
+Payment Allocation
+
+Receipt
+
+Offline Payment Record
+
+Offline Payment Verify / Reject
+
+Cheque Clearance / Bounce
+
+Payment Issue
+
+Credit
+
+Do not allow the frontend to submit success state.
+
+Provider webhook should not use normal browser authentication.
+
+Define separate verification/security requirements.
+
+==================================================
+30. REFUND APIs
+==================================================
+
+Design:
+
+Refund request
+
+Eligibility preview
+
+Admin approval where permitted
+
+Principal approval where required
+
+Approved-refund queue
+
+Fresh validation
+
+Process online refund
+
+Record authorized offline refund
+
+Get refund status
+
+Refund receipt
+
+Provider refund webhook/result
+
+Reconciliation
+
+Never allow:
+
+PATCH /refund/{id}
+{
+  "status": "SUCCEEDED"
+}
+
+from ordinary frontend code.
+
+==================================================
+31. SETTLEMENT APIs
+==================================================
+
+Design:
+
+Expected settlement
+
+Provider settlement import/webhook
+
+Matching
+
+Exception
+
+Resolution
+
+Settlement reports
+
+Do not change verified Parent payments to force settlement reconciliation.
+
+==================================================
+32. TRANSPORT APIs
+==================================================
+
+Design:
+
+Routes
+
+Stops
+
+Vehicles
+
+Route capacity
+
+Student assignment
+
+Transport change request
+
+Approval/rejection
+
+Financial adjustment linkage
+
+Vehicle replacement
+
+Transport alert
+
+Transport incident
+
+Future vehicle location adapter
+
+No Student personal GPS endpoint.
+
+==================================================
+33. COMMUNICATION AND NOTIFICATION APIs
+==================================================
+
+Design:
+
+Notice Draft
+
+Approval
+
+Schedule
+
+Publish
+
+Cancel scheduled notice
+
+Notification preferences
+
+Notification list
+
+Mark read
+
+Delivery status
+
+Template
+
+Channel provider status
+
+Separate business event from delivery channel/provider.
+
+==================================================
+34. PTM APIs
+==================================================
+
+Design:
+
+Create PTM event
+
+Teacher availability
+
+Booking window
+
+Available slots
+
+Book slot
+
+Reschedule request
+
+Accept/reject reschedule
+
+Cancel
+
+Complete
+
+Parent-visible summary
+
+Restricted internal note
+
+School monitoring
+
+Prevent double booking transactionally.
+
+==================================================
+35. COMPLAINT APIs
+==================================================
+
+Design:
+
+Create complaint
+
+Assign
+
+Reassign
+
+Parent-visible response
+
+Internal note
+
+Escalate
+
+Resolve
+
+Parent confirm resolution
+
+Reopen
+
+Close
+
+History
+
+Original Parent complaint body must not be editable through later updates.
+
+==================================================
+36. EVENT AND CONSENT APIs
+==================================================
+
+Design:
+
+Event Draft
+
+Validation
+
+Approval
+
+Publish
+
+Participant list
+
+Parent consent
+
+Payment reference
+
+Transport requirement
+
+Reminder
+
+Cancel/reschedule
+
+Refund case generation
+
+Completion
+
+Admin cannot change Parent consent directly.
+
+==================================================
+37. STUDENT SAFETY APIs
+==================================================
+
+Design:
+
+Pickup contacts
+
+Pickup contact change request
+
+Temporary authorization
+
+Early pickup request
+
+School-initiated pickup
+
+Release validation
+
+Complete release
+
+Incident
+
+Principal escalation
+
+Release record must be immutable after completion except controlled correction.
+
+==================================================
+38. REPORT AND EXPORT APIs
+==================================================
+
+Design:
+
+Report catalog
+
+Report parameters
+
+Generate normal report
+
+Generate sensitive export
+
+Step-up challenge where required
+
+Download authorized result
+
+Export audit
+
+For V1, design synchronous generation for reasonably sized reports and define the safe limitation.
+
+Do not promise unsupported background processing.
+
+==================================================
+39. BULK IMPORT APIs
+==================================================
+
+Design:
+
+Download template metadata
+
+Create upload/staging batch
+
+Validate batch
+
+Get row errors
+
+Download error report
+
+Preview
+
+Execute valid rows
+
+Get batch result
+
+Controlled rollback where permitted
+
+Do not silently skip invalid rows.
+
+==================================================
+40. AUDIT APIs
+==================================================
+
+Design read-only operational APIs for authorized users.
+
+Support:
+
+Filter by actor
+
+Action
+
+Entity
+
+Date range
+
+Module
+
+School Scope
+
+Export when separately authorized
+
+Do not expose endpoints to edit/delete audit events.
+
+==================================================
+41. DASHBOARD API STRATEGY
+==================================================
+
+Design dashboard-summary endpoints carefully.
+
+Avoid requiring the frontend to make 50 requests for one dashboard.
+
+But do not create one enormous endpoint returning the whole database.
+
+Recommend role-specific aggregate endpoints such as:
+
+GET /api/v1/student-dashboard
+
+GET /api/v1/parent-dashboard
+
+GET /api/v1/teacher-dashboard
+
+GET /api/v1/principal-dashboard
+
+GET /api/v1/admin-dashboard
+
+or recommend a cleaner resource convention.
+
+Document what each summary contains and excludes.
+
+==================================================
+42. ANALYTICS API RULES
+==================================================
+
+Analytics must use:
+
+Authorized scope
+
+Published/final data where required
+
+Aggregated results
+
+No Teacher ranking
+
+No Student ranking
+
+No employee productivity score
+
+Define contracts for:
+
+Published academic trends
+
+Attendance summaries
+
+Syllabus status
+
+Finance summaries
+
+Operational exceptions
+
+==================================================
+43. DATE, TIME AND TIMEZONE
+==================================================
+
+Define:
+
+Date format
+
+Date-time format
+
+Timezone strategy
+
+School timezone
+
+Server storage recommendation
+
+Display conversion
+
+Avoid ambiguous local timestamps.
+
+==================================================
+44. CURRENCY AND MONEY
+==================================================
+
+Define money representation.
+
+Do not use floating-point types for money.
+
+Recommend:
+
+Minor-unit integer
+
+or:
+
+Decimal string/BigDecimal representation
+
+Define API format for:
+
+Amount
+
+Currency
+
+Tax
+
+Discount
+
+Concession
+
+Credit
+
+Refund
+
+Settlement
+
+==================================================
+45. ENUMS AND STATUSES
+==================================================
+
+Centralize API enums.
+
+Examples:
+
+AccountStatus
+
+AttendanceStatus
+
+MarksStatus
+
+ReportCardStatus
+
+PaymentStatus
+
+RefundStatus
+
+SettlementStatus
+
+ComplaintStatus
+
+ApprovalStatus
+
+DocumentStatus
+
+Do not use inconsistent values such as:
+
+APPROVED
+
+Approved
+
+approved
+
+across endpoints.
+
+==================================================
+46. API DOCUMENTATION
+==================================================
+
+Define OpenAPI requirements.
+
+Each endpoint should document:
+
+Summary
+
+Description
+
+Required role/permission
+
+Tenant scope
+
+Request schema
+
+Response schema
+
+Errors
+
+Idempotency requirement
+
+Step-up authentication requirement
+
+Audit requirement
+
+Example request/response
+
+Do not expose sensitive details in public API documentation.
+
+==================================================
+47. API TESTING STRATEGY
+==================================================
+
+For each critical endpoint, define:
+
+Happy-path test
+
+Validation failure
+
+Unauthenticated test
+
+Unauthorized role test
+
+Wrong tenant test
+
+Wrong relationship test
+
+Invalid workflow state test
+
+Concurrency test
+
+Idempotency test where applicable
+
+Audit-event test
+
+Example:
+
+Teacher submits marks:
+Assigned Subject + DRAFT
+→ success
+
+Unassigned Subject
+→ denied
+
+School B record
+→ denied
+
+Already ACCEPTED
+→ conflict/denied
+
+Duplicate submission key
+→ same safe result
+
+==================================================
+48. FRONTEND MIGRATION STRATEGY
+==================================================
+
+The frontend currently uses centralized mock data/services.
+
+Define how to replace mock services gradually.
+
+Example:
+
+MockAttendanceService
+
+        ↓
+
+AttendanceApiClient
+
+Keep UI components independent from transport implementation.
+
+Recommend:
+
+API client structure
+
+Auth interceptors
+
+Request ID handling
+
+Error mapping
+
+Schema/runtime validation if appropriate
+
+Caching strategy
+
+Loading/error state strategy
+
+Do not write the entire API client yet.
+
+==================================================
+49. OUTPUT REQUIRED
+==================================================
+
+Do NOT implement controllers or API client code yet.
+
+Produce:
+
+1. API Architecture Overview
+2. API Naming and Versioning Standard
+3. Authentication API Contract
+4. Current User / School Context Contract
+5. Standard Success Response
+6. Standard Error Contract
+7. Pagination / Filter / Sort Standard
+8. Identifier Standard
+9. Concurrency Standard
+10. Idempotency Standard
+11. File API Standard
+12. Student API Catalog
+13. Parent API Catalog
+14. Teacher API Catalog
+15. Principal API Catalog
+16. Admin API Catalog
+17. Platform Admin API Catalog
+18. Academic Workflow API Catalog
+19. Finance API Catalog
+20. Transport API Catalog
+21. Communication API Catalog
+22. Safety API Catalog
+23. Reports/Exports API Catalog
+24. Audit API Catalog
+25. Dashboard API Strategy
+26. Date/Time Standard
+27. Currency Standard
+28. Enum/Status Standard
+29. OpenAPI Documentation Standard
+30. API Test Matrix
+31. Frontend Mock-to-API Migration Plan
+32. Open Decisions Requiring Product Owner Approval
+33. Recommended API Implementation Order
+
+For every endpoint specify:
+
+HTTP METHOD
+
+PATH
+
+PURPOSE
+
+ACTOR
+
+REQUIRED PERMISSION
+
+TENANT SCOPE
+
+RELATIONSHIP SCOPE
+
+VALID SOURCE STATE
+
+REQUEST SCHEMA
+
+SUCCESS RESPONSE
+
+ERRORS
+
+IDEMPOTENCY REQUIRED?
+
+STEP-UP REQUIRED?
+
+AUDIT REQUIRED?
+
+Clearly label:
+
+DESIGN DECISION
+
+and:
+
+IMPLEMENTATION TODO
+
+Do not claim APIs are implemented.
+
+Stop after Phase 13 API Contract documentation.
+---------------------------------------------------------------------------------------------------------------------------------------------------
+PHASE 14
+---------------------------------------------------------------------------------------------------------------------------------------------------
+Proceed with PHASE 14 ONLY:
+
+FUTURESCHOOL PRODUCTION AUDIT MODEL + THREAT MODEL
+
+The following phases are complete:
+
+Phase 10
+Security Architecture
+
+Phase 11
+Database + Multi-Tenant Architecture
+
+Phase 12
+Authorization Matrix
+
+Phase 13
+Production API Contract
+
+Do NOT start Spring Boot business implementation yet.
+
+Do NOT generate controllers, repositories, JPA entities, payment integrations, or frontend API clients in this phase.
+
+Act as:
+
+- Senior Application Security Architect
+- Senior SaaS Security Architect
+- Senior Threat Modeling Engineer
+- Senior Audit Architecture Engineer
+- Senior Spring Security Architect
+- Senior FinTech Security Engineer
+- Senior Privacy Engineering Architect
+- Senior Incident Response Architect
+
+FutureSchool is a multi-school SaaS platform containing:
+
+- Student records
+- Parent records
+- Teacher and Staff records
+- Attendance
+- Homework
+- Exams
+- Marks
+- Report Cards
+- Fees
+- Payments
+- Refunds
+- Credits
+- Concessions
+- Transport
+- Complaints
+- Student safety information
+- Pickup authorization
+- User accounts
+- Permissions
+- Platform subscriptions
+- Audit records
+
+The objective of Phase 14 is to finalize:
+
+1. What FutureSchool audits
+2. How audit records are structured
+3. Who can access audit information
+4. How audit integrity is preserved
+5. What security/privacy threats FutureSchool faces
+6. What preventive controls are required
+7. What detection/monitoring controls are required
+8. What recovery actions are required
+9. Which security requirements become implementation backlog items
+
+==================================================
+1. AUDIT ARCHITECTURE PRINCIPLES
+==================================================
+
+Audit history must represent historical truth.
+
+Normal business users must not be able to:
+
+- edit audit events
+- delete audit events
+- rewrite audit actor
+- rewrite original timestamp
+- remove approval history
+- secretly remove failed attempts
+
+Corrections must create NEW audit events.
+
+Example:
+
+Event 1001
+Student Registered Email Changed
+
+Event 1012
+Student Registered Email Corrected
+
+Event 1001 remains historically visible.
+
+Design the audit architecture as append-oriented / immutable to ordinary application workflows.
+
+Do not claim cryptographic immutability unless an actual mechanism will later implement it.
+
+==================================================
+2. STANDARD AUDIT EVENT
+==================================================
+
+Design a canonical FutureSchool audit-event model.
+
+Consider fields such as:
+
+audit_event_id
+
+school_id / tenant_id
+
+platform_scope if applicable
+
+actor_user_id
+
+actor_login_id
+
+actor_role
+
+effective_permission
+
+delegated_authority_id
+if applicable
+
+action
+
+module
+
+entity_type
+
+entity_id
+
+parent_entity_type
+if applicable
+
+parent_entity_id
+
+previous_state
+or safe previous-state reference
+
+new_state
+or safe new-state reference
+
+reason
+
+approval_reference
+
+policy_version
+
+workflow_state_before
+
+workflow_state_after
+
+request_id
+
+correlation_id
+
+idempotency_key reference where appropriate
+
+source_channel
+
+created_at
+
+security_classification
+
+Design the final schema.
+
+Avoid storing unnecessary secrets or sensitive payloads in audit history.
+
+==================================================
+3. DO NOT AUDIT SECRETS
+==================================================
+
+Explicitly prohibit audit logs from storing:
+
+- Passwords
+- Password hashes
+- MFA secrets
+- OTP values
+- Access tokens
+- Refresh tokens
+- Session secrets
+- Payment-provider secrets
+- Card numbers
+- CVV
+- UPI PIN
+- Private keys
+- Database credentials
+- AI API keys
+
+For sensitive operations record:
+
+"Credential Reset Performed"
+
+not:
+
+the generated credential.
+
+==================================================
+4. AUTHENTICATION AUDIT
+==================================================
+
+Define audit/security events for:
+
+Successful Login
+
+Failed Login
+
+Rate Limited Login
+
+Account Locked
+
+Account Unlocked
+
+Logout
+
+Logout All Sessions
+
+Password Reset Requested
+
+Password Reset Completed
+
+Password Changed
+
+Recovery Email Changed
+
+MFA Enrolled
+
+MFA Removed / Reset
+
+MFA Verification Failure
+
+Session Revoked
+
+Principal Recovery
+
+Admin Recovery
+
+Platform Admin Recovery
+
+Do not record credentials themselves.
+
+==================================================
+5. AUTHORIZATION SECURITY EVENTS
+==================================================
+
+Define which authorization failures should create security/audit events.
+
+Examples:
+
+Cross-Tenant Access Attempt
+
+Unauthorized Student Access
+
+Unauthorized Marks Access
+
+Unauthorized Finance Access
+
+Unapproved Sensitive Export Attempt
+
+Admin Attempting Principal-Only Action
+
+Expired Delegation Used
+
+Feature Entitlement Violation
+
+Potential Object-Level Authorization Failure
+
+Avoid overwhelming storage with every harmless 403.
+
+Develop severity/category guidance.
+
+==================================================
+6. STUDENT ADMINISTRATION AUDIT
+==================================================
+
+Define mandatory audit events for:
+
+Admission Created
+
+Admission Submitted
+
+Admission Approved / Returned / Rejected
+
+Student Activated
+
+Student Profile Changed
+
+Registered Email Changed
+
+Family Relationship Added/Removed
+
+Class Capacity Override
+
+Promotion Executed
+
+Student Exit Initiated
+
+Student Exit Approved
+
+Student Exit Completed
+
+Student Reactivation / Exit Amendment
+
+ID Card Created/Replaced
+
+Certificate Issued/Reissued
+
+==================================================
+7. STAFF AUDIT
+==================================================
+
+Define events for:
+
+Staff Account Created
+
+Teacher Allocation Proposed
+
+Teacher Allocation Approved
+
+Teacher Allocation Activated
+
+Class Teacher Assignment
+
+Class Teacher Handover
+
+Temporary Substitution
+
+Exam Duty Assignment
+
+Staff Attendance Correction
+
+Teacher Leave Approval
+
+Staff Exit Initiated
+
+Staff Exit Completed
+
+Staff Reactivated
+
+==================================================
+8. ATTENDANCE AUDIT
+==================================================
+
+Audit:
+
+Attendance Session Submitted
+
+Attendance Deadline Missed where appropriate
+
+Attendance Corrected
+
+Attendance Reopening Requested
+
+Attendance Reopening Approved
+
+Administrative Attendance Correction
+
+Post-Closure Attendance Correction
+
+Preserve:
+
+Original value
+
+New value
+
+Reason
+
+Actor
+
+Approval
+
+Policy version
+
+Do not silently overwrite attendance history.
+
+==================================================
+9. MARKS AUDIT
+==================================================
+
+Audit:
+
+Marks Draft Created where necessary
+
+Marks Submitted
+
+Marks Returned
+
+Marks Resubmitted
+
+Marks Accepted
+
+Marks Import Executed
+
+Marks Import Rolled Back
+
+Marks Reopening Requested
+
+Marks Reopening Approved
+
+Published Mark Correction Requested
+
+Class Teacher Verification
+
+Principal Approval
+
+Corrected Mark Applied
+
+Report Card Version Created
+
+Avoid excessive logging for every keystroke.
+
+Log material workflow/state changes.
+
+==================================================
+10. REPORT CARD AUDIT
+==================================================
+
+Audit:
+
+Report Card Generated
+
+Conduct/Remark Finalized where appropriate
+
+Submitted to Principal
+
+Principal Approved
+
+Principal Returned
+
+Class Teacher Corrected
+
+Final Class Publication
+
+Parent Acknowledged
+
+Published Correction
+
+Version Superseded
+
+Version Published
+
+Preserve exact Report Card version references.
+
+==================================================
+11. FINANCIAL AUDIT
+==================================================
+
+Define strong audit records for:
+
+Fee Structure Created
+
+Fee Structure Approved
+
+Fee Structure Published
+
+Billing Run Previewed where necessary
+
+Billing Run Executed
+
+Invoice Created
+
+Late Fee Applied
+
+Late Fee Waived
+
+Due Date Extended
+
+Concession Requested
+
+Concession Approved
+
+Concession Applied
+
+Payment Order Created
+
+Online Payment Verified
+
+Offline Payment Recorded
+
+Offline Payment Verified
+
+Offline Payment Rejected
+
+Cheque Cleared
+
+Cheque Bounced
+
+Payment Allocated
+
+Receipt Generated
+
+Credit Created
+
+Credit Applied
+
+Refund Requested
+
+Refund Approved
+
+Refund Processing Started
+
+Refund Succeeded
+
+Refund Failed
+
+Settlement Received
+
+Settlement Matched
+
+Reconciliation Exception
+
+Reconciliation Resolved
+
+Daily Finance Closing
+
+Never rewrite financial history to make reconciliation appear successful.
+
+==================================================
+12. HALL TICKET AUDIT
+==================================================
+
+Audit:
+
+Hall Ticket Policy Version
+
+Clearance Snapshot
+
+Class Teacher Release
+
+Bulk Release
+
+Principal Override
+
+Override Reason
+
+Released By
+
+Released At
+
+Use the financial/policy snapshot that supported eligibility.
+
+==================================================
+13. TRANSPORT AUDIT
+==================================================
+
+Audit:
+
+Route Created/Changed
+
+Vehicle Assignment
+
+Student Transport Assignment
+
+Transport Change Request
+
+Transport Change Approval
+
+Transport Fee Adjustment
+
+Vehicle Replacement
+
+Transport Incident
+
+Transport Assignment Ended
+
+Preserve effective dates.
+
+==================================================
+14. STUDENT SAFETY AUDIT
+==================================================
+
+Treat these records as highly sensitive.
+
+Audit:
+
+Permanent Pickup Contact Added/Removed
+
+Temporary Pickup Authorization
+
+Early Pickup Requested
+
+Early Pickup Approved
+
+Pickup Person Verified
+
+Student Released
+
+School-Initiated Pickup
+
+Incident Created
+
+Incident Escalated
+
+Incident Closed
+
+Emergency Safety Information Access
+
+For emergency-data access record:
+
+Actor
+
+Student
+
+Reason
+
+Category Accessed
+
+Timestamp
+
+Do not put confidential safety content into audit records unnecessarily.
+
+==================================================
+15. COMPLAINT AUDIT
+==================================================
+
+Audit:
+
+Complaint Submitted
+
+Assigned
+
+Reassigned
+
+Escalated
+
+Parent-visible Response
+
+Internal Note Metadata where appropriate
+
+Resolved
+
+Reopened
+
+Closed
+
+Original complaint content must not become editable history.
+
+==================================================
+16. POLICY AND CONFIGURATION AUDIT
+==================================================
+
+Audit:
+
+Policy Draft Created
+
+Policy Changed
+
+Policy Approved
+
+Policy Returned
+
+Policy Published
+
+Policy Activated
+
+Policy Retired
+
+Future-Effective Policy Activated
+
+School Calendar Published
+
+Timetable Published
+
+Exam Schedule Published
+
+School Master Changed
+
+Critical Integration Changed
+
+Record relevant policy/version references.
+
+==================================================
+17. ADMIN SECURITY AUDIT
+==================================================
+
+Audit strongly:
+
+Admin Permission Added
+
+Admin Permission Removed
+
+Permission Bundle Changed
+
+Sensitive Permission Requested
+
+Sensitive Permission Approved
+
+Principal Recovery Performed
+
+Delegation Created
+
+Delegation Revoked
+
+Sensitive Export Generated
+
+Academic Year Closed
+
+Tenant-Level Configuration Changed
+
+Integration Credential Replaced
+without logging credential value
+
+==================================================
+18. PLATFORM ADMIN AUDIT
+==================================================
+
+Audit:
+
+School Application Reviewed
+
+Tenant Created
+
+Tenant Activated
+
+Tenant Suspended
+
+Tenant Reactivated
+
+Subscription Changed
+
+Per-Student Rate Changed
+
+Contracted/Billable Student Rule Changed
+
+Feature Entitlement Added/Removed
+
+Platform Support Access Granted
+
+Support Access Revoked
+
+Platform Security Action
+
+Platform Admin Permission Change
+
+Platform Admin must have its own high-sensitivity audit model.
+
+==================================================
+19. DELEGATION AUDIT
+==================================================
+
+For Acting Principal:
+
+Record:
+
+Original Principal
+
+Acting User
+
+Permission Scope
+
+Valid From
+
+Valid Until
+
+Created By
+
+Approved By where applicable
+
+Revoked By
+
+Revocation Reason
+
+Every delegated action should reference the active delegation authorization.
+
+==================================================
+20. SENSITIVE EXPORT AUDIT
+==================================================
+
+Record:
+
+Who exported
+
+School
+
+Report type
+
+Data classification
+
+Filter/scope
+
+Record count if safely available at generation time
+
+File/export reference
+
+Step-up verification completed
+
+Generated at
+
+Expiry if temporary download
+
+Never store the exported sensitive dataset as plain audit payload.
+
+==================================================
+21. FILE ACCESS AUDIT
+==================================================
+
+Determine which file accesses require audit.
+
+Examples:
+
+Ordinary Student Study Material
+may not require high-detail security audit.
+
+Sensitive files such as:
+
+Complaint Evidence
+
+Medical/Safety Attachment
+
+Financial Documents
+
+Sensitive Audit Export
+
+Principal Governance Export
+
+may require stronger access auditing.
+
+Define categories.
+
+==================================================
+22. AUDIT RETENTION
+==================================================
+
+Design retention categories.
+
+Different audit/security records may need different retention policies.
+
+Do not invent legal retention periods.
+
+Design the system so retention periods are configurable according to contractual/legal policy.
+
+Define:
+
+ACTIVE
+
+ARCHIVED
+
+RETENTION_LOCKED where appropriate
+
+Do not allow School Admin to casually delete audit history.
+
+==================================================
+23. AUDIT ACCESS AUTHORIZATION
+==================================================
+
+Define who can see:
+
+Student operational history
+
+Teacher operational history
+
+Finance audit
+
+Security audit
+
+Principal approval history
+
+Platform audit
+
+Safety access history
+
+School Admin must not automatically see every security or safety audit event.
+
+Use least privilege.
+
+==================================================
+24. AUDIT QUERY / REPORTING
+==================================================
+
+Design common filters:
+
+Date Range
+
+Actor
+
+Role
+
+Module
+
+Action
+
+Entity Type
+
+Entity ID
+
+Security Severity
+
+School
+
+Workflow
+
+Correlation ID
+
+Approval Reference
+
+For Platform Admin:
+
+Tenant filter
+
+Define how audit surfaces support investigation without exposing secrets.
+
+==================================================
+25. EVENT CATEGORIES AND SEVERITY
+==================================================
+
+Recommend event classes such as:
+
+BUSINESS_AUDIT
+
+SECURITY_EVENT
+
+FINANCIAL_AUDIT
+
+PRIVILEGED_ACTION
+
+DATA_ACCESS
+
+SYSTEM_OPERATION
+
+Then recommend severity:
+
+INFO
+
+NOTICE
+
+WARNING
+
+HIGH
+
+CRITICAL
+
+or a better model.
+
+Clearly explain that severity is about event impact, not employee performance.
+
+==================================================
+26. SECURITY MONITORING
+==================================================
+
+Identify events requiring monitoring/alerting, such as:
+
+Repeated Login Failures
+
+Credential Stuffing Pattern
+
+Cross-Tenant Access Attempts
+
+Repeated Authorization Failures
+
+Principal Recovery
+
+Platform Admin Recovery
+
+Sensitive Admin Permission Addition
+
+Large Sensitive Export
+
+Multiple Payment Webhook Verification Failures
+
+Duplicate Payment Attempts
+
+Repeated Refund Failures
+
+Academic Year Close
+
+Backup Failure
+
+Critical Integration Failure
+
+Unusual Platform Support Access
+
+Do not create employee "risk scores".
+
+==================================================
+27. CORRELATION IDs
+==================================================
+
+Design request/correlation identifiers.
+
+Example:
+
+Parent payment request
+        ↓
+Payment Order
+        ↓
+Provider Webhook
+        ↓
+Payment
+        ↓
+Allocation
+        ↓
+Receipt
+
+All related operational/audit events should be traceable through suitable identifiers.
+
+Recommend approach.
+
+==================================================
+28. THREAT MODEL METHOD
+==================================================
+
+Create the FutureSchool threat model using a recognized structured approach such as STRIDE where appropriate.
+
+For every threat document:
+
+Asset
+
+Threat Category
+
+Threat
+
+Attack Scenario
+
+Affected Roles
+
+Potential Impact
+
+Preventive Control
+
+Detection Control
+
+Recovery Control
+
+Residual Risk
+
+Implementation Phase
+
+Do not claim the control exists until implemented/tested.
+
+==================================================
+29. TENANT ISOLATION THREATS
+==================================================
+
+Model threats including:
+
+BOLA / IDOR
+
+School ID Manipulation
+
+Cross-Tenant Search Leakage
+
+Cross-Tenant Export
+
+Cross-Tenant File Access
+
+Cross-Tenant Cache Leakage
+
+Cross-Tenant Background Processing
+
+Platform Support Abuse
+
+Incorrect Tenant Context
+
+Tenant Mistake During Bulk Import
+
+School A Payment Applied to School B
+
+These are release-critical threats.
+
+==================================================
+30. AUTHENTICATION THREATS
+==================================================
+
+Model:
+
+Credential Stuffing
+
+Brute Force
+
+Weak Password
+
+Password Reset Abuse
+
+Reset Token Theft
+
+Session Theft
+
+Refresh Token Theft
+
+Stale Session After Permission Change
+
+MFA Bypass
+
+Principal Account Takeover
+
+Admin Account Takeover
+
+Platform Admin Account Takeover
+
+==================================================
+31. AUTHORIZATION THREATS
+==================================================
+
+Model:
+
+Role Elevation
+
+Permission Escalation
+
+Subject Teacher Accessing Unassigned Class
+
+Parent Accessing Another Student
+
+Admin Performing Principal Action
+
+Principal Self-Approval
+
+Expired Delegation
+
+School Admin Accessing Platform API
+
+Feature Entitlement Bypass
+
+Closed-Year Write
+
+Workflow State Bypass
+
+==================================================
+32. PAYMENT THREATS
+==================================================
+
+Model:
+
+Browser Forged Payment Success
+
+Amount Tampering
+
+Invoice Manipulation
+
+Webhook Forgery
+
+Webhook Replay
+
+Duplicate Webhook
+
+Duplicate Payment
+
+Incorrect Allocation
+
+Unauthorized Refund
+
+Duplicate Refund
+
+Settlement Mismatch
+
+Admin Financial Manipulation
+
+Offline Payment Fraud
+
+Maker/Checker Bypass
+
+Keep PCI-sensitive payment/card data out of FutureSchool where hosted-provider design permits.
+
+==================================================
+33. FILE UPLOAD THREATS
+==================================================
+
+Model:
+
+Malicious File Upload
+
+Executable File
+
+MIME Spoofing
+
+Oversized File
+
+Path Traversal
+
+Cross-Tenant File Access
+
+Malware
+
+Public URL Leakage
+
+Sensitive Document Export
+
+Unsafe Filename
+
+Stored XSS through uploaded content where applicable
+
+==================================================
+34. WEB APPLICATION THREATS
+==================================================
+
+Model:
+
+XSS
+
+CSRF according to authentication architecture
+
+SQL Injection
+
+Mass Assignment
+
+Broken Access Control
+
+CORS Misconfiguration
+
+Security Header Misconfiguration
+
+Open Redirect
+
+Sensitive Error Leakage
+
+Rate Limit Abuse
+
+API Enumeration
+
+Dependency Vulnerabilities
+
+Secrets in Frontend Bundle
+
+==================================================
+35. AI THREATS
+==================================================
+
+Model:
+
+Prompt Injection
+
+Cross-Tenant AI Context Leakage
+
+Sending Sensitive Data to AI Provider
+
+AI Hallucination
+
+AI Performing Consequential Action
+
+Student Accessing Unapproved Material
+
+Teacher Draft Mistaken for Published Academic Content
+
+Private Complaint/Safety Data Included in AI Context
+
+AI Cost Abuse
+
+Provider Outage
+
+Design:
+
+AI authorization
+
+source grounding
+
+data minimization
+
+tool/action restrictions
+
+usage limits
+
+audit where appropriate
+
+Human approval
+
+==================================================
+36. PLATFORM ADMIN THREATS
+==================================================
+
+Model:
+
+Platform Admin Takeover
+
+Tenant Suspension Abuse
+
+Subscription Manipulation
+
+Support Impersonation
+
+Unauthorized Tenant Data Access
+
+Unauthorized Feature Enablement
+
+School Creation Fraud
+
+Platform Secret Exposure
+
+Bulk Tenant Export
+
+==================================================
+37. BACKUP / RECOVERY THREATS
+==================================================
+
+Model:
+
+Backup Failure
+
+Unencrypted Backup
+
+Unauthorized Backup Access
+
+Wrong-Tenant Restore
+
+Incomplete Restore
+
+Corrupt Backup
+
+Accidental Production Restore
+
+Ransomware/Data Loss
+
+Restore Without Audit
+
+Define preventive/detection/recovery controls.
+
+==================================================
+38. PRIVACY THREATS
+==================================================
+
+Model:
+
+Excessive Data Collection
+
+Overbroad Staff Access
+
+Sensitive Safety Data Leakage
+
+Export Leakage
+
+Data Retained Beyond configured policy
+
+Inactive/Exited Account Still Accessible
+
+Third-Party Provider Receiving Excessive Data
+
+Logs Containing Restricted Personal Data
+
+Do not invent legal conclusions.
+
+Flag legal/privacy controls requiring jurisdiction-specific professional review.
+
+==================================================
+39. DENIAL-OF-SERVICE / AVAILABILITY THREATS
+==================================================
+
+Model:
+
+Login Flood
+
+API Flood
+
+Large Report Abuse
+
+Bulk Import Abuse
+
+AI Request Abuse
+
+File Upload Abuse
+
+Payment Webhook Flood
+
+Database Connection Exhaustion
+
+External Provider Outage
+
+Define rate limits and graceful degradation requirements conceptually.
+
+==================================================
+40. INCIDENT RESPONSE MAPPING
+==================================================
+
+For material threat categories define:
+
+Detect
+
+Triage
+
+Contain
+
+Preserve Evidence
+
+Revoke Access if necessary
+
+Recover
+
+Validate
+
+Document
+
+Notify according to applicable policy/law
+
+Prevent Recurrence
+
+Do not invent statutory notification timelines.
+
+Mark legal notification requirements for jurisdiction-specific review.
+
+==================================================
+41. SECURITY TEST MAPPING
+==================================================
+
+Map threats to future tests.
+
+Examples:
+
+Cross-Tenant Access
+→ Automated authorization test
+
+IDOR
+→ Object access negative test
+
+Webhook Replay
+→ Idempotency/replay test
+
+XSS
+→ Input/output security test
+
+SQL Injection
+→ API/database security test
+
+File Access
+→ Tenant/relationship download test
+
+Privilege Escalation
+→ Permission-change test
+
+MFA Bypass
+→ Authentication security test
+
+Backup
+→ Restore test
+
+==================================================
+42. RELEASE-BLOCKING SECURITY CONTROLS
+==================================================
+
+Identify controls that MUST be implemented and tested before a real school uses production.
+
+At minimum evaluate:
+
+Tenant Isolation
+
+Authentication
+
+Authorization
+
+Password Hashing
+
+MFA for Privileged Users
+
+Session Revocation
+
+Audit Logging
+
+File Authorization
+
+Payment Verification
+
+Webhook Verification
+
+Idempotency
+
+Secrets Management
+
+Encrypted Transport
+
+Secure Backups
+
+Restore Testing
+
+Sensitive Export Controls
+
+Monitoring
+
+Rate Limiting
+
+Input Validation
+
+Do not classify a control as implemented yet.
+
+==================================================
+43. SECURITY IMPLEMENTATION BACKLOG
+==================================================
+
+Turn the design into prioritized future engineering work.
+
+Use categories such as:
+
+P0 – Required before production
+
+P1 – Required before wider rollout
+
+P2 – Important hardening / scaling
+
+For every backlog item provide:
+
+Control
+
+Reason
+
+Affected Module
+
+Implementation Phase
+
+Acceptance Test
+
+Do not estimate dates or duration.
+
+==================================================
+44. OUTPUT REQUIRED
+==================================================
+
+Do NOT implement code in this phase.
+
+Produce:
+
+1. Canonical Audit Event Model
+
+2. Audit Categories
+
+3. Audit Severity Model
+
+4. Authentication Audit Matrix
+
+5. Authorization/Security Event Matrix
+
+6. Student Administration Audit Matrix
+
+7. Staff Audit Matrix
+
+8. Attendance Audit Matrix
+
+9. Marks Audit Matrix
+
+10. Report Card Audit Matrix
+
+11. Financial Audit Matrix
+
+12. Transport Audit Matrix
+
+13. Safety Audit Matrix
+
+14. Complaint Audit Matrix
+
+15. Policy/Configuration Audit Matrix
+
+16. Admin Security Audit Matrix
+
+17. Platform Admin Audit Matrix
+
+18. Delegation Audit Model
+
+19. Sensitive Export Audit Model
+
+20. Audit Access-Control Matrix
+
+21. Audit Retention Architecture
+
+22. Audit Search/Investigation Model
+
+23. Security Monitoring Event Catalog
+
+24. Correlation-ID Strategy
+
+25. Complete Threat Model
+
+26. Tenant Isolation Threats
+
+27. Authentication Threats
+
+28. Authorization Threats
+
+29. Payment Threats
+
+30. File Security Threats
+
+31. Web Application Threats
+
+32. AI Threats
+
+33. Platform Admin Threats
+
+34. Backup/Recovery Threats
+
+35. Privacy Threats
+
+36. Availability Threats
+
+37. Incident Response Mapping
+
+38. Security Test Mapping
+
+39. Release-Blocking Security Requirements
+
+40. P0/P1/P2 Security Backlog
+
+41. Open Product/Security Decisions requiring Product Owner approval
+
+42. Inputs required before Phase 15 implementation
+
+For audit matrices specify where relevant:
+
+ACTION
+
+ACTOR
+
+ENTITY
+
+OLD/NEW STATE?
+
+REASON REQUIRED?
+
+APPROVAL REFERENCE?
+
+POLICY VERSION?
+
+CORRELATION ID?
+
+SECURITY CLASSIFICATION
+
+AUDIT CATEGORY
+
+SEVERITY
+
+ALERT REQUIRED?
+
+For threat-model entries specify:
+
+ASSET
+
+THREAT CATEGORY
+
+ATTACK SCENARIO
+
+IMPACT
+
+PREVENTIVE CONTROL
+
+DETECTION CONTROL
+
+RECOVERY CONTROL
+
+SECURITY TEST
+
+RESIDUAL RISK
+
+IMPLEMENTATION PRIORITY
+
+Clearly distinguish:
+
+DESIGN DECISION
+
+IMPLEMENTATION TODO
+
+LEGAL / PRIVACY REVIEW REQUIRED
+
+Do not claim FutureSchool is secure merely because controls are documented.
+
+Stop after Phase 14 documentation.
+---------------------------------------------------------------------------------------------------------------------------------------------------
+PHASE 15
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+PHASE 16
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+PHASE 17
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+PHASE 18
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+PHASE 19
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+PHASE 20
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+PHASE 21
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+PHASE 22
+---------------------------------------------------------------------------------------------------------------------------------------------------
