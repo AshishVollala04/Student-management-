@@ -7180,31 +7180,8451 @@ Stop after Phase 14 documentation.
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 PHASE 15
 ---------------------------------------------------------------------------------------------------------------------------------------------------
+Proceed with PHASE 15 ONLY:
 
+FUTURESCHOOL SPRING BOOT BACKEND FOUNDATION
+
+The following design phases are complete and approved:
+
+Phase 10: Security Architecture
+Phase 11: Database and Multi-Tenant Architecture
+Phase 12: Authorization Matrix
+Phase 13: Production API Contract
+Phase 14: Audit Model and Threat Model
+
+Now begin production backend implementation.
+
+Act as:
+
+- Senior Java 21 Engineer
+- Senior Spring Boot Architect
+- Senior PostgreSQL Engineer
+- Senior Spring Security Engineer
+- Senior SaaS Architect
+- Senior DevOps Engineer
+- Senior Test Automation Engineer
+
+IMPORTANT:
+
+This phase is only for the backend foundation.
+
+Do not implement all FutureSchool business modules.
+
+Do not create every database table.
+
+Do not implement payment-provider integration.
+
+Do not connect the frontend yet.
+
+Do not create fake authorization that claims to be production-ready.
+
+Implement, build, test and stop after the foundation is working.
+
+==================================================
+1. TARGET STACK
+==================================================
+
+Use:
+
+- Java 21
+- Current approved stable Spring Boot version
+- Maven
+- Spring Web
+- Spring Security
+- Spring Data JPA
+- Bean Validation
+- PostgreSQL Driver
+- Flyway
+- Spring Boot Actuator
+- OpenAPI / Swagger
+- Testcontainers for PostgreSQL integration tests
+- JUnit 5
+- Mockito where appropriate
+
+Use Lombok only if it is already approved for the project.
+
+Do not use H2 as proof that PostgreSQL-specific behavior works.
+
+==================================================
+2. ARCHITECTURE
+==================================================
+
+Use a modular monolith.
+
+Recommended package structure:
+
+com.futureschool
+
+  application/
+    FutureSchoolApplication.java
+
+  common/
+    api/
+    exception/
+    validation/
+    persistence/
+    security/
+    time/
+    money/
+    id/
+    audit/
+
+  platform/
+    school/
+    subscription/
+    entitlement/
+
+  identity/
+    user/
+    account/
+    role/
+    permission/
+    session/
+
+  academic/
+    academicyear/
+    schoolclass/
+    section/
+    subject/
+
+  student/
+
+  staff/
+
+  allocation/
+
+Do not create empty packages merely to match this list.
+
+Create only packages needed for Phase 15.
+
+Keep domain logic out of controllers.
+
+Use clear boundaries such as:
+
+Controller
+    ↓
+Application Service
+    ↓
+Domain
+    ↓
+Repository
+
+==================================================
+3. PROJECT CONFIGURATION
+==================================================
+
+Create environment-specific configuration for:
+
+- local development
+- automated tests
+- future staging
+- future production
+
+Do not commit production secrets.
+
+Use environment variables for:
+
+DATABASE_URL
+DATABASE_USERNAME
+DATABASE_PASSWORD
+
+Create:
+
+application.yml
+
+application-local.yml
+
+application-test.yml
+
+.env.example if useful
+
+Ensure .env and secret files are ignored by Git.
+
+Do not place credentials in React or committed Java files.
+
+==================================================
+4. POSTGRESQL AND FLYWAY
+==================================================
+
+Configure PostgreSQL and Flyway.
+
+Create only foundational migrations in this phase.
+
+Recommended foundational tables:
+
+schools
+
+platform_users if required by approved architecture
+
+users
+
+roles
+
+permissions
+
+user_roles
+
+role_permissions or user_permissions according to the approved model
+
+academic_years
+
+school_classes
+
+sections
+
+subjects
+
+students
+
+student_enrollments
+
+staff
+
+teacher_subject_allocations
+
+class_teacher_assignments
+
+audit_events
+
+Adjust the list according to the approved Phase 11 design.
+
+Do not add Attendance, Homework, Marks, Payments, Report Cards, Transport and Complaints yet.
+
+==================================================
+5. IDENTIFIERS
+==================================================
+
+Implement the approved identifier strategy.
+
+Use:
+
+- internal opaque identifiers, preferably UUIDs
+- human-readable business identifiers separately
+
+Examples:
+
+school internal UUID
+school code
+
+student internal UUID
+Student ID such as GVS-2027-0001
+
+staff internal UUID
+Staff ID such as TCH0001
+
+Do not use visible Student IDs or Staff IDs as database primary keys.
+
+Enforce critical uniqueness at the database level.
+
+==================================================
+6. TENANT FOUNDATION
+==================================================
+
+Implement a foundational TenantContext abstraction.
+
+The production tenant will eventually be derived from authenticated identity.
+
+For Phase 15:
+
+- define TenantContext interface
+- define safe tenant identifier type
+- provide a test/local-only tenant resolver where required
+- clearly mark local placeholder behavior
+- do not accept arbitrary schoolId as trusted authority
+- prevent repositories/services from accidentally becoming globally unscoped
+
+Create repository patterns supporting school-scoped queries.
+
+Do not claim full tenant security is complete until Phase 16 authorization is implemented and tested.
+
+==================================================
+7. FOUNDATIONAL DOMAIN MODELS
+==================================================
+
+Implement only approved foundational models:
+
+School
+
+AcademicYear
+
+SchoolClass
+
+Section
+
+Subject
+
+Student
+
+StudentEnrollment
+
+Staff
+
+TeacherSubjectAllocation
+
+ClassTeacherAssignment
+
+User / Account foundation
+
+Role
+
+Permission
+
+AuditEvent foundation
+
+Use lifecycle statuses rather than destructive deletion.
+
+Examples:
+
+SchoolStatus:
+SETUP
+ACTIVE
+SUSPENDED
+CLOSED
+
+AccountStatus:
+DRAFT
+ACTIVE
+LOCKED
+INACTIVE
+EXITED
+RECOVERY_REQUIRED
+
+AcademicYearStatus:
+DRAFT
+READY
+ACTIVE
+CLOSED
+
+Define enums consistently.
+
+==================================================
+8. AUDIT FOUNDATION
+==================================================
+
+Implement the audit-event persistence foundation.
+
+Audit storage must not contain:
+
+- passwords
+- password hashes
+- MFA secrets
+- access tokens
+- refresh tokens
+- OTPs
+- provider secrets
+- card data
+
+Create:
+
+AuditEvent entity/domain model
+
+AuditEventRepository
+
+AuditService interface
+
+Safe audit-event creation model
+
+Do not implement every business audit event yet.
+
+Add one integration test proving an audit event can be persisted and retrieved by authorized internal code.
+
+Do not expose delete/update operations for audit records.
+
+==================================================
+9. TIME AND MONEY FOUNDATIONS
+==================================================
+
+Use:
+
+java.time.Instant for server audit timestamps
+
+LocalDate for school dates where appropriate
+
+ZoneId for school timezone configuration later
+
+Use BigDecimal for money.
+
+Never use double or float for fees/payments.
+
+Create reusable value objects/utilities only where they improve consistency.
+
+==================================================
+10. API FOUNDATION
+==================================================
+
+Configure:
+
+/api/v1
+
+Create standard error responses according to Phase 13.
+
+Implement:
+
+GlobalExceptionHandler
+
+Validation error mapping
+
+Not-found error mapping
+
+Conflict error mapping
+
+Unauthorized/forbidden placeholders compatible with Spring Security
+
+Request/correlation ID filter
+
+Do not expose stack traces, SQL errors or internal class names.
+
+==================================================
+11. HEALTH ENDPOINTS
+==================================================
+
+Provide safe health endpoints.
+
+At minimum:
+
+GET /actuator/health
+
+and optionally:
+
+GET /api/v1/health
+
+Response example:
+
+{
+  "status": "UP",
+  "application": "FutureSchool Backend"
+}
+
+Do not expose sensitive environment or database credentials.
+
+Restrict detailed Actuator exposure.
+
+==================================================
+12. OPENAPI
+==================================================
+
+Configure OpenAPI / Swagger.
+
+Document only implemented foundation endpoints.
+
+Do not publish documentation for APIs that do not exist.
+
+Prepare reusable documentation conventions for:
+
+- authentication requirement
+- required permission
+- tenant scope
+- error schemas
+- request ID
+- idempotency where applicable
+
+==================================================
+13. SECURITY FOUNDATION
+==================================================
+
+Configure Spring Security with secure defaults.
+
+For Phase 15:
+
+- deny access by default
+- explicitly permit safe health/OpenAPI endpoints where approved
+- configure stateless or selected session foundation according to Phase 10
+- create placeholder authentication integration points
+- configure secure error handling
+- configure CORS from environment configuration
+- configure CSRF appropriately for the selected future authentication architecture
+- add baseline security headers
+
+Do not implement complete login/JWT/MFA yet.
+
+That belongs to Phase 16.
+
+Do not temporarily permit all business endpoints.
+
+==================================================
+14. SEED DATA
+==================================================
+
+Avoid uncontrolled production seed data.
+
+For local development only, provide minimal fictional data where useful:
+
+School:
+Green Valley School
+
+Academic Year:
+2027-28
+
+One class and section
+
+One fictional Student
+
+One fictional Teacher
+
+Do not create publicly known default production passwords.
+
+Do not run local seed logic in production profiles.
+
+==================================================
+15. TESTING
+==================================================
+
+Create:
+
+Unit tests for foundational value/domain rules
+
+Repository integration tests with PostgreSQL Testcontainers
+
+Flyway migration test
+
+Application context test
+
+Health endpoint test
+
+Tenant-scoped repository test
+
+Validation/error contract test
+
+Audit persistence test
+
+Test at least one wrong-tenant access scenario at repository/service foundation level.
+
+==================================================
+16. BUILD AND QUALITY
+==================================================
+
+Run:
+
+mvn clean test
+
+mvn verify
+
+Fix:
+
+Compilation errors
+
+Flyway errors
+
+Test failures
+
+Spring context failures
+
+PostgreSQL compatibility failures
+
+OpenAPI errors
+
+Security configuration errors
+
+Do not stop after creating files.
+
+==================================================
+17. DOCUMENTATION
+==================================================
+
+Update README with:
+
+Prerequisites
+
+Java version
+
+PostgreSQL setup
+
+Environment variables
+
+Local run commands
+
+Test commands
+
+Migration behavior
+
+Module architecture
+
+Current implementation boundaries
+
+Clearly state:
+
+Authentication and complete authorization are not implemented until Phase 16.
+
+Business modules are not implemented yet.
+
+==================================================
+18. OUTPUT REQUIRED
+==================================================
+
+At the end report:
+
+1. Existing backend code audited
+2. Files created
+3. Files modified
+4. Dependencies added
+5. Package/module structure
+6. Flyway migrations created
+7. Database tables created
+8. Tenant foundation
+9. Security defaults
+10. Audit foundation
+11. API error model
+12. Tests created
+13. Exact mvn test/verify result
+14. Manual local testing steps
+15. Known limitations
+16. DONE
+17. NOT DONE
+18. NEXT
+
+STOP after Phase 15.
+
+Do not start Phase 16 automatically.
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 PHASE 16
 ---------------------------------------------------------------------------------------------------------------------------------------------------
+Proceed with PHASE 16 ONLY:
 
+FUTURESCHOOL REAL AUTHENTICATION AND AUTHORIZATION
+
+Phase 15 Spring Boot Backend Foundation is complete and the build passes.
+
+Now implement production-oriented authentication and foundational authorization.
+
+Act as:
+
+- Senior Spring Security Engineer
+- Senior Identity Architect
+- Senior SaaS Security Engineer
+- Senior Java 21 Engineer
+- Senior Application Security Tester
+
+IMPORTANT:
+
+Implement real backend security for the approved architecture.
+
+Do not implement FutureSchool business modules such as Attendance, Homework, Marks, Payments or Report Cards yet.
+
+Do not rely on frontend role checks.
+
+Do not expose test/demo authentication in production profiles.
+
+Do not claim security is production-ready until tests pass.
+
+==================================================
+1. AUTHENTICATION ARCHITECTURE
+==================================================
+
+Follow the approved Phase 10 authentication architecture.
+
+Implement the approved session/token strategy.
+
+If using access and refresh tokens:
+
+- short-lived access token
+- securely managed refresh-session record
+- refresh rotation
+- refresh reuse detection where designed
+- session revocation
+- token-signing material from secure server configuration
+- no signing secrets in source control
+- no tokens in normal application logs
+
+If the approved design uses secure server sessions, implement that approved design instead.
+
+Do not invent a different authentication model without explaining the conflict.
+
+==================================================
+2. LOGIN IDENTIFIERS
+==================================================
+
+Support:
+
+Student / Parent:
+Student ID + Password + Portal Context
+
+Teacher:
+Staff ID
+
+Principal:
+Principal Staff ID
+
+Admin:
+Admin Staff ID
+
+Platform Admin:
+Platform-managed account
+
+Student and Parent use the same credential record but different validated portal contexts.
+
+A Parent session remains scoped to exactly one Student identity.
+
+Family relationship does not grant sibling portal access.
+
+==================================================
+3. PASSWORD SECURITY
+==================================================
+
+Implement secure password hashing using an approved adaptive password encoder.
+
+Use the approved Spring Security password strategy.
+
+Never store or return plaintext passwords.
+
+Implement:
+
+Password setup
+
+Password change
+
+Password reset request
+
+Reset-token creation
+
+Reset-token expiry
+
+Single-use reset token
+
+Reset completion
+
+Session revocation after reset
+
+Credential-reset audit event
+
+Prevent account enumeration through password-reset responses.
+
+==================================================
+4. ACCOUNT STATES
+==================================================
+
+Enforce:
+
+DRAFT
+
+ACTIVE
+
+LOCKED
+
+INACTIVE
+
+EXITED
+
+RECOVERY_REQUIRED
+
+Examples:
+
+DRAFT:
+No normal login
+
+ACTIVE:
+Login allowed
+
+LOCKED:
+Login denied pending unlock/recovery
+
+INACTIVE:
+Login denied
+
+EXITED:
+Login denied, history retained
+
+RECOVERY_REQUIRED:
+Only approved recovery flow allowed
+
+==================================================
+5. LOGIN PROTECTION
+==================================================
+
+Implement:
+
+Login throttling
+
+Failed-login tracking
+
+Configurable lock policy
+
+Safe authentication errors
+
+Security audit events
+
+Rate limiting at the appropriate application/gateway layer
+
+Do not reveal whether a Student or Staff ID exists through distinct public errors.
+
+==================================================
+6. MFA
+==================================================
+
+Implement MFA foundation for:
+
+Principal
+
+Admin
+
+Platform Admin
+
+Use the approved MFA method.
+
+Support:
+
+Enrollment
+
+Verification
+
+Recovery/replacement through protected workflow
+
+MFA status
+
+Step-up verification
+
+Do not expose MFA secrets after enrollment.
+
+Do not write MFA secrets into audit logs or API responses.
+
+If full external delivery is not available yet, implement a secure development adapter and clearly separate it from production behavior.
+
+==================================================
+7. STEP-UP AUTHENTICATION
+==================================================
+
+Implement reusable step-up architecture for operations such as:
+
+Principal Recovery
+
+Admin Permission Changes
+
+Sensitive Exports
+
+Academic Year Close
+
+Published Mark Correction
+
+High-impact Refund Approval/Processing
+
+Hall Ticket Override
+
+Emergency Communication
+
+Delegation Change
+
+Staff Reactivation
+
+Critical Policy Publication
+
+This phase may implement the common step-up mechanism and example protected endpoint, while business-specific endpoints come later.
+
+==================================================
+8. CURRENT USER CONTEXT
+==================================================
+
+Implement:
+
+GET /api/v1/me
+
+Return only authorized context:
+
+User reference
+
+Login ID
+
+Portal context
+
+Role
+
+School context
+
+Permissions
+
+Feature entitlements
+
+Account status/security summary
+
+Current Academic Year reference
+
+Subject/Class Teacher assignments where applicable
+
+Do not return password hashes, MFA secrets, internal tokens or unrelated school data.
+
+==================================================
+9. SCHOOL/TENANT CONTEXT
+==================================================
+
+Derive tenant context from authenticated identity.
+
+Do not trust arbitrary browser-provided schoolId.
+
+Implement:
+
+Authenticated tenant context
+
+School-scoped service/repository enforcement
+
+Rejection of mismatched tenant resources
+
+Separate Platform Admin namespace
+
+Tenant-scope audit context
+
+==================================================
+10. ROLE AND PERMISSION AUTHORIZATION
+==================================================
+
+Implement approved roles:
+
+STUDENT
+
+PARENT
+
+TEACHER
+
+PRINCIPAL
+
+ADMIN
+
+PLATFORM_ADMIN
+
+Implement permission evaluation.
+
+Admin remains ADMIN with permission bundles/granular permissions.
+
+Examples:
+
+ADMISSIONS
+
+FINANCE
+
+ACADEMIC_OPERATIONS
+
+TRANSPORT
+
+SECURITY
+
+REPORTS
+
+Do not make ADMIN automatically equivalent to every permission.
+
+==================================================
+11. RELATIONSHIP AUTHORIZATION
+==================================================
+
+Create reusable policy/authorization services for:
+
+Own Student identity
+
+Parent-linked Student context
+
+Active Subject Teacher allocation
+
+Active Class Teacher assignment
+
+Principal My Teaching allocation
+
+Same school
+
+Active Academic Year
+
+Archived/closed-year read access
+
+Platform support authorization
+
+Do not put all authorization manually inside controllers.
+
+Recommended flow:
+
+Authentication
+    ↓
+Security Context
+    ↓
+Tenant Context
+    ↓
+Permission Evaluation
+    ↓
+Relationship Policy
+    ↓
+Workflow Policy
+    ↓
+Service
+
+==================================================
+12. FEATURE ENTITLEMENTS
+==================================================
+
+Enforce school feature entitlements on the backend.
+
+Examples:
+
+AI
+
+Transport
+
+Advanced Reports
+
+Online Payments
+
+Do not rely on hidden navigation.
+
+Return a safe entitlement summary in current-user/school context.
+
+==================================================
+13. PLATFORM ADMIN SEPARATION
+==================================================
+
+Create a separate Platform Admin authorization boundary.
+
+School Admin must not access:
+
+/api/v1/platform/**
+
+Platform Admin must not receive unrestricted direct marks-editing or Student-data permissions.
+
+Implement one safe Platform endpoint, such as an authorized school-summary list, to validate the boundary.
+
+Do not implement the full Platform Admin business module yet.
+
+==================================================
+14. SESSION MANAGEMENT
+==================================================
+
+Implement:
+
+List own active sessions
+
+Revoke one own session
+
+Revoke all sessions
+
+Administrative session revocation where permission permits
+
+Revocation after password reset
+
+Revocation after account exit/deactivation
+
+Re-evaluation after sensitive permission change
+
+Do not expose raw tokens.
+
+==================================================
+15. SECURITY EVENTS
+==================================================
+
+Write audit/security events for:
+
+Login success
+
+Login failure
+
+Rate limiting
+
+Account locked
+
+Account unlocked
+
+Logout
+
+Password changed
+
+Password reset
+
+MFA enrolled
+
+MFA changed/reset
+
+Session revoked
+
+Permission changed
+
+Principal recovery attempt where foundation exists
+
+Cross-tenant access attempt according to approved severity policy
+
+Ensure logs/audit records do not contain credentials.
+
+==================================================
+16. API SECURITY
+==================================================
+
+Protect APIs by default.
+
+Configure:
+
+Consistent 401 handling
+
+Consistent 403 handling
+
+Safe 404 behavior where non-disclosure is required
+
+CORS allowlist from configuration
+
+CSRF strategy matching authentication method
+
+Security headers
+
+Request ID propagation
+
+Safe error responses
+
+No stack traces in production responses
+
+==================================================
+17. EXAMPLE AUTHORIZED ENDPOINTS
+==================================================
+
+Implement only a small security-validation API set:
+
+GET /api/v1/me
+
+GET /api/v1/security/sessions
+
+DELETE /api/v1/security/sessions/{sessionId}
+
+DELETE /api/v1/security/sessions
+
+GET /api/v1/student/me
+for Student context only
+
+GET /api/v1/teacher/me/allocations
+for Teacher/Principal My Teaching only
+
+GET /api/v1/admin/me/permissions
+for Admin only
+
+GET /api/v1/platform/schools/summary
+for Platform Admin only
+
+Keep responses minimal and foundational.
+
+Do not implement complete business modules.
+
+==================================================
+18. DEVELOPMENT USERS
+==================================================
+
+Provide development-only fictional accounts through a local seed/profile.
+
+Examples:
+
+Student/Parent:
+GVS-2027-0001
+
+Teacher:
+TCH0001
+
+Principal:
+PRN0001
+
+Admin:
+ADM0001
+
+Platform Admin:
+platform development account
+
+Do not use production default passwords.
+
+Clearly document local-only setup.
+
+Prevent development seed users from loading in production.
+
+==================================================
+19. AUTHORIZATION TESTS
+==================================================
+
+Create comprehensive ALLOW and DENY integration tests.
+
+At minimum:
+
+Student logs in as Student:
+ALLOW Student Portal context
+
+Same Student credentials as Parent:
+ALLOW Parent Portal context
+
+Parent requests unrelated Student:
+DENY
+
+Parent requests internally linked sibling:
+DENY
+
+Teacher requests assigned Class/Subject:
+ALLOW
+
+Teacher requests unassigned Subject:
+DENY
+
+Teacher requests School B:
+DENY
+
+Principal accesses leadership summary:
+ALLOW
+
+Principal attempts unrestricted Admin permission change:
+DENY
+
+Admin with Finance permission:
+ALLOW Finance-authorized foundation endpoint
+
+Admissions-only Admin attempts Finance endpoint:
+DENY
+
+School Admin attempts Platform API:
+DENY
+
+Platform Admin attempts direct Teacher marks mutation:
+DENY
+
+Locked account:
+DENY login
+
+Exited account:
+DENY login
+
+Revoked session/token:
+DENY
+
+Expired token/session:
+DENY
+
+Wrong tenant:
+DENY
+
+Disabled feature:
+DENY
+
+==================================================
+20. AUTHENTICATION SECURITY TESTS
+==================================================
+
+Test:
+
+Valid login
+
+Invalid password
+
+Unknown login identifier with safe generic error
+
+Wrong portal context
+
+Rate limiting
+
+Lock behavior
+
+Password reset single use
+
+Expired reset token
+
+Session revocation
+
+Refresh rotation if applicable
+
+MFA required
+
+MFA invalid
+
+Step-up required
+
+Step-up expired
+
+No credential leakage in logs/responses
+
+==================================================
+21. BUILD AND VALIDATION
+==================================================
+
+Run:
+
+mvn clean test
+
+mvn verify
+
+Run PostgreSQL/Testcontainers integration tests.
+
+Inspect for:
+
+Compilation errors
+
+Flyway errors
+
+Spring context errors
+
+Security filter-chain errors
+
+Token/session failures
+
+Cross-tenant failures
+
+Incorrect status codes
+
+Credential leakage
+
+Fix all identified failures before stopping.
+
+==================================================
+22. DOCUMENTATION
+==================================================
+
+Update README with:
+
+Authentication model
+
+Student/Parent shared credential behavior
+
+Staff login behavior
+
+MFA behavior
+
+Step-up behavior
+
+Account states
+
+Session management
+
+Tenant-context derivation
+
+Permission/relationship authorization
+
+Development login setup
+
+Security limitations still pending
+
+Do not put real passwords or secrets in README.
+
+==================================================
+23. OUTPUT REQUIRED
+==================================================
+
+Report:
+
+1. Authentication architecture implemented
+2. Session/token model implemented
+3. Password hashing/reset implementation
+4. MFA foundation
+5. Step-up foundation
+6. Tenant context
+7. Roles and permissions
+8. Relationship authorization
+9. Feature entitlement enforcement
+10. Platform Admin separation
+11. Security/audit events
+12. Endpoints implemented
+13. Tests implemented
+14. ALLOW/DENY test results
+15. Exact mvn clean test result
+16. Exact mvn verify result
+17. Manual API testing steps
+18. Known limitations
+19. DONE
+20. NOT DONE
+21. NEXT
+
+STOP after Phase 16.
+
+Do not begin Phase 17 automatically.
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 PHASE 17
 ---------------------------------------------------------------------------------------------------------------------------------------------------
+17A School and Academic Foundation
+17B Student Administration
+17C Staff and Allocations
+17D Attendance
+17E Homework
+17F Quiz and Study Materials
+17G Exams and Marks
+17H Report Cards
+17I Finance
+17J Transport
+17K Communication and PTM
+17L Events and Consent
+17M Safety and Pickup
+17N Reports and Audit
+17O Platform Subscription
 
+Proceed with PHASE 17:
+
+FUTURESCHOOL BACKEND BUSINESS MODULE IMPLEMENTATION
+
+Phase 15 Backend Foundation is complete.
+Phase 16 Authentication and Authorization is complete.
+
+IMPORTANT:
+
+Phase 17 contains multiple subphases.
+
+Do not implement every business module at once.
+
+Implement exactly one subphase at a time.
+
+For every subphase:
+
+1. Review the approved database design.
+2. Review the approved API contract.
+3. Review the authorization matrix.
+4. Review the audit requirements.
+5. Review relevant threats.
+6. Create/update Flyway migrations.
+7. Implement domain models.
+8. Implement repositories.
+9. Implement application services.
+10. Implement controllers.
+11. Implement authorization policies.
+12. Implement audit events.
+13. Implement validation and safe errors.
+14. Implement unit and integration tests.
+15. Add OpenAPI documentation.
+16. Run mvn clean test and mvn verify.
+17. Fix all failures.
+18. Provide manual API tests.
+19. Report DONE, NOT DONE and NEXT.
+20. Stop.
+
+Every business endpoint must enforce:
+
+Tenant
++
+Role
++
+Permission
++
+Relationship
++
+Workflow State
++
+Feature Entitlement where applicable
+
+Never rely on frontend-hidden controls.
+
+Never bypass approved workflow states.
+
+Never silently overwrite historical records.
+
+Never weaken security to make tests pass.
+
+Start with Phase 17A only.
+
+Proceed with PHASE 17A ONLY:
+
+SCHOOL AND ACADEMIC FOUNDATION BUSINESS MODULE
+
+Implement the production backend for:
+
+School Context
+
+Academic Year
+
+Classes
+
+Sections
+
+Subjects
+
+Class-Subject Configuration
+
+School Calendar foundation
+
+Do not implement Admissions, Attendance, Homework, Marks, Payments or Transport yet.
+
+==================================================
+1. SCHOOL CONTEXT
+==================================================
+
+Implement school-context read endpoints for authenticated school users.
+
+Return safe fields only:
+
+School code
+
+School name
+
+Logo/file reference
+
+Branding
+
+Timezone
+
+Supported languages
+
+Current Academic Year
+
+Enabled feature summary
+
+Do not expose platform-commercial information to ordinary users.
+
+School identity changes remain Admin/Principal governance work for later.
+
+==================================================
+2. ACADEMIC YEAR
+==================================================
+
+Implement:
+
+Create Draft Academic Year
+
+Update Draft
+
+Read Academic Year
+
+List Academic Years
+
+Readiness summary foundation
+
+Submit relevant approval request where required
+
+Activate only through approved workflow foundation
+
+Close is not implemented here unless explicitly required later
+
+Statuses:
+
+DRAFT
+
+READY
+
+ACTIVE
+
+CLOSED
+
+Enforce:
+
+One active Academic Year per school, unless approved architecture says otherwise.
+
+Dates must be valid.
+
+Tenant scope is mandatory.
+
+==================================================
+3. CLASSES
+==================================================
+
+Implement:
+
+Create Class Draft/configuration
+
+Update allowed values
+
+List Classes
+
+Get Class
+
+Activate/deactivate according to lifecycle
+
+Normal Capacity
+
+Maximum Capacity
+
+Display order
+
+Validation:
+
+Normal Capacity must not exceed Maximum Capacity.
+
+Do not allow destructive deletion after downstream references exist.
+
+==================================================
+4. SECTIONS
+==================================================
+
+Implement:
+
+Create Section
+
+List Sections by Class/Academic Year
+
+Update Section
+
+Normal/Maximum Capacity
+
+Lifecycle status
+
+Prevent duplicate section name/code within approved scope.
+
+==================================================
+5. SUBJECTS
+==================================================
+
+Implement:
+
+Create Subject
+
+Subject Code
+
+Subject Name
+
+Subject Type
+
+Status
+
+Weekly Period Requirement
+
+List/Search/Filter
+
+Prevent duplicate subject code within approved scope.
+
+==================================================
+6. CLASS-SUBJECT CONFIGURATION
+==================================================
+
+Implement mapping between Academic Year, Class and Subject.
+
+Support:
+
+Required Subject
+
+Optional Subject where architecture supports it
+
+Weekly Period Requirement override where approved
+
+Assessment-enabled status
+
+Do not assign Teachers in this subphase.
+
+==================================================
+7. SCHOOL CALENDAR FOUNDATION
+==================================================
+
+Implement:
+
+Calendar Draft
+
+Working Day
+
+Holiday
+
+Vacation
+
+Special Working Day
+
+Exam Day foundation
+
+PTM/Event date foundation
+
+Conflict validation
+
+Calendar version foundation
+
+Do not implement complete Event/PTM business modules.
+
+Major publication/approval may remain in a later governance subphase if not yet supported.
+
+==================================================
+8. AUTHORIZATION
+==================================================
+
+Allow appropriate read access to authenticated school users.
+
+Mutation requires:
+
+ADMIN
+
+with ACADEMIC_OPERATIONS permission
+
+Principal may review/approve where the approved workflow requires it.
+
+Students/Parents/Teachers may read only the calendar/academic structure appropriate to their portal.
+
+School A cannot access School B.
+
+Platform Admin does not automatically edit school academic data.
+
+==================================================
+9. AUDIT
+==================================================
+
+Audit:
+
+Academic Year Created/Changed
+
+Class Created/Changed
+
+Section Created/Changed
+
+Subject Created/Changed
+
+Class-Subject Configuration Changed
+
+Calendar Draft/Version Changed
+
+Store safe old/new state references and reasons where required.
+
+==================================================
+10. VALIDATION
+==================================================
+
+Implement:
+
+Tenant-aware uniqueness
+
+Valid date ranges
+
+Capacity rules
+
+Lifecycle-state rules
+
+No updates to CLOSED Academic Year except dedicated future correction workflows
+
+Safe conflict errors
+
+Optimistic concurrency for editable Drafts
+
+==================================================
+11. API CONTRACT
+==================================================
+
+Use the approved Phase 13 endpoint conventions.
+
+Implement only approved endpoints.
+
+Do not invent inconsistent paths or response formats.
+
+Use standard pagination, errors, request IDs and OpenAPI documentation.
+
+==================================================
+12. TESTS
+==================================================
+
+Create tests for:
+
+School A Academic Admin creates Class:
+ALLOW
+
+School B Admin reads School A Class:
+DENY
+
+Teacher lists current Classes/Subjects:
+ALLOW read only
+
+Teacher creates Class:
+DENY
+
+Finance-only Admin creates Subject:
+DENY
+
+Duplicate Section:
+CONFLICT
+
+Normal Capacity greater than Maximum:
+VALIDATION FAILURE
+
+CLOSED Academic Year edit:
+DENY/CONFLICT
+
+Two Active Academic Years:
+BLOCKED
+
+Calendar conflict:
+VALIDATION FAILURE
+
+Audit event created after material change:
+PASS
+
+==================================================
+13. BUILD
+==================================================
+
+Run:
+
+mvn clean test
+
+mvn verify
+
+Fix all failures before stopping.
+
+==================================================
+14. OUTPUT
+==================================================
+
+Report:
+
+Files created/modified
+
+Flyway migrations
+
+Entities/domain models
+
+Repositories
+
+Services
+
+Controllers
+
+Authorization policies
+
+Audit events
+
+Endpoints
+
+Tests
+
+Build results
+
+Manual API test steps
+
+Known limitations
+
+DONE
+
+NOT DONE
+
+NEXT
+
+STOP after Phase 17A.
+
+The next subphase will be Phase 17B: Student Administration.
+Proceed with PHASE 17B ONLY:
+
+FUTURESCHOOL STUDENT ADMISSIONS & STUDENT 360
+
+Phase 17A is complete and mvn clean test + mvn verify pass.
+
+Implement only Student Administration.
+
+Build:
+
+1. Admission Draft
+2. Multi-step Admission Wizard backend
+3. Student identity
+4. Student Enrollment
+5. Parent/Guardian information
+6. Emergency contacts
+7. Admission-document metadata
+8. Student ID generation
+9. Duplicate detection
+10. Class/Section capacity validation
+11. Principal approval when policy requires
+12. Admin activation
+13. Student 360 read model
+14. Student profile-change requests
+15. Family/sibling relationships
+16. Admission audit history
+
+Admission lifecycle:
+
+DRAFT
+→ VALIDATED
+→ AWAITING_APPROVAL when required
+→ APPROVED
+→ READY_FOR_ACTIVATION
+→ ACTIVE
+
+Alternative states:
+
+RETURNED
+REJECTED
+CANCELLED
+
+Critical rule:
+
+Admission Draft must NOT create:
+
+- Active Student account
+- Final fee invoices
+- Attendance eligibility
+- Hall Ticket eligibility
+- Active transport seat
+
+Student ID must be stable.
+
+Student Enrollment is academic-year-specific.
+
+Do not overwrite historical Enrollment.
+
+Implement transactional Admission Activation.
+
+Implement authorization:
+
+Admissions Admin → allowed
+Finance-only Admin → denied
+Teacher → denied
+Student/Parent → no administrative admission access
+Principal → approval only where policy requires
+
+Implement API contract from Phase 13.
+
+Create Flyway migrations only for missing Student-domain structures.
+
+Implement audit events.
+
+TEST:
+
+- Successful Draft
+- Duplicate Student
+- Duplicate Admission Number
+- Wrong tenant
+- Invalid Class
+- Invalid Section
+- Capacity exceeded
+- Principal approval required
+- Admin cannot bypass approval
+- Successful activation
+- Duplicate activation is idempotent
+- Student 360 permissions
+- Family relationship conflict
+- Closed-year enrollment blocked
+
+Run:
+
+mvn clean test
+mvn verify
+
+Fix everything.
+
+STOP after 17B.
+Proceed with PHASE 17C ONLY:
+
+FUTURESCHOOL STAFF, TEACHER ALLOCATIONS & STAFF EXIT
+
+Implement:
+
+1. Staff onboarding
+2. Teacher account creation
+3. Principal account foundation
+4. Admin account foundation
+5. Staff employment records
+6. Subject Teacher Allocations
+7. Class Teacher Assignments
+8. Allocation proposals
+9. Conflict validation
+10. Principal approval
+11. Admin activation
+12. Teacher allocation history
+13. Class Teacher handover
+14. Temporary substitution foundation
+15. Staff Exit
+16. Responsibility handover
+17. Staff reactivation controlled workflow
+
+Use Staff ID examples:
+
+TCHxxxx
+PRNxxxx
+ADMxxxx
+
+Creating Teacher account does NOT grant Student/Class access.
+
+Access comes from active assignments.
+
+Allocation workflow:
+
+Admin Proposal
+→ Validation
+→ Principal Approval
+→ Fresh Validation
+→ Admin Activation
+
+Replacement must identify open responsibilities.
+
+Staff Exit must check:
+
+- Subject allocations
+- Class Teacher assignment
+- Marks workflows
+- Homework
+- Meetings
+- Complaints
+- Exam duty
+- Leave
+- Timetable responsibilities
+
+At completion:
+
+ACTIVE
+→ EXITED
+
+Sessions revoked.
+Active permissions removed.
+Historical ownership preserved.
+
+Never delete departed Staff.
+
+TEST wrong tenant, conflicting allocation, stale approval, exited Teacher login/access, Class Teacher handover and self-approval restrictions.
+
+Run full build/tests.
+
+STOP after 17C.
+Proceed with PHASE 17D ONLY:
+
+FUTURESCHOOL STUDENT AND STAFF ATTENDANCE
+
+Implement Student Attendance and Staff Attendance.
+
+STUDENT ATTENDANCE:
+
+Sessions:
+
+MORNING
+AFTERNOON
+
+Statuses:
+
+PRESENT
+ABSENT
+LEAVE
+
+Derive daily result according to approved rules.
+
+Class Teacher only may normally mark Attendance.
+
+Support:
+
+- Attendance Sheet
+- Mark All Present
+- Exception changes
+- Approved Leave context
+- Morning Submission
+- Afternoon Submission
+- Deadline
+- Late-entry lock
+- Reopening Request
+- Authorized Reopening
+- Correction with reason
+- Exceptional Administrative Correction
+- Historical correction
+- Parent/Student read view
+- Principal monitoring
+- Admin operational monitoring
+
+Approved Leave must NOT silently create Attendance.
+
+STAFF ATTENDANCE:
+
+Support:
+
+ADMIN_MANUAL
+SELF_CHECK_IN
+BIOMETRIC_FUTURE
+COMBINATION
+
+Implement:
+
+- Check-in
+- Check-out
+- Approved Leave context
+- Conflict detection
+- Missing check-out
+- Administrative correction
+- Staff personal read view
+
+No performance scoring.
+
+Audit every material correction.
+
+TEST:
+
+- Class Teacher allowed
+- Subject Teacher not Class Teacher denied
+- Wrong Class denied
+- Wrong school denied
+- Locked period denied
+- Approved reopening works
+- Correction history retained
+- Parent own child only
+- Principal school monitoring
+- Finance-only Admin cannot alter Student Attendance unless separately authorized
+
+Build/test and STOP.
+Proceed with PHASE 17E ONLY:
+
+FUTURESCHOOL HOMEWORK MODULE
+
+Implement:
+
+Homework Draft
+Homework Publication
+Homework Attachments
+Student Assignment Scope
+Student Submission
+Submission Attachment
+Teacher Review
+Feedback
+Optional Homework Marks
+Due/Overdue status
+Archive/History
+
+Teacher authorization requires:
+
+Same School
++
+Active Subject Allocation
++
+Correct Class
++
+Correct Subject
+
+Class Teacher does not automatically gain edit access to every Subject's Homework unless separately allocated.
+
+Student can:
+
+- View assigned Homework
+- Submit own work
+- Update own submission while allowed
+
+Parent:
+
+- Read tracking/status only
+- Cannot submit Student Homework
+
+Workflow:
+
+DRAFT
+→ PUBLISHED
+→ STUDENT_SUBMITTED
+→ REVIEWED
+
+Support late/overdue states without destroying the underlying lifecycle.
+
+Files must use File Asset authorization from the approved architecture.
+
+Homework marks are NOT formal exam marks.
+
+Audit publication and significant changes.
+
+Test Student A cannot submit Student B work.
+
+Run mvn clean test + mvn verify.
+
+STOP after 17E.
+Proceed with PHASE 17F ONLY:
+
+QUIZ, QUESTION BANK & STUDY MATERIALS
+
+MODULE 1 — QUESTION BANK
+
+Implement:
+
+Question
+MCQ Options
+Subject
+Class
+Chapter
+Difficulty
+Owner Teacher
+Status
+
+Teacher requires active Subject Allocation.
+
+MODULE 2 — QUIZ
+
+Implement:
+
+Quiz Draft
+Quiz Questions
+Assignment Scope
+Publish
+Availability Window
+Due Date
+Attempt Limit
+Student Attempt
+Student Answer
+Completion
+Score
+Review Policy
+
+Prevent answer leakage before allowed review state.
+
+Prevent Student from attempting another Student's Quiz.
+
+MODULE 3 — STUDY MATERIAL
+
+Implement:
+
+Study Material
+File Asset
+Material Version
+Student Publication
+Parent Visibility
+AI Approval Request
+AI Approval Status
+Approved AI Version
+
+Important:
+
+Version 2 AI Approved
+does NOT automatically mean
+Version 3 AI Approved.
+
+Parent may view Teacher-published materials according to policy.
+
+MODULE 4 — CLASS FAQ / STUDENT DOUBTS FOUNDATION
+
+Support Student academic doubt and Teacher reply.
+
+Published Class FAQ must hide Student identity.
+
+Audit publication/version/AI approval state transitions.
+
+Run tests/build.
+
+STOP after 17F.
+Proceed with PHASE 17G ONLY:
+
+FUTURESCHOOL EXAMS, RE-EXAMS & FORMAL MARKS
+
+This is a HIGH-IMPORTANCE academic module.
+
+Implement carefully.
+
+EXAMS:
+
+Assessment Configuration
+Applicable Classes
+Subject Maximum Marks
+Exam Window
+Marks Entry Window
+Hall Ticket Required
+Report Card Required
+Re-Exam Policy Reference
+
+Keep Exam Configuration separate from Exam Schedule.
+
+EXAM SCHEDULE:
+
+Draft
+Validation
+Principal Approval
+Admin Publication
+Versioning
+
+MARKS:
+
+Support academic status:
+
+ATTENDED
+ABSENT
+
+ABSENT is NOT zero.
+
+0 means Student attended and scored zero.
+
+Marks lifecycle:
+
+DRAFT
+→ SUBMITTED
+→ RETURNED
+→ RESUBMITTED
+→ ACCEPTED
+
+Implement:
+
+Web-grid service/API
+Draft save
+Validation
+Submission
+Class Teacher return
+Correction
+Resubmission
+Acceptance
+
+Teacher must have active Class + Subject Allocation.
+
+Implement maximum-marks validation.
+
+MARKS IMPORT:
+
+Upload/Staging Batch
+Validation
+Preview
+Execute Draft import
+Import Version
+Rollback while permitted
+
+RE-EXAM:
+
+Original Exam Status must support AB validation.
+
+Workflow:
+
+Request
+→ Eligibility Validation
+→ Approval according to policy
+→ Schedule
+→ Re-Exam
+→ Marks
+→ Class Teacher Review
+
+Original AB remains history.
+
+MARKS REOPENING:
+
+Locked Marks
+→ Request
+→ Authorized Approval
+→ Temporary Reopening
+→ Correction
+→ Re-lock
+
+Implement audit extensively.
+
+TEST authorization, wrong Student/Class/Subject, AB vs zero, range validation, locked window, duplicate Re-Exam, stale assignment, wrong tenant and workflow-state bypass.
+
+Build/test.
+
+STOP after 17G.
+Proceed with PHASE 17H ONLY:
+
+FUTURESCHOOL REPORT CARDS AND PROMOTION
+
+REPORT CARD PREPARATION:
+
+Class Teacher validates:
+
+All required Subjects
+Marks accepted
+No missing Marks
+Re-Exam resolved
+Attendance available
+Conduct complete
+Remarks complete
+
+Generate Report Cards.
+
+Store:
+
+Subject Results
+Attendance
+Totals
+Percentage
+Grade
+Result
+Conduct
+Academic Remark
+Conduct Remark
+
+REPORT CARD WORKFLOW:
+
+DRAFT
+→ SUBMITTED_TO_PRINCIPAL
+→ PARTIALLY_RETURNED / UNDER_REVIEW
+→ APPROVED
+→ PUBLISHED
+
+Principal may:
+
+Approve selected Students
+Return selected Students with mandatory reason
+
+Previously approved cards remain approved.
+
+Final class-wide publication allowed only when required cards are approved.
+
+Principal approval MUST NOT publish automatically.
+
+PUBLISHED CORRECTION:
+
+Subject Teacher
+→ Correction Request
+→ Class Teacher Verification
+→ Principal Approval
+→ Correct Mark
+→ Report Card V2
+→ Class Teacher Republishes
+
+V1:
+SUPERSEDED
+
+V2:
+CURRENT
+
+PARENT ACKNOWLEDGEMENT:
+
+Implement acknowledgement separately from publication.
+
+PROMOTION:
+
+Class Teacher Recommendation
+→ Eligibility Validation
+→ Principal Academic Decision
+→ Admin Execution
+
+Promotion Execution creates next-year Student Enrollment.
+
+Do not overwrite previous enrollment.
+
+Implement transactional promotion batch.
+
+Test partial Principal return, no premature publication, version history, stale approval and promotion blocks.
+
+Build/test.
+
+STOP after 17H.
+Proceed with PHASE 17I ONLY:
+
+FUTURESCHOOL FINANCE MODULE
+
+This is a HIGH-RISK financial module.
+
+Implement only according to approved Finance/Security architecture.
+
+FEE STRUCTURE:
+
+Versioned Fee Structure
+Fee Categories
+Four primary periods:
+
+1. School Opening
+2. Before SA-1
+3. Before SA-2
+4. Before Pre-Final
+
+Transport Fee separate.
+
+Workflow:
+
+Admin Draft
+→ Validation
+→ Principal Approval when required
+→ Fresh Validation
+→ Admin Publication
+
+BILLING:
+
+Billing Run Draft
+Eligibility Calculation
+Preview
+Blocked Students
+Execute Eligible Invoices
+Duplicate Protection
+Billing Run ID
+
+INVOICE:
+
+Immutable original obligation.
+
+Changes use:
+
+Adjustment
+Late Fee
+Waiver
+Concession
+Credit
+
+PARTIAL/MULTI-TERM PAYMENT:
+
+Support payment allocation across multiple invoices.
+
+PAYMENT ORDER:
+
+Backend calculates authoritative amount.
+
+Frontend NEVER submits authoritative success.
+
+Create Payment Order
+→ Payment Provider Adapter
+→ Hosted Checkout details
+→ Verified Webhook
+→ Payment
+→ Allocations
+→ Receipt
+
+Implement provider interface plus safe fake/sandbox adapter if real provider configuration is unavailable.
+
+WHATEVER adapter is used must not pretend production payment integration is complete.
+
+WEBHOOK:
+
+Signature-verification abstraction
+Idempotency
+Replay protection
+Unique provider reference
+Safe duplicate behavior
+
+OFFLINE PAYMENT:
+
+Cash
+Cheque
+Bank Transfer
+Office UPI/QR
+
+Maker-checker policy.
+
+Cheque:
+
+RECEIVED
+→ PENDING_CLEARANCE
+→ CLEARED / BOUNCED
+
+CONCESSION:
+
+Proposal
+Policy Validation
+Principal Approval
+Admin Application
+
+Original Fee preserved.
+
+CREDIT:
+
+Create
+Apply to future fee
+or Refund request
+
+REFUND:
+
+REQUESTED
+→ UNDER_REVIEW
+→ APPROVED
+→ PROCESSING
+→ SUCCEEDED / FAILED
+
+Online success only after provider confirmation.
+
+Original Payment preserved.
+
+Generate separate Refund Receipt.
+
+DAILY FINANCE CLOSE:
+
+Verified
+Pending
+Refunds
+Credits
+Exceptions
+
+Do not falsify pending records.
+
+SETTLEMENT:
+
+EXPECTED
+→ RECEIVED
+→ MATCHING
+→ MATCHED
+
+or:
+
+RECONCILIATION_REQUIRED
+→ RESOLVED
+
+Payment success remains independent of settlement state.
+
+Use BigDecimal.
+
+Use transactions.
+
+Implement idempotency.
+
+Audit heavily.
+
+Run extensive tests including duplicate webhook, forged success rejection, duplicate billing, duplicate refund and wrong tenant.
+
+STOP after 17I.
+Proceed with PHASE 17J ONLY:
+
+FUTURESCHOOL HALL TICKET MODULE
+
+Implement:
+
+Hall Ticket Policy
+Required Fee Categories
+Policy Version
+Exam applicability
+
+FutureSchool calculates:
+
+CLEARED
+PENDING
+
+using:
+
+Verified Payments
+Credits
+Approved Concessions
+Adjustments
+
+Do not allow Admin to manually set CLEARED.
+
+Class Teacher:
+
+- sees eligible Students
+- sees required outstanding amount only
+- bulk/single release
+- cannot release PENDING Student
+
+Principal:
+
+- school-wide monitoring
+- exceptional controlled override
+
+Override requires:
+
+Student CLEARED
+Exam Published
+Not Already Released
+Reason
+Step-Up Authentication
+Audit
+
+Release stores:
+
+Student
+Exam
+Policy Version
+Clearance Snapshot
+Released By
+Released At
+Override flag/reason
+
+Student/Parent sees only released Hall Ticket.
+
+Test financial recalculation, Class Teacher scope, duplicate release/idempotency and override security.
+
+STOP after 17J.
+Proceed with PHASE 17K ONLY:
+
+FUTURESCHOOL TRANSPORT MODULE
+
+Implement:
+
+Transport Route
+Ordered Route Stops
+Vehicle
+Vehicle Capacity
+Route-Vehicle Assignment
+Transport Fee Plan
+Student Transport Assignment
+Transport Change Request
+Vehicle Replacement
+Transport Alert
+Transport Incident
+
+Commute modes:
+
+SCHOOL_TRANSPORT
+WALK
+PUBLIC_TRANSPORT
+BICYCLE
+
+Student Transport Assignment must be effective-dated.
+
+Parent may request:
+
+Route Change
+Pickup Point Change
+Start/Stop School Transport
+
+Transport Admin validates:
+
+Route active
+Pickup Point valid
+Capacity
+Effective date
+Fee plan
+
+Mid-year changes create Finance adjustment context.
+
+Do not overwrite historical route assignments.
+
+Vehicle states:
+
+ACTIVE
+UNAVAILABLE
+MAINTENANCE
+INACTIVE
+
+Future GPS foundation:
+
+Map location to Vehicle.
+
+Never create Student personal GPS tracking.
+
+Principal receives exception summary, not normal route administration.
+
+Test capacity concurrency and wrong-tenant assignment.
+
+STOP after 17K.
+Proceed with PHASE 17L ONLY:
+
+COMMUNICATION, NOTIFICATIONS, COMPLAINTS AND PTM
+
+COMMUNICATION:
+
+Implement authorized Teacher/Parent threads.
+
+Parent can message:
+
+Class Teacher
+Assigned Subject Teachers
+
+Not arbitrary Staff.
+
+NOTICES:
+
+Routine Admin Notice
+Important Notice Approval
+Scheduled Notice
+Publication
+Cancellation
+
+Emergency publication remains Principal/delegated authority.
+
+NOTIFICATIONS:
+
+Business Event
+→ Notification Service
+→ In-App
+→ Email Adapter
+→ Future SMS/WhatsApp adapters
+
+Track delivery status separately from business event.
+
+COMPLAINTS:
+
+SUBMITTED
+→ ASSIGNED
+→ IN_PROGRESS
+→ RESOLVED
+→ CLOSED
+
+Support:
+
+REOPENED
+ESCALATED
+
+Policy-driven routing.
+
+Separate:
+
+Parent-visible Response
+
+from:
+
+Restricted Internal Note
+
+Original Parent complaint immutable.
+
+PTM:
+
+PTM Event
+Booking Window
+Teacher Availability
+Meeting Slots
+Parent Booking
+Reschedule
+Cancel
+Complete
+Parent-visible Summary
+Restricted Internal Note
+
+Prevent double booking transactionally.
+
+Principal receives operational PTM monitoring.
+
+Test relationship authorization and privacy separation.
+
+STOP after 17L.
+Proceed with PHASE 17M ONLY:
+
+FUTURESCHOOL EVENTS AND PARENT CONSENT
+
+Implement:
+
+School Event Draft
+Event Type
+Audience
+Classes
+Date/Time
+Venue
+Consent Requirement
+Fee Requirement
+Transport Requirement
+Cancellation Policy
+Refund Policy
+
+Workflow:
+
+Admin Draft
+→ Validation
+→ Principal Approval for major event
+→ Admin Publication
+
+Parent consent:
+
+APPROVED
+DECLINED
+PENDING
+
+Admin cannot rewrite Parent decision.
+
+Paid events reuse Finance infrastructure.
+
+Do NOT create a second payment system.
+
+Cancellation:
+
+Event Cancelled
+→ Policy Evaluation
+→ Eligible Refund Cases
+→ Existing Refund Workflow
+
+Reschedule:
+
+Create version/revision.
+Notify affected Parents/Students/Teachers.
+
+Track:
+
+Invited
+Consent Approved
+Declined
+Pending
+Paid
+Payment Pending
+Transport Capacity
+
+Test consent ownership and wrong-Student access.
+
+STOP after 17M.
+Proceed with PHASE 17N ONLY:
+
+STUDENT SAFETY, PICKUP, EARLY RELEASE AND INCIDENTS
+
+This module contains restricted Student safety information.
+
+Implement:
+
+Permanent Pickup Contacts
+Pickup Contact Change Request
+Temporary Pickup Authorization
+Early Pickup Request
+School-Initiated Pickup
+Student Release
+Student Incident
+
+TEMPORARY AUTHORIZATION:
+
+Student
+Authorized Person
+Relationship
+Contact
+Valid Date/Time
+Reason
+Status
+
+EARLY PICKUP:
+
+Parent Request
+→ School Approval
+→ Class Teacher Awareness
+→ Office/Admin Verification
+→ Student Release
+
+Before Release validate:
+
+Student Active
+Authorization Valid
+Correct Date/Time
+Pickup Person Authorized
+Student Not Already Released
+Required Workflow Approved
+
+Store actual:
+
+Release Time
+Released To
+Authorization Used
+Verified By
+Released By
+Related Incident
+
+Attendance remains separate.
+
+After early release, Teaching views may show:
+
+LEFT_SCHOOL
+at actual time
+
+without rewriting original Attendance session.
+
+INCIDENT:
+
+Restricted access.
+
+Support:
+
+Medical/School Health
+Safety
+Exam
+Transport
+Emergency
+
+Principal may:
+
+Review
+Assign Follow-Up
+Restricted Note
+Parent Meeting
+Close Incident
+
+Audit sensitive access according to Phase 14.
+
+Finance-only Admin must be denied.
+
+STOP after 17N.
+Proceed with PHASE 17O ONLY:
+
+DOCUMENTS, REPORTS, EXPORTS AND HISTORICAL ARCHIVE
+
+DOCUMENTS:
+
+Internal school-office workflow for:
+
+Bonafide
+Study Certificate
+Fee Statement
+Transfer Certificate
+Other configured documents
+
+No Parent online certificate-request center unless requirements change.
+
+Use authoritative Student/Finance data.
+
+Transfer Certificate depends on completed Exit workflow.
+
+Issued document:
+
+Version 1
+ISSUED
+
+Correction:
+Version 2
+CURRENT
+
+V1:
+SUPERSEDED
+
+REPORTS:
+
+Implement permission-aware report catalog.
+
+Student Administration
+Attendance
+Academic Operations
+Finance
+Transport
+Communication
+Security/Audit
+
+Normal vs Sensitive exports.
+
+Sensitive export requires:
+
+Permission
+Step-Up Authentication
+Tenant Scope
+Audit
+Watermark/identifying metadata where applicable
+
+Never export:
+
+Passwords
+Hashes
+Tokens
+MFA secrets
+Provider secrets
+
+FILES:
+
+Use authorized object-storage abstraction.
+
+ARCHIVE:
+
+Closed Academic Years
+Historical Students
+Exited Staff
+Historical Finance
+Historical Report Cards
+Audit
+
+ARCHIVED ≠ DELETED.
+
+Closed year remains read-only.
+
+POST-CLOSURE CORRECTIONS:
+
+Use specialized correction workflow.
+
+Do not reopen entire year.
+
+RETENTION:
+
+Policy-driven configuration only.
+
+Do not invent legal retention periods.
+
+Test restricted exports and archive authorization.
+
+STOP after 17O.
+Proceed with PHASE 17P ONLY:
+
+FUTURESCHOOL PLATFORM ADMIN, SCHOOL ONBOARDING,
+SUBSCRIPTION AND BILLABLE STUDENTS
+
+This module is separate from School Admin.
+
+PLATFORM ADMIN:
+
+Implement:
+
+School Applications
+School Verification
+Tenant Creation
+Tenant Activation
+Tenant Suspension
+Tenant Reactivation
+Initial Principal Provisioning
+Initial School Admin Provisioning
+Subscription
+Feature Entitlements
+Platform Support Access
+Platform Integration Health
+Platform Audit
+
+SCHOOL ONBOARDING:
+
+APPLICATION
+→ VERIFICATION
+→ APPROVED
+→ SETUP
+→ ACTIVE
+
+Support:
+
+SUSPENDED
+CLOSED
+
+Tenant creation must be transactional.
+
+School Admin must never create unrelated tenants.
+
+SUBSCRIPTION:
+
+Commercial model:
+
+PER_BILLABLE_STUDENT
+
+Prepare for approximately:
+
+₹30–₹50
+per billable Student
+per month
+
+Do NOT hardcode these as permanent prices.
+
+Store configurable contract values.
+
+Design:
+
+Subscription Contract
+Price Per Student
+Currency
+Billing Frequency
+Contracted Student Count
+Active Student Count
+Billable Student Count
+Start Date
+End Date
+Renewal Date
+Subscription Status
+
+Keep FutureSchool Subscription completely separate from Parent School Fees.
+
+BILLABLE STUDENTS:
+
+Define and implement the approved billing rule.
+
+Do not automatically assume:
+
+Active Students = Billable Students
+
+unless the contract policy says so.
+
+Support:
+
+Contracted Students
+Active Students
+Billable Students
+Reconciliation
+Additional Student Adjustment
+Renewal
+
+FEATURE ENTITLEMENTS:
+
+Examples:
+
+CORE_ACADEMICS
+PAYMENTS
+TRANSPORT
+AI
+ADVANCED_REPORTS
+SMS
+WHATSAPP
+BUS_GPS
+
+Backend enforces entitlement.
+
+Platform Admin can enable/disable according to contract.
+
+School Admin cannot self-enable premium entitlements.
+
+PLATFORM SUPPORT:
+
+Do not give unrestricted Tenant data access by default.
+
+Create explicit:
+
+Support Access Request
+Tenant
+Reason
+Scope
+Granted By
+Valid From
+Valid Until
+Audit
+
+PLATFORM AUDIT:
+
+Audit:
+
+Tenant Created
+Activated
+Suspended
+Reactivated
+Subscription Changed
+Rate Changed
+Billable Rule Changed
+Entitlement Changed
+Support Access Granted
+Support Access Revoked
+
+PLATFORM SECURITY:
+
+MFA
+Step-Up
+Separate permissions
+Strong audit
+No ordinary School Admin access
+
+TEST:
+
+School Admin → Platform API = DENY
+
+Platform Admin → Tenant Management = ALLOW
+
+Platform Admin → Direct Student Marks Edit = DENY
+
+Disabled Feature → Relevant School API = DENY
+
+Subscription entitlement change reflected safely
+
+Tenant suspension behavior
+
+Wrong-tenant support access denied
+
+Billable Student reconciliation
+
+Run complete tests.
+
+STOP after 17P.
+17B
+↓
+Build
+↓
+mvn clean test
+↓
+mvn verify
+↓
+Manual test
+↓
+Git commit
+
+17C
+↓
+Build
+↓
+Test
+↓
+Commit
+
+17D
+↓
+...
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 PHASE 18
 ---------------------------------------------------------------------------------------------------------------------------------------------------
+Proceed with PHASE 18 ONLY:
 
+FUTURESCHOOL PRODUCTION THIRD-PARTY INTEGRATIONS
+
+The following work is complete:
+
+- Backend foundation
+- Authentication and authorization
+- Required Phase 17 business modules
+- Tenant isolation
+- Audit foundation
+- API contracts
+- Business-module tests
+
+Now implement the approved production integration architecture.
+
+Act as:
+
+- Senior Integration Architect
+- Senior Spring Boot Engineer
+- Senior Payment Integration Engineer
+- Senior Cloud Storage Engineer
+- Senior Notification Engineer
+- Senior AI Platform Engineer
+- Senior DevOps Engineer
+- Senior Security Engineer
+- Senior QA Automation Engineer
+
+IMPORTANT:
+
+Do not integrate every possible vendor at once.
+
+Implement only the production integrations required for the initial FutureSchool release:
+
+1. Payment Provider
+2. Transactional Email
+3. Private Object/File Storage
+4. AI Provider, only if AI is included in initial launch
+5. Monitoring and Error Tracking
+6. Backup/Recovery Infrastructure Integration
+
+Create architectural foundations for future:
+
+- SMS
+- WhatsApp
+- Vehicle GPS
+- Biometric Attendance
+- Accounting Software
+- Enterprise SSO
+
+Do not implement future integrations unless explicitly instructed.
+
+==================================================
+1. INTEGRATION ARCHITECTURE
+==================================================
+
+All third-party integrations must use internal interfaces and provider adapters.
+
+Business modules must not call provider SDKs directly.
+
+Create internal interfaces such as:
+
+PaymentGateway
+
+EmailProvider
+
+FileStorageProvider
+
+AIProvider
+
+MonitoringProvider
+
+SMSProvider, future foundation only
+
+WhatsAppProvider, future foundation only
+
+VehicleLocationProvider, future foundation only
+
+BiometricProvider, future foundation only
+
+Use architecture:
+
+Business Module
+    ↓
+FutureSchool Integration Interface
+    ↓
+Provider Adapter
+    ↓
+External Provider
+
+This must allow FutureSchool to change providers without rewriting business modules.
+
+==================================================
+2. CONFIGURATION AND SECRETS
+==================================================
+
+All integration secrets remain server-side.
+
+Do not expose secrets in:
+
+- React source code
+- API responses
+- Git repository
+- application.yml committed values
+- audit-event payloads
+- normal application logs
+- exception responses
+- OpenAPI examples
+
+Use environment variables or an approved secret-management mechanism.
+
+Create safe variable names such as:
+
+PAYMENT_PROVIDER_API_KEY
+
+PAYMENT_PROVIDER_API_SECRET
+
+PAYMENT_WEBHOOK_SECRET
+
+EMAIL_PROVIDER_API_KEY
+
+OBJECT_STORAGE_ACCESS_KEY
+
+OBJECT_STORAGE_SECRET_KEY
+
+AI_PROVIDER_API_KEY
+
+ERROR_TRACKING_DSN
+
+Do not commit real values.
+
+Update:
+
+.env.example
+
+README configuration section
+
+Git ignore rules
+
+Environment-specific configuration
+
+==================================================
+3. SCHOOL-SPECIFIC INTEGRATION CONFIGURATION
+==================================================
+
+Some providers may be platform-wide.
+
+Some providers may be configured per school.
+
+Support the approved architecture for:
+
+Platform-owned integration
+
+or
+
+School-specific integration configuration
+
+Examples:
+
+Payment Provider:
+May be school-specific according to commercial/settlement model
+
+Email:
+May be platform-managed with school branding
+
+AI:
+May be platform-managed with per-school entitlement and usage controls
+
+Object Storage:
+Usually platform-managed with school-scoped storage keys
+
+Never allow School A configuration to affect School B.
+
+Do not store raw provider secrets in ordinary integration configuration tables.
+
+Store secret references or encrypted configuration according to approved security architecture.
+
+==================================================
+4. PAYMENT PROVIDER INTEGRATION
+==================================================
+
+Implement the production payment adapter architecture.
+
+Use the selected provider only after explicit configuration.
+
+If a provider has not yet been selected, implement:
+
+- PaymentGateway interface
+- safe sandbox/fake adapter
+- provider adapter placeholder
+- integration tests
+- configuration requirements
+
+Do not pretend a fake adapter is a production payment integration.
+
+Required operations:
+
+Create Payment Order
+
+Get Order Status where supported
+
+Verify Provider Signature
+
+Process Webhook
+
+Get Payment Status where needed
+
+Create Refund
+
+Get Refund Status
+
+Get Settlement Data where supported
+
+Generate provider correlation/reference data
+
+==================================================
+5. AUTHORITATIVE PAYMENT FLOW
+==================================================
+
+Implement the approved flow:
+
+Parent selects invoices
+        ↓
+Spring Boot loads authoritative invoices
+        ↓
+Backend calculates payable amount
+        ↓
+Backend creates internal Payment Order
+        ↓
+Payment Provider Order created
+        ↓
+Frontend receives safe checkout information
+        ↓
+Provider-hosted checkout
+        ↓
+Provider authentication
+        ↓
+Signed Provider Webhook
+        ↓
+Backend verifies signature
+        ↓
+Backend applies idempotency
+        ↓
+Payment stored transactionally
+        ↓
+Invoices allocated
+        ↓
+Receipt generated
+        ↓
+Parent notified
+        ↓
+Settlement/Reconciliation tracked
+
+Never accept frontend-supplied:
+
+Payment SUCCESS
+
+Paid Amount as authoritative
+
+Provider verification result
+
+Receipt confirmation
+
+==================================================
+6. PAYMENT WEBHOOK SECURITY
+==================================================
+
+Implement:
+
+Signature verification
+
+Timestamp/replay validation where provider supports it
+
+Raw-body verification when required
+
+Idempotency
+
+Unique provider reference
+
+Duplicate-event handling
+
+Unsupported-event handling
+
+Safe logging
+
+Request/correlation ID
+
+Audit event
+
+The webhook endpoint must not depend on normal browser authentication.
+
+It must use provider-verification controls.
+
+Never write provider secrets or full sensitive payloads to logs.
+
+==================================================
+7. PAYMENT FAILURE BEHAVIOR
+==================================================
+
+Handle:
+
+Order creation failure
+
+Provider unavailable
+
+Webhook delayed
+
+Webhook duplicated
+
+Signature invalid
+
+Payment failed
+
+Payment pending
+
+Payment successful while webhook delayed
+
+Allocation failure
+
+Receipt-generation failure
+
+Refund failure
+
+Settlement mismatch
+
+Financial failures must not create a partially committed ledger.
+
+Use database transactions and recovery/reconciliation states.
+
+==================================================
+8. REFUND INTEGRATION
+==================================================
+
+Implement approved refund processing:
+
+Approved Refund
+        ↓
+Fresh Validation
+        ↓
+Finance Admin Process Action
+        ↓
+Provider Refund Request
+        ↓
+PROCESSING
+        ↓
+Provider Confirmation
+        ↓
+SUCCEEDED or FAILED
+        ↓
+Refund Receipt
+        ↓
+Reconciliation
+
+Do not allow ordinary Admin/API requests to directly set:
+
+SUCCEEDED
+
+Support partial refunds.
+
+Total refunds must not exceed the refundable allocation.
+
+==================================================
+9. TRANSACTIONAL EMAIL
+==================================================
+
+Implement EmailProvider interface and selected provider adapter.
+
+Support emails for:
+
+Account setup
+
+Password recovery
+
+Security alerts
+
+Payment receipts
+
+Refund confirmations
+
+Fee reminders
+
+Report Card publication
+
+Emergency notices
+
+PTM reminders
+
+Event reminders
+
+Transport alerts where configured
+
+Use templates.
+
+Template data must be validated and school-branded.
+
+Do not insert unrestricted user HTML directly into templates.
+
+==================================================
+10. EMAIL DELIVERY STATES
+==================================================
+
+Track:
+
+QUEUED
+
+SENT_TO_PROVIDER
+
+DELIVERED where supported
+
+FAILED
+
+BOUNCED where supported
+
+RETRY_SCHEDULED where applicable
+
+Business workflow status must remain separate from delivery status.
+
+Example:
+
+Report Card Published
+may remain true even if Parent email delivery failed.
+
+Email failure should create an operational notification/retry item, not reverse the Report Card publication.
+
+==================================================
+11. PRIVATE OBJECT STORAGE
+==================================================
+
+Implement FileStorageProvider.
+
+Store actual files outside PostgreSQL.
+
+PostgreSQL stores:
+
+File ID
+
+School ID
+
+Storage Key
+
+Original Filename
+
+Safe Filename
+
+MIME Type
+
+File Size
+
+Checksum where approved
+
+Owner/Reference
+
+Uploaded By
+
+Classification
+
+Upload Status
+
+Malware Scan Status foundation
+
+Created At
+
+Retention metadata
+
+==================================================
+12. FILE UPLOAD SECURITY
+==================================================
+
+Implement:
+
+Allowed MIME types
+
+Extension validation
+
+File-size limits
+
+Safe filenames
+
+Randomized storage keys
+
+Tenant-scoped storage paths
+
+Authorization before upload
+
+Authorization before download
+
+No unrestricted public URLs
+
+Checksum where useful
+
+Future malware-scanning state
+
+Reject unsupported or dangerous files.
+
+Do not trust only browser-reported MIME type.
+
+Use server-side content inspection where feasible.
+
+==================================================
+13. AUTHORIZED FILE DOWNLOAD
+==================================================
+
+Download flow:
+
+Authenticated User
+        ↓
+Tenant Context
+        ↓
+Permission
+        ↓
+Resource Relationship
+        ↓
+File Classification
+        ↓
+ALLOW or DENY
+        ↓
+Short-lived authorized download
+or backend-streamed response
+
+Knowing the File ID or storage key must not grant access.
+
+Test cross-tenant and wrong-Student access.
+
+==================================================
+14. AI PROVIDER INTEGRATION
+==================================================
+
+Implement AI only if included in the approved V1 feature set.
+
+Use:
+
+AIProvider interface
+
+Provider Adapter
+
+School Feature Entitlement
+
+Role Authorization
+
+Usage Controls
+
+Approved Source Context
+
+AI Audit/Usage Metadata
+
+Do not make business modules call one LLM SDK directly.
+
+==================================================
+15. STUDENT AI TUTOR
+==================================================
+
+Student AI must use only authorized academic sources.
+
+Flow:
+
+Student asks question
+        ↓
+Authorize Student + School
+        ↓
+Confirm AI entitlement
+        ↓
+Retrieve approved Study Material context
+        ↓
+Minimize sensitive data
+        ↓
+Send bounded context to AI Provider
+        ↓
+Return grounded answer
+        ↓
+Include source references
+        ↓
+Record safe usage metadata
+
+Do not send:
+
+Other Students' data
+
+Private complaints
+
+Safety incidents
+
+Payment details
+
+Unapproved Teacher material
+
+Passwords/tokens
+
+==================================================
+16. TEACHER, PRINCIPAL AND ADMIN AI
+==================================================
+
+Teacher AI:
+
+Draft academic content only
+
+Principal AI:
+
+Summarize authorized leadership data
+
+Admin AI:
+
+Summarize authorized operational data
+
+AI must not execute:
+
+Marks change
+
+Attendance change
+
+Payment/refund
+
+Permission change
+
+Credential reset
+
+Hall Ticket release
+
+Academic Year close
+
+Student/Staff exit
+
+Emergency publication
+
+Any approval decision
+
+==================================================
+17. AI SECURITY AND COST CONTROLS
+==================================================
+
+Implement:
+
+Prompt-injection resistance foundation
+
+Context allowlist
+
+Role/tenant authorization
+
+Source filtering
+
+Output-size controls
+
+Request-rate limits
+
+Per-school usage measurement
+
+Per-user usage measurement
+
+Feature entitlement
+
+Safe timeout/fallback
+
+Provider failure handling
+
+No automatic consequential actions
+
+AI usage must be observable for cost control.
+
+Do not expose provider API keys to frontend.
+
+==================================================
+18. MONITORING AND ERROR TRACKING
+==================================================
+
+Integrate approved monitoring/error-tracking tools through configuration.
+
+Monitor:
+
+Backend exceptions
+
+Frontend exceptions where separately configured
+
+API latency
+
+5xx rate
+
+Authentication failures
+
+Authorization failures according to severity
+
+Payment webhook failures
+
+Refund failures
+
+Email failures
+
+File-storage failures
+
+AI failures
+
+Database health
+
+Connection pool
+
+Flyway failures
+
+Backup status
+
+External integration health
+
+Do not send passwords, tokens, payment secrets or restricted Student data to monitoring providers.
+
+==================================================
+19. HEALTH CHECKS
+==================================================
+
+Implement safe integration health indicators:
+
+Payment Adapter
+
+Email Provider
+
+Object Storage
+
+AI Provider
+
+Database
+
+Do not expose sensitive provider configuration.
+
+Provide separate:
+
+Public/basic health
+
+Authenticated operational health
+
+Platform Admin detailed integration health
+
+Define graceful behavior when a provider is unavailable.
+
+==================================================
+20. RETRIES AND RESILIENCE
+==================================================
+
+Only retry operations when safe.
+
+Safe examples may include:
+
+Email send
+
+Read-only provider status call
+
+Idempotent notification delivery
+
+Potentially unsafe retries:
+
+Payment order creation without idempotency
+
+Refund creation without idempotency
+
+Duplicate webhooks
+
+Financial allocation
+
+Use:
+
+Timeouts
+
+Limited retry counts
+
+Exponential backoff where appropriate
+
+Circuit-breaker pattern where justified
+
+Idempotency
+
+Dead-letter/manual-review state where necessary
+
+Do not retry financial mutations blindly.
+
+==================================================
+21. BACKUP AND RECOVERY INTEGRATION
+==================================================
+
+Implement or document integration hooks for:
+
+Automated PostgreSQL backups
+
+Object-storage backup/versioning where approved
+
+Backup health monitoring
+
+Restore-test evidence
+
+Recovery request tracking
+
+Recovery audit
+
+Do not allow School Admin to trigger unrestricted production restore.
+
+If cloud infrastructure cannot be created in the current environment, create:
+
+Infrastructure configuration templates
+
+Runbooks
+
+Validation scripts
+
+Acceptance tests
+
+Clearly distinguish implemented infrastructure from documentation.
+
+==================================================
+22. FUTURE INTEGRATION INTERFACES
+==================================================
+
+Create interfaces/configuration foundations only for:
+
+SMSProvider
+
+WhatsAppProvider
+
+VehicleLocationProvider
+
+BiometricProvider
+
+AccountingExportProvider
+
+EnterpriseIdentityProvider
+
+Do not implement concrete vendors unless explicitly approved.
+
+Business modules must remain independent of these providers.
+
+==================================================
+23. INTEGRATION AUDIT
+==================================================
+
+Audit:
+
+Payment configuration changed
+
+Payment webhook rejected
+
+Refund processed
+
+Email sender configuration changed
+
+Sensitive delivery failure
+
+File downloaded where classification requires auditing
+
+AI entitlement/usage changes
+
+Integration secret replaced, without recording secret
+
+Provider enabled/disabled
+
+Integration health critical failure
+
+==================================================
+24. INTEGRATION TESTING
+==================================================
+
+Use provider sandbox/test environments where available.
+
+Create adapter contract tests.
+
+Create mock/fake providers for automated tests.
+
+Test:
+
+Payment order creation
+
+Amount tampering rejected
+
+Invalid webhook signature
+
+Webhook replay
+
+Duplicate webhook
+
+Payment transaction rollback
+
+Refund duplicate prevention
+
+Email failure
+
+File upload invalid type
+
+Cross-tenant file access
+
+AI entitlement disabled
+
+AI wrong-tenant context denied
+
+Provider timeout
+
+Provider unavailable
+
+No secret leakage
+
+==================================================
+25. BUILD AND VALIDATION
+==================================================
+
+Run:
+
+mvn clean test
+
+mvn verify
+
+Frontend build if integration changes affect frontend:
+
+npm run build
+
+Fix all failures.
+
+Do not disable tests.
+
+Do not weaken authorization.
+
+Do not hardcode production credentials to make integration tests pass.
+
+==================================================
+26. DOCUMENTATION
+==================================================
+
+Create/update:
+
+Integration architecture
+
+Provider-selection record
+
+Environment-variable list
+
+Local development adapter instructions
+
+Sandbox configuration
+
+Webhook setup guide
+
+File-storage setup guide
+
+AI usage/security guide
+
+Monitoring guide
+
+Backup/recovery runbook
+
+Provider outage runbook
+
+Secret-rotation procedure
+
+Clearly identify:
+
+IMPLEMENTED
+
+SANDBOX ONLY
+
+PLACEHOLDER
+
+FUTURE
+
+==================================================
+27. OUTPUT REQUIRED
+==================================================
+
+Report:
+
+1. Integration interfaces
+2. Provider adapters
+3. Payment integration status
+4. Webhook security
+5. Refund integration
+6. Email integration
+7. File storage integration
+8. AI integration status
+9. Monitoring integration
+10. Backup/recovery integration
+11. Future integration foundations
+12. Secrets/configuration
+13. Audit events
+14. Tests
+15. Exact build results
+16. Manual sandbox tests
+17. Production configuration still required
+18. Known risks
+19. DONE
+20. NOT DONE
+21. NEXT
+
+STOP after Phase 18.
+
+Do not begin Phase 19 automatically.
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 PHASE 19
 ---------------------------------------------------------------------------------------------------------------------------------------------------
+Proceed with PHASE 19 ONLY:
 
+FUTURESCHOOL FULL-SYSTEM TESTING,
+SECURITY VALIDATION AND RELEASE GATE
+
+Phase 18 production integration work is complete.
+
+Do not add new product features in this phase.
+
+Act as:
+
+- Senior QA Architect
+- Senior Test Automation Engineer
+- Senior Application Security Tester
+- Senior SaaS Reliability Engineer
+- Senior Payments QA Engineer
+- Senior Accessibility Engineer
+- Senior Performance Test Engineer
+- Senior Release Manager
+
+The objective is to determine whether FutureSchool is ready to enter a controlled staging environment.
+
+Do not declare READY merely because the application builds.
+
+==================================================
+1. TEST INVENTORY
+==================================================
+
+Create a complete test inventory across:
+
+Frontend
+
+Backend
+
+Database
+
+Authentication
+
+Authorization
+
+Tenant Isolation
+
+Academic Workflows
+
+Finance
+
+Payments
+
+Refunds
+
+Transport
+
+Communication
+
+Student Safety
+
+Files
+
+Exports
+
+AI
+
+Integrations
+
+Audit
+
+Backup/Recovery
+
+Platform Admin
+
+Subscription
+
+Accessibility
+
+Responsive UI
+
+Performance
+
+Reliability
+
+Deployment
+
+==================================================
+2. TEST ENVIRONMENTS
+==================================================
+
+Use isolated automated-test environments.
+
+Use:
+
+PostgreSQL Testcontainers
+
+Fake/Sandbox Payment Provider
+
+Fake/Sandbox Email Provider
+
+Test Object Storage
+
+Fake/Sandbox AI Provider
+
+Fictional test schools
+
+Do not run destructive tests against production.
+
+Create at least:
+
+School A
+
+School B
+
+Different roles and permissions
+
+Multiple academic years
+
+Active and closed records
+
+==================================================
+3. UNIT TESTS
+==================================================
+
+Review unit-test coverage for:
+
+Domain state transitions
+
+Validation rules
+
+Money calculations
+
+Attendance derivation
+
+Capacity rules
+
+Marks validation
+
+Report Card calculations
+
+Fee calculation
+
+Concessions
+
+Credits
+
+Refundable amount
+
+Payment allocation
+
+Billable Student calculation
+
+Policy resolution
+
+Permission decisions
+
+Add missing high-value unit tests.
+
+Do not chase a coverage percentage while leaving critical logic untested.
+
+==================================================
+4. DATABASE AND MIGRATION TESTS
+==================================================
+
+Test:
+
+Fresh database migration
+
+Upgrade from previous migration state
+
+Constraints
+
+Unique indexes
+
+Foreign keys
+
+Tenant-aware uniqueness
+
+No duplicate invoice
+
+No duplicate provider reference
+
+No duplicate release
+
+Versioning constraints
+
+Closed-year protection
+
+Flyway checksum integrity
+
+Never modify already-applied migrations to hide failures.
+
+==================================================
+5. AUTHENTICATION TESTS
+==================================================
+
+Test:
+
+Student login
+
+Parent login using same Student credential/context
+
+Teacher login
+
+Principal login
+
+Admin login
+
+Platform Admin login
+
+Invalid credentials
+
+Unknown identifier
+
+Wrong portal context
+
+Locked account
+
+Inactive account
+
+Exited account
+
+Password reset
+
+Expired reset token
+
+Reused reset token
+
+Session revocation
+
+MFA
+
+Step-up verification
+
+Rate limiting
+
+Generic authentication errors
+
+No credential leakage
+
+==================================================
+6. AUTHORIZATION TESTS
+==================================================
+
+For every critical action create:
+
+ALLOW test
+
+DENY wrong role
+
+DENY missing permission
+
+DENY wrong relationship
+
+DENY wrong workflow state
+
+DENY wrong tenant
+
+DENY disabled feature
+
+Examples:
+
+Assigned Maths Teacher enters Maths:
+ALLOW
+
+Teacher enters Physics without allocation:
+DENY
+
+Parent accesses own Student:
+ALLOW
+
+Parent accesses sibling:
+DENY
+
+Admin approves Report Card:
+DENY
+
+Principal edits all Teacher marks:
+DENY
+
+School Admin accesses Platform API:
+DENY
+
+Platform Admin edits Student marks:
+DENY
+
+==================================================
+7. TENANT ISOLATION TESTS
+==================================================
+
+Treat cross-school leakage as release-blocking.
+
+Test School A cannot access School B through:
+
+Direct resource ID
+
+Business ID
+
+Search
+
+Pagination
+
+Filter
+
+Export
+
+File download
+
+Dashboard aggregation
+
+Notification
+
+Payment
+
+Refund
+
+Bulk import
+
+Audit
+
+Cache
+
+Background/provider callback
+
+AI context
+
+Platform support without explicit authorization
+
+Test both read and write paths.
+
+==================================================
+8. WORKFLOW TESTS
+==================================================
+
+Automate complete workflows.
+
+ADMISSION:
+
+Admin Draft
+→ Validation
+→ Principal Approval if required
+→ Activation
+→ Student Account
+→ Enrollment
+
+ATTENDANCE:
+
+Teacher Submission
+→ Parent/Student View
+→ Principal/Admin Monitoring
+→ Correction
+
+ACADEMIC:
+
+Subject Teacher Marks
+→ Class Teacher Review
+→ Report Card
+→ Principal Approval
+→ Class Teacher Publication
+→ Student/Parent View
+
+CORRECTION:
+
+Published Mark
+→ Correction Request
+→ Verification
+→ Approval
+→ Report Card V2
+→ V1 Superseded
+
+PROMOTION:
+
+Recommendation
+→ Eligibility
+→ Principal Decision
+→ Admin Execution
+→ New Enrollment
+
+==================================================
+9. FINANCE TESTS
+==================================================
+
+Test:
+
+Fee Structure versioning
+
+Four instalments
+
+Billing run
+
+Duplicate invoice prevention
+
+Partial payment
+
+Multi-invoice allocation
+
+Concession
+
+Credit
+
+Late fee
+
+Late-fee waiver
+
+Due-date extension
+
+Offline payment
+
+Maker-checker
+
+Cheque clearance/bounce
+
+Receipt
+
+Refund request
+
+Refund approval
+
+Partial refund
+
+Duplicate refund prevention
+
+Settlement
+
+Reconciliation
+
+Daily finance close
+
+Hall Ticket clearance recalculation
+
+Use exact BigDecimal assertions.
+
+==================================================
+10. PAYMENT SECURITY TESTS
+==================================================
+
+Test:
+
+Frontend amount tampering
+
+Forged payment success
+
+Invalid webhook signature
+
+Webhook replay
+
+Duplicate webhook
+
+Out-of-order webhook
+
+Unknown provider reference
+
+Wrong tenant payment
+
+Provider timeout
+
+Allocation transaction failure
+
+Receipt-generation failure
+
+Refund failure
+
+Duplicate refund
+
+Settlement mismatch
+
+No raw payment credentials stored or logged
+
+All financial failures must leave consistent ledger state.
+
+==================================================
+11. FILE SECURITY TESTS
+==================================================
+
+Test:
+
+Allowed upload
+
+Disallowed extension
+
+MIME spoofing
+
+Oversized file
+
+Unsafe filename
+
+Cross-tenant download
+
+Wrong Student download
+
+Wrong role download
+
+Expired download authorization
+
+Public URL leakage
+
+Sensitive attachment access
+
+Deleted/retired file reference
+
+Future malware-scan status behavior
+
+==================================================
+12. AI SECURITY TESTS
+==================================================
+
+Test:
+
+AI feature disabled
+
+Wrong role
+
+Wrong tenant
+
+Prompt injection attempt
+
+Cross-Student request
+
+Unapproved Study Material
+
+Sensitive complaint/context exclusion
+
+Safety data exclusion
+
+AI provider timeout
+
+Rate/usage limit
+
+No consequential business mutation
+
+Source grounding behavior
+
+No API key in frontend or response
+
+==================================================
+13. EXPORT SECURITY TESTS
+==================================================
+
+Test:
+
+Normal export
+
+Sensitive export with permission
+
+Sensitive export without permission
+
+Step-up required
+
+Wrong tenant
+
+Filter/scope validation
+
+Watermark/identification metadata
+
+Audit event
+
+No credentials/tokens/secrets
+
+Expired export/download
+
+Large export limitation
+
+==================================================
+14. AUDIT TESTS
+==================================================
+
+Verify audit events for:
+
+Login/reset/MFA
+
+Permission change
+
+Marks correction
+
+Report Card approval/publication
+
+Payment
+
+Refund
+
+Teacher allocation
+
+Hall Ticket override
+
+Sensitive export
+
+Academic Year close
+
+Student/Staff exit
+
+Tenant activation/suspension
+
+Ensure events cannot be updated/deleted through application APIs.
+
+Ensure secret values are absent.
+
+Ensure correlation IDs connect multi-step workflows.
+
+==================================================
+15. CONCURRENCY TESTS
+==================================================
+
+Test:
+
+Two Admins generating same invoice
+
+Two webhook deliveries
+
+Two refunds
+
+Two Teachers updating Marks Draft
+
+Two Hall Ticket releases
+
+Two Parents booking same PTM slot
+
+Two Transport assignments taking final seat
+
+Two promotion executions
+
+Two admission activations
+
+Two academic-year closes
+
+Expected result:
+
+One safe success
+
+Other request gets idempotent response or conflict
+
+No duplicated business record
+
+==================================================
+16. FRONTEND COMPONENT TESTS
+==================================================
+
+Test:
+
+Role navigation
+
+Protected routes
+
+Unauthorized pages
+
+Loading states
+
+Empty states
+
+Error states
+
+Tables and filters
+
+Dialogs
+
+Form validation
+
+Status badges
+
+Feature entitlements
+
+School branding
+
+Session expiry
+
+API-error mapping
+
+Do not test only snapshots.
+
+Test behavior.
+
+==================================================
+17. END-TO-END TESTS
+==================================================
+
+Use an approved E2E framework compatible with the project.
+
+Automate key journeys:
+
+Student login and published result
+
+Parent leave request
+
+Teacher attendance
+
+Marks to publication
+
+Parent fee/payment/receipt
+
+Hall Ticket release
+
+Teacher leave and substitution
+
+Complaint escalation
+
+Transport change
+
+Admin Draft and Principal approval
+
+Platform school activation
+
+Cross-school denial
+
+==================================================
+18. RESPONSIVE TESTING
+==================================================
+
+Validate:
+
+Mobile
+
+Tablet
+
+Laptop
+
+Desktop
+
+Test:
+
+Sidebar/drawer
+
+Tables
+
+Forms
+
+Dialogs
+
+Charts
+
+Long names
+
+Long notices
+
+Different languages
+
+Currency
+
+Touch targets
+
+No horizontal overflow except purposeful responsive tables.
+
+==================================================
+19. ACCESSIBILITY TESTING
+==================================================
+
+Validate against the approved accessibility target, using WCAG 2.2 AA as the intended benchmark where applicable.
+
+Check:
+
+Keyboard navigation
+
+Focus order
+
+Visible focus
+
+Labels
+
+Error association
+
+Color contrast
+
+Modal focus trap
+
+Skip navigation
+
+Screen-reader names
+
+Table headers
+
+Form instructions
+
+Chart text summaries
+
+No color-only status communication
+
+Document identified exceptions.
+
+==================================================
+20. PERFORMANCE TESTING
+==================================================
+
+Define expected initial-load and API performance budgets.
+
+Test representative operations:
+
+Login
+
+Dashboards
+
+Student search
+
+Attendance sheet
+
+Marks grid
+
+Finance ledger
+
+Reports
+
+Payment webhook
+
+Bulk import validation
+
+Do not invent unrealistic enterprise scale.
+
+Use realistic pilot and projected school sizes.
+
+Test at least:
+
+Small school
+
+Medium school
+
+Large school scenario according to agreed assumptions
+
+Measure:
+
+Response time
+
+Error rate
+
+Throughput
+
+Database load
+
+Connection pool
+
+Memory
+
+Slow queries
+
+==================================================
+21. LARGE-DATA TESTS
+==================================================
+
+Test realistic volumes such as:
+
+Several schools
+
+Hundreds/thousands of Students per school
+
+Multiple academic years
+
+Attendance history
+
+Marks
+
+Invoices/payments
+
+Audit events
+
+Notifications
+
+Do not load the whole dataset into one response.
+
+Verify pagination and indexes.
+
+==================================================
+22. RELIABILITY AND FAILURE TESTS
+==================================================
+
+Simulate:
+
+PostgreSQL temporary failure
+
+Payment provider outage
+
+Email provider outage
+
+Object storage outage
+
+AI provider outage
+
+Webhook delay
+
+Duplicate event
+
+Service restart
+
+Timeout
+
+Partial downstream failure
+
+Ensure graceful error states and safe recovery.
+
+==================================================
+23. BACKUP AND RESTORE TEST
+==================================================
+
+Perform a controlled restore test if infrastructure allows.
+
+Validate:
+
+Database backup exists
+
+Backup is encrypted according to design
+
+Restore completes
+
+Application starts
+
+Tenant data is consistent
+
+Files/references remain valid
+
+No wrong-tenant restore
+
+Restore is audited
+
+If actual restore cannot be executed, mark it NOT DONE and release-blocking where appropriate.
+
+==================================================
+24. SECURITY SCANNING
+==================================================
+
+Run appropriate:
+
+Dependency vulnerability scanning
+
+Secret scanning
+
+Static analysis
+
+Container-image scanning if containers exist
+
+Frontend dependency audit
+
+Backend dependency audit
+
+Infrastructure configuration checks
+
+Do not automatically upgrade major versions without compatibility review.
+
+Triage findings:
+
+Critical
+
+High
+
+Medium
+
+Low
+
+False positive with justification
+
+==================================================
+25. MANUAL SECURITY REVIEW
+==================================================
+
+Manually review:
+
+Controller authorization
+
+Service authorization
+
+Tenant-scoped repositories
+
+Mass assignment
+
+DTO overexposure
+
+Sensitive logs
+
+CORS
+
+CSRF behavior
+
+Security headers
+
+Actuator exposure
+
+OpenAPI exposure
+
+Error leakage
+
+File access
+
+Payment webhooks
+
+Platform Admin support access
+
+==================================================
+26. PRIVACY REVIEW
+==================================================
+
+Review:
+
+Data minimization
+
+Role-based visibility
+
+Safety-record restriction
+
+Inactive account access
+
+Exited Student/Staff access
+
+Retention configuration
+
+AI data sharing
+
+External provider data
+
+Exports
+
+Logs
+
+Flag jurisdiction-specific legal/privacy items for professional review.
+
+Do not make unsupported legal-compliance claims.
+
+==================================================
+27. DEFECT MANAGEMENT
+==================================================
+
+Record every discovered defect with:
+
+ID
+
+Severity
+
+Module
+
+Description
+
+Steps to reproduce
+
+Expected
+
+Actual
+
+Tenant/security impact
+
+Fix
+
+Test added
+
+Status
+
+Critical/High security or financial defects block staging.
+
+==================================================
+28. RELEASE-GATE CRITERIA
+==================================================
+
+Create mandatory gates.
+
+Examples:
+
+No open Critical defects
+
+No open High tenant-isolation defects
+
+No authorization bypass
+
+No known payment-integrity issue
+
+No secret exposed
+
+Migrations pass
+
+Automated test suite passes
+
+Frontend build passes
+
+Backend verify passes
+
+Backup/restore evidence available
+
+Monitoring configured
+
+Pilot runbook ready
+
+Do not mark a deferred security issue as passed.
+
+==================================================
+29. TRACEABILITY MATRIX
+==================================================
+
+Map:
+
+Requirement
+
+API
+
+Backend module
+
+Frontend screen
+
+Authorization rule
+
+Audit event
+
+Test case
+
+Status
+
+Use this for critical FutureSchool V1 workflows.
+
+==================================================
+30. BUILD AND TEST COMMANDS
+==================================================
+
+Run all applicable commands, including:
+
+mvn clean test
+
+mvn verify
+
+npm test where configured
+
+npm run build
+
+E2E test command
+
+Security scans
+
+Fix test failures.
+
+Do not skip failing tests silently.
+
+==================================================
+31. OUTPUT REQUIRED
+==================================================
+
+Produce:
+
+1. Master Test Plan
+2. Environment/Test Data Plan
+3. Unit-Test Results
+4. Migration/Database Results
+5. Authentication Results
+6. Authorization Matrix Results
+7. Tenant-Isolation Results
+8. Workflow Results
+9. Finance/Payment Results
+10. File Security Results
+11. AI Security Results
+12. Export Security Results
+13. Audit Results
+14. Concurrency Results
+15. Frontend Results
+16. E2E Results
+17. Responsive Results
+18. Accessibility Results
+19. Performance Results
+20. Reliability Results
+21. Backup/Restore Results
+22. Security Scan Results
+23. Privacy Review
+24. Defect Register
+25. Traceability Matrix
+26. Release-Gate Status
+27. Exact build/test commands and results
+28. Blocking Issues
+29. Risks Accepted, with owner and justification
+30. READY FOR STAGING or NOT READY FOR STAGING
+31. DONE
+32. NOT DONE
+33. NEXT
+
+Do not merely state "all tests passed" without evidence.
+
+STOP after Phase 19.
+
+Do not create the staging environment automatically.
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 PHASE 20
 ---------------------------------------------------------------------------------------------------------------------------------------------------
+Proceed with PHASE 20 ONLY:
 
+FUTURESCHOOL STAGING ENVIRONMENT
+AND RELEASE CANDIDATE DEPLOYMENT
+
+Phase 19 completed with:
+
+READY FOR STAGING
+
+Do not deploy to production.
+
+Do not use real school production data.
+
+Act as:
+
+- Senior DevOps Architect
+- Senior Cloud Engineer
+- Senior Release Engineer
+- Senior Site Reliability Engineer
+- Senior Security Engineer
+- Senior Database Engineer
+- Senior QA Lead
+
+The objective is to create a secure, production-like staging environment for end-to-end validation and pilot preparation.
+
+==================================================
+1. STAGING PRINCIPLES
+==================================================
+
+Staging must be:
+
+Separate from local development
+
+Separate from production
+
+Production-like
+
+Protected
+
+Observable
+
+Repeatable
+
+Deployed through controlled automation
+
+Use only fictional, synthetic or properly authorized test data.
+
+Do not copy real Student/Parent data into staging without an approved, secure anonymization and authorization process.
+
+==================================================
+2. CLOUD AND INFRASTRUCTURE DECISION
+==================================================
+
+Use the approved cloud/infrastructure provider.
+
+If no provider has been approved:
+
+Do not create random cloud resources.
+
+First provide an infrastructure decision record comparing the approved realistic options.
+
+Then wait for explicit provider approval.
+
+The design must support:
+
+React frontend hosting
+
+Spring Boot runtime
+
+Managed PostgreSQL
+
+Object storage
+
+Secrets management
+
+HTTPS
+
+DNS
+
+Monitoring
+
+Logging
+
+Backups
+
+Email sandbox/test configuration
+
+Payment sandbox
+
+AI sandbox/test configuration
+
+==================================================
+3. ENVIRONMENT STRUCTURE
+==================================================
+
+Define:
+
+local
+
+test
+
+staging
+
+production
+
+Each environment must have separate:
+
+Database
+
+Object-storage namespace/bucket
+
+Secrets
+
+Payment-provider configuration
+
+Email configuration
+
+AI configuration
+
+Logs
+
+Monitoring labels
+
+Do not share staging and production database credentials.
+
+==================================================
+4. DOMAIN AND HTTPS
+==================================================
+
+Configure an approved staging hostname, for example:
+
+staging.<approved-domain>
+
+or:
+
+app-staging.<approved-domain>
+
+Use valid HTTPS certificates.
+
+Force HTTPS.
+
+Configure secure redirects.
+
+Do not expose backend administrative ports publicly.
+
+==================================================
+5. NETWORK ARCHITECTURE
+==================================================
+
+Design:
+
+Public frontend/reverse proxy/load balancer
+
+Private backend connectivity where applicable
+
+Private managed database access
+
+Restricted object-storage access
+
+Outbound access to approved providers
+
+Administrative access controls
+
+Do not expose PostgreSQL publicly to the internet unless there is an explicitly secured and justified operational requirement.
+
+==================================================
+6. CONTAINERIZATION
+==================================================
+
+If approved, create production-oriented containers for:
+
+Spring Boot backend
+
+React frontend or static build served through approved hosting
+
+Use:
+
+Multi-stage builds
+
+Non-root runtime users
+
+Minimal base images
+
+Health checks
+
+Pinned/reviewed versions
+
+No secrets baked into images
+
+No development tools in production runtime image
+
+Scan container images.
+
+==================================================
+7. INFRASTRUCTURE AS CODE
+==================================================
+
+Use the approved Infrastructure-as-Code tool.
+
+Create reproducible definitions for:
+
+Network
+
+Application runtime
+
+Database
+
+Object storage
+
+Secrets references
+
+Monitoring
+
+DNS/HTTPS where supported
+
+Backup policy
+
+Do not manually create undocumented infrastructure.
+
+Do not store secret values in IaC state or repository improperly.
+
+==================================================
+8. CI/CD PIPELINE
+==================================================
+
+Create a staging pipeline.
+
+Recommended stages:
+
+Checkout
+
+Secret scan
+
+Frontend install
+
+Frontend lint/test
+
+Frontend build
+
+Backend compile
+
+Backend unit/integration tests
+
+mvn verify
+
+Dependency scan
+
+Container build
+
+Container scan
+
+Push artifact/image
+
+Database migration validation
+
+Deploy to staging
+
+Health checks
+
+Smoke tests
+
+E2E critical-path tests
+
+Release report
+
+Deployment should stop on failed tests.
+
+==================================================
+9. DATABASE MIGRATION
+==================================================
+
+Apply Flyway migrations through the controlled deployment process.
+
+Before deployment:
+
+Validate migration order
+
+Validate checksums
+
+Backup staging database where useful
+
+Run migration
+
+Run health validation
+
+Never use automatic destructive schema recreation.
+
+Do not modify applied migration files.
+
+==================================================
+10. STAGING SECRETS
+==================================================
+
+Store staging secrets in the approved secret manager.
+
+Include:
+
+Database credentials
+
+Token signing material
+
+Payment sandbox secrets
+
+Email sandbox credentials
+
+Object-storage credentials
+
+AI sandbox keys
+
+Monitoring configuration
+
+Use separate staging values.
+
+Never commit secrets.
+
+Document secret rotation.
+
+==================================================
+11. STAGING DATASET
+==================================================
+
+Create realistic fictional staging data.
+
+At minimum:
+
+Platform Admin account
+
+School A
+
+School B
+
+Principal for each
+
+Multiple Admin permission profiles
+
+Teachers
+
+Class Teacher
+
+Students
+
+Parent contexts
+
+Academic Year
+
+Classes/Sections
+
+Subjects
+
+Teacher Allocations
+
+Attendance
+
+Homework
+
+Quiz
+
+Study Materials
+
+Exam
+
+Marks
+
+Report Cards
+
+Fee Structure
+
+Invoices
+
+Payments
+
+Transport
+
+Complaints
+
+PTM
+
+Events
+
+Pickup Authorization
+
+Audit events
+
+Use clearly fictional identities.
+
+Include wrong-tenant test data intentionally for security validation.
+
+==================================================
+12. DEVELOPMENT / TEST ACCOUNTS
+==================================================
+
+Create controlled staging test accounts.
+
+Do not use predictable public production defaults.
+
+Store access instructions securely.
+
+Require MFA for privileged staging users when feasible.
+
+Do not list real staging passwords in public README files.
+
+Provide a secure test-account management procedure.
+
+==================================================
+13. PAYMENT SANDBOX
+==================================================
+
+Configure payment-provider sandbox/test mode only.
+
+Validate:
+
+Payment order
+
+Hosted checkout
+
+Success webhook
+
+Failure webhook
+
+Pending state
+
+Duplicate webhook
+
+Refund sandbox
+
+Settlement test data where available
+
+Clearly label staging transactions as sandbox/test.
+
+No real money should move.
+
+==================================================
+14. EMAIL SANDBOX
+==================================================
+
+Use approved sandbox/test delivery controls.
+
+Prevent staging from accidentally emailing real Parents or Staff.
+
+Use:
+
+Test-recipient allowlist
+
+Sandbox inbox
+
+Staging email subject prefix
+
+Example:
+
+[FutureSchool STAGING]
+
+Validate templates and failure behavior.
+
+==================================================
+15. OBJECT STORAGE
+==================================================
+
+Create staging object-storage namespace.
+
+Configure:
+
+Private access
+
+Tenant-scoped keys
+
+Authorized upload/download
+
+Lifecycle policy
+
+CORS if required
+
+Encryption
+
+Logging where approved
+
+No public Student-document bucket.
+
+==================================================
+16. AI SANDBOX
+==================================================
+
+If AI is enabled:
+
+Use staging/sandbox configuration.
+
+Use only fictional data.
+
+Enforce:
+
+Entitlements
+
+Tenant scope
+
+Usage limits
+
+Approved sources
+
+No consequential actions
+
+Monitor token/usage cost.
+
+==================================================
+17. MONITORING AND ALERTS
+==================================================
+
+Configure staging monitoring for:
+
+Frontend errors
+
+Backend errors
+
+API latency
+
+5xx rate
+
+Authentication failures
+
+Authorization failures
+
+Payment webhook failures
+
+Email failures
+
+Object-storage failures
+
+AI failures
+
+Database connections
+
+Database storage
+
+CPU/memory
+
+Health checks
+
+Backup status
+
+Configure alert routes for the implementation team.
+
+Do not send restricted data in alerts.
+
+==================================================
+18. LOGGING
+==================================================
+
+Use structured logs.
+
+Include:
+
+Timestamp
+
+Environment
+
+Service
+
+Request ID
+
+Correlation ID
+
+Tenant reference where safe
+
+User reference where safe
+
+Event code
+
+Severity
+
+Do not log:
+
+Passwords
+
+Tokens
+
+MFA secrets
+
+Payment secrets
+
+Full sensitive payloads
+
+Restricted safety data
+
+==================================================
+19. BACKUPS
+==================================================
+
+Configure staging backup policy.
+
+Perform a staging restore test.
+
+Validate:
+
+Backup created
+
+Restore environment isolated
+
+Migrations consistent
+
+Application starts
+
+Tenant data correct
+
+File references valid
+
+Restore audited/documented
+
+A restore test is stronger evidence than backup status alone.
+
+==================================================
+20. DEPLOYMENT STRATEGY
+==================================================
+
+Use an approved safe deployment strategy.
+
+Examples:
+
+Rolling deployment
+
+Blue/green
+
+Controlled recreate for small pilot architecture, with justified downtime
+
+Document:
+
+Deployment
+
+Health check
+
+Smoke test
+
+Rollback trigger
+
+Rollback method
+
+Database migration rollback limitations
+
+Do not claim zero downtime if not implemented.
+
+==================================================
+21. RELEASE CANDIDATE
+==================================================
+
+Create a release candidate:
+
+FutureSchool V1 RC1
+
+Use semantic/versioned release naming according to project convention.
+
+Record:
+
+Git commit
+
+Frontend artifact
+
+Backend artifact
+
+Migration version
+
+Configuration version
+
+Release notes
+
+Known limitations
+
+Test evidence
+
+==================================================
+22. STAGING SMOKE TESTS
+==================================================
+
+Run after deployment:
+
+Frontend opens
+
+Backend health
+
+Authentication
+
+Student login
+
+Parent login
+
+Teacher login
+
+Principal login
+
+Admin login
+
+Platform Admin login
+
+School context
+
+Tenant denial
+
+Database access
+
+Object storage
+
+Payment sandbox
+
+Email sandbox
+
+AI sandbox if enabled
+
+Audit creation
+
+==================================================
+23. STAGING END-TO-END TESTS
+==================================================
+
+Run critical workflows:
+
+Admission to activation
+
+Attendance to Parent view
+
+Homework publication/submission/review
+
+Marks to Report Card publication
+
+Published correction/versioning
+
+Fee billing and sandbox payment
+
+Receipt
+
+Hall Ticket clearance and release
+
+Teacher leave and substitute
+
+Transport change
+
+Complaint escalation
+
+Event consent
+
+Pickup release
+
+Student promotion
+
+Student exit
+
+Tenant subscription/entitlement
+
+==================================================
+24. SECURITY VALIDATION IN STAGING
+==================================================
+
+Repeat essential negative tests:
+
+School A cannot access School B
+
+Parent cannot access another Student
+
+Teacher cannot access unrelated subject
+
+Admin cannot approve Report Card
+
+School Admin cannot access Platform APIs
+
+Disabled entitlement denied
+
+Sensitive export requires step-up
+
+Cross-tenant file download denied
+
+Invalid payment webhook rejected
+
+Replayed webhook safe
+
+Audit cannot be deleted
+
+==================================================
+25. PERFORMANCE VALIDATION
+==================================================
+
+Run staging performance tests within safe limits.
+
+Do not overload shared external sandbox providers.
+
+Test representative:
+
+Login
+
+Dashboard
+
+Attendance sheet
+
+Marks grid
+
+Student search
+
+Finance ledger
+
+Payment webhook
+
+Report generation
+
+Use results to identify slow queries and indexes.
+
+==================================================
+26. USER ACCEPTANCE TEST PLAN
+==================================================
+
+Create role-based UAT scripts for:
+
+Student
+
+Parent
+
+Teacher
+
+Class Teacher
+
+Principal
+
+Admissions Admin
+
+Finance Admin
+
+Transport Admin
+
+Security Admin
+
+Platform Admin
+
+Each script includes:
+
+Preconditions
+
+Steps
+
+Expected result
+
+Pass/Fail
+
+Issue reference
+
+Do not ask client users to test security controls they cannot meaningfully validate. Keep technical security validation with engineering.
+
+==================================================
+27. PILOT READINESS CONTENT
+==================================================
+
+Prepare:
+
+Pilot Scope
+
+Pilot Users
+
+Pilot Modules
+
+Training Plan
+
+Support Process
+
+Issue Reporting
+
+Data Migration Template
+
+Configuration Checklist
+
+School Responsibilities
+
+FutureSchool Responsibilities
+
+Daily Health Review
+
+Pilot Exit Criteria
+
+Do not start the pilot yet.
+
+==================================================
+28. OPERATIONAL RUNBOOKS
+==================================================
+
+Create runbooks for:
+
+Deployment
+
+Rollback
+
+Database migration failure
+
+Application outage
+
+Payment provider outage
+
+Email outage
+
+Object storage outage
+
+AI outage
+
+Account recovery
+
+Security incident
+
+Backup failure
+
+Restore
+
+Tenant suspension/reactivation
+
+Sensitive export investigation
+
+==================================================
+29. STAGING DEFECT MANAGEMENT
+==================================================
+
+Create staging issue process:
+
+Severity
+
+Owner
+
+Module
+
+School/tenant scope
+
+Reproduction
+
+Logs/request IDs
+
+Fix version
+
+Retest
+
+Closure
+
+No Critical or tenant-isolation High defect may be deferred into the pilot.
+
+==================================================
+30. STAGING EXIT GATE
+==================================================
+
+Define gate to proceed to Phase 21 Pilot School.
+
+Minimum:
+
+Deployment repeatable
+
+All health checks pass
+
+Critical journeys pass
+
+Tenant isolation passes
+
+Payment sandbox passes
+
+Email sandbox passes
+
+File security passes
+
+MFA/step-up passes
+
+Monitoring active
+
+Backups active
+
+Restore tested
+
+Runbooks ready
+
+UAT scripts ready
+
+No open Critical defects
+
+No unresolved High security/financial defects
+
+==================================================
+31. OUTPUT REQUIRED
+==================================================
+
+Report:
+
+1. Approved infrastructure architecture
+2. Environment separation
+3. IaC created
+4. CI/CD pipeline
+5. Container configuration
+6. Database staging deployment
+7. Flyway status
+8. Secrets configuration
+9. Staging hostname/HTTPS status
+10. Fictional dataset
+11. Test accounts procedure
+12. Payment sandbox status
+13. Email sandbox status
+14. Object-storage status
+15. AI sandbox status
+16. Monitoring/alerts
+17. Logging
+18. Backup status
+19. Restore-test result
+20. Release Candidate details
+21. Smoke-test results
+22. E2E results
+23. Security results
+24. Performance results
+25. UAT package
+26. Pilot-readiness package
+27. Runbooks
+28. Open defects
+29. Risks
+30. Exact deployment/build commands and results
+31. READY FOR PILOT or NOT READY FOR PILOT
+32. DONE
+33. NOT DONE
+34. NEXT
+
+Do not deploy to production.
+
+Do not onboard a real school automatically.
+
+STOP after Phase 20.
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 PHASE 21
 ---------------------------------------------------------------------------------------------------------------------------------------------------
+Proceed with PHASE 21 ONLY:
 
+FUTURESCHOOL CONTROLLED PILOT SCHOOL
+
+Phase 20 Staging and Release Candidate validation is complete.
+
+The system has been classified:
+
+READY FOR PILOT
+
+IMPORTANT:
+
+This phase is NOT a nationwide production launch.
+
+This phase is a controlled rollout with one approved pilot school.
+
+Do not enable every module for every user immediately.
+
+Do not load production school data until the approved migration, security, privacy, backup, support and authorization checks are complete.
+
+Act as:
+
+- Senior SaaS Implementation Lead
+- Senior Customer Success Engineer
+- Senior Site Reliability Engineer
+- Senior Security Engineer
+- Senior Data Migration Engineer
+- Senior QA Lead
+- Senior Product Manager
+- Senior Support Engineer
+
+==================================================
+1. PILOT OBJECTIVE
+==================================================
+
+The purpose of the pilot is to prove:
+
+1. Teachers can realistically use FutureSchool.
+2. Parents understand the Parent Portal.
+3. Admin workflows reduce manual effort.
+4. Principal dashboards provide useful visibility.
+5. Academic workflows match real school operations.
+6. Financial workflows remain accurate.
+7. Authorization and tenant isolation work in real usage.
+8. FutureSchool can be supported operationally.
+9. The school receives enough value to justify full rollout.
+10. We can identify production defects before broader deployment.
+
+Do not treat the pilot as merely a demo.
+
+==================================================
+2. PILOT SCOPE
+==================================================
+
+Start small.
+
+Recommended initial scope:
+
+- One approved School tenant
+- Principal
+- School Admin
+- Selected Teachers
+- 1–2 Classes/Sections
+- Selected Parents
+- Selected Students
+
+Recommended first workflows:
+
+Attendance
+
+Homework
+
+Parent Portal
+
+Notices
+
+PTM
+
+Published Results / Report Card workflow
+
+Optionally:
+
+Fees and Payments
+
+only if the financial implementation and provider integration have passed all required tests.
+
+Do not activate every FutureSchool module simply because it exists.
+
+==================================================
+3. PILOT AGREEMENT
+==================================================
+
+Prepare a written Pilot Scope document covering:
+
+School
+
+Pilot start date
+
+Pilot end/review date
+
+Included Classes
+
+Included Teachers
+
+Included Students
+
+Included Parents
+
+Enabled modules
+
+Excluded modules
+
+Support process
+
+Data responsibilities
+
+Commercial pilot terms
+
+Success criteria
+
+Termination / rollback process
+
+Data export expectations
+
+Privacy responsibilities
+
+Do not create unsupported legal promises.
+
+Flag contractual/privacy/legal terms requiring professional review.
+
+==================================================
+4. SCHOOL ONBOARDING
+==================================================
+
+Use the Platform Admin onboarding workflow:
+
+School Application
+        ↓
+Verification
+        ↓
+Tenant Created
+        ↓
+Principal Provisioned
+        ↓
+Initial Admin Provisioned
+        ↓
+School Master Setup
+        ↓
+Academic Year Setup
+        ↓
+Pilot Configuration
+        ↓
+Tenant Activated for Pilot
+
+Do not use shared accounts.
+
+Every Staff member must have an individual account.
+
+==================================================
+5. SCHOOL CONFIGURATION
+==================================================
+
+Configure and validate:
+
+School Name
+
+School Code
+
+School Logo
+
+Address
+
+Timezone
+
+Languages
+
+Academic Year
+
+Classes
+
+Sections
+
+Subjects
+
+Teacher Allocations
+
+Class Teacher Assignments
+
+Timetable
+
+School Calendar
+
+Fee Structure if included
+
+Transport only if included
+
+Policies
+
+Notification configuration
+
+Feature entitlements
+
+Confirm Principal approval wherever required.
+
+==================================================
+6. DATA MIGRATION
+==================================================
+
+Use official import templates.
+
+Migration flow:
+
+School provides data
+        ↓
+Import to staging validation
+        ↓
+Duplicate checks
+        ↓
+Data-quality report
+        ↓
+School verifies
+        ↓
+Approved migration
+        ↓
+Production Pilot tenant import
+        ↓
+Post-import reconciliation
+
+Never silently correct unclear source data.
+
+Create a migration exception report.
+
+==================================================
+7. MIGRATION RECONCILIATION
+==================================================
+
+Verify counts such as:
+
+Students Provided
+Students Imported
+
+Staff Provided
+Staff Imported
+
+Classes
+
+Sections
+
+Subjects
+
+Teacher Allocations
+
+Transport assignments if enabled
+
+Opening balances if enabled
+
+Any mismatch requires explicit resolution.
+
+Do not begin the Pilot with unexplained migration differences.
+
+==================================================
+8. ACCOUNT PROVISIONING
+==================================================
+
+Provision:
+
+Principal
+
+Admin
+
+Selected Teachers
+
+Selected Student/Parent accounts
+
+Require:
+
+Password setup
+
+MFA for Principal/Admin
+
+Account activation
+
+Correct School assignment
+
+Correct role
+
+Correct permissions
+
+Correct Teacher allocations
+
+Session-security checks
+
+Do not distribute default shared passwords.
+
+==================================================
+9. TRAINING
+==================================================
+
+Create separate short training paths.
+
+PRINCIPAL:
+
+Executive Dashboard
+Approvals
+Attendance Monitoring
+Exam/Report Card workflow
+Audit awareness
+
+ADMIN:
+
+Students
+Staff
+Accounts
+Academic configuration
+Operational monitoring
+
+TEACHER:
+
+Login
+Attendance
+Homework
+Marks if enabled
+Parent communication
+PTM
+
+PARENT:
+
+Login
+Attendance
+Homework
+Notices
+Meetings
+Fees if enabled
+
+Keep training role-specific.
+
+Do not demonstrate unrelated administrative capabilities to ordinary users.
+
+==================================================
+10. PILOT DAY-0 VALIDATION
+==================================================
+
+Before users begin:
+
+Check:
+
+HTTPS
+
+Tenant isolation
+
+MFA
+
+Backups
+
+Monitoring
+
+Email
+
+Payment sandbox/live status according to pilot scope
+
+Object storage
+
+School branding
+
+Teacher allocations
+
+Student enrollment
+
+Parent account mapping
+
+Notifications
+
+Audit logging
+
+Health checks
+
+Support channel
+
+Rollback procedure
+
+No Critical defect may remain.
+
+==================================================
+11. DAILY PILOT MONITORING
+==================================================
+
+Monitor at least:
+
+Authentication failures
+
+Authorization failures
+
+Cross-tenant denial events
+
+API errors
+
+Database health
+
+Payment failures if enabled
+
+Notification failures
+
+Storage failures
+
+Performance
+
+Backup status
+
+Teacher attendance-submission workflow
+
+Parent login problems
+
+Support tickets
+
+Do not convert operational metrics into employee performance scores.
+
+==================================================
+12. PRODUCT-USAGE OBSERVATION
+==================================================
+
+Track product-level usage such as:
+
+Teachers who successfully logged in
+
+Attendance sessions completed
+
+Homework published
+
+Parent logins
+
+Notices viewed
+
+PTM bookings
+
+Report Cards published
+
+Support issues
+
+Workflow failures
+
+Do not use these metrics to rank employees.
+
+Use them to evaluate product usability.
+
+==================================================
+13. SUPPORT PROCESS
+==================================================
+
+Create a pilot support workflow:
+
+Issue submitted
+        ↓
+Severity assigned
+        ↓
+Request ID
+        ↓
+Investigation
+        ↓
+Resolution
+        ↓
+School confirmation
+        ↓
+Close
+
+Severity:
+
+P0
+School-critical outage or serious security/financial issue
+
+P1
+Major workflow unavailable
+
+P2
+Significant defect with workaround
+
+P3
+Minor usability/configuration issue
+
+P4
+Enhancement/request
+
+Do not dismiss product defects as training problems without investigation.
+
+==================================================
+14. INCIDENT RESPONSE
+==================================================
+
+For security or data incidents:
+
+Detect
+        ↓
+Contain
+        ↓
+Preserve evidence
+        ↓
+Investigate
+        ↓
+Revoke access if required
+        ↓
+Recover
+        ↓
+Validate
+        ↓
+Document
+        ↓
+Notify according to applicable contractual/legal requirements
+        ↓
+Prevent recurrence
+
+Do not invent statutory notification deadlines.
+
+Refer jurisdiction-specific legal obligations for professional review.
+
+==================================================
+15. PAYMENT PILOT
+==================================================
+
+If real payments are enabled:
+
+First validate with controlled low-risk transactions.
+
+Check:
+
+Correct invoice
+
+Correct Student
+
+Correct amount
+
+Provider checkout
+
+Provider webhook
+
+Payment allocation
+
+Receipt
+
+Parent view
+
+Finance view
+
+Settlement
+
+Reconciliation
+
+Refund test according to approved controlled process
+
+Do not enable broad Parent payments before this validation passes.
+
+==================================================
+16. ACADEMIC PILOT
+==================================================
+
+Validate:
+
+Teacher Attendance
+
+Homework
+
+Marks if included
+
+Class Teacher review
+
+Report Card
+
+Principal approval
+
+Class Teacher publication
+
+Student view
+
+Parent view
+
+Published correction process
+
+No Student/Parent must see unpublished marks.
+
+==================================================
+17. TENANT SECURITY VALIDATION
+==================================================
+
+During Pilot re-run critical tenant tests:
+
+Pilot School cannot access another test School.
+
+Parent cannot access another Student.
+
+Teacher cannot access unrelated Class/Subject.
+
+School Admin cannot access Platform Admin APIs.
+
+Platform Support requires explicit support authorization.
+
+Sensitive files remain restricted.
+
+==================================================
+18. FEEDBACK COLLECTION
+==================================================
+
+Conduct structured feedback separately with:
+
+Principal
+
+Admin
+
+Teachers
+
+Parents
+
+Ask:
+
+What task became easier?
+
+What task became harder?
+
+What is confusing?
+
+What information is missing?
+
+What workflow does not match your school?
+
+What feature is unnecessary?
+
+What issue would stop you using FutureSchool?
+
+Do not simply ask:
+
+"Do you like FutureSchool?"
+
+==================================================
+19. PILOT SUCCESS METRICS
+==================================================
+
+Define concrete product success criteria.
+
+Examples:
+
+Critical workflows completed successfully
+
+No unresolved security issue
+
+No financial inconsistencies
+
+Teacher workflow usable without repeated support
+
+Parent onboarding understandable
+
+Principal obtains useful operational visibility
+
+Admin can manage the enabled processes
+
+Acceptable system reliability
+
+School is willing to continue/full-rollout
+
+Do not invent universal thresholds.
+
+Set approved Pilot targets with the client.
+
+==================================================
+20. CHANGE CONTROL
+==================================================
+
+Not every client request becomes immediate V1 functionality.
+
+Classify feedback as:
+
+BUG
+
+CONFIGURATION ISSUE
+
+TRAINING ISSUE
+
+V1 GAP
+
+FUTURE ENHANCEMENT
+
+CUSTOM REQUIREMENT
+
+SECURITY ISSUE
+
+Do not change core product architecture for one request without Product Owner review.
+
+==================================================
+21. PILOT FIX RELEASES
+==================================================
+
+Use controlled releases.
+
+For every Pilot hotfix:
+
+Issue
+        ↓
+Fix
+        ↓
+Automated Test
+        ↓
+Regression Test
+        ↓
+Staging Verification
+        ↓
+Approval
+        ↓
+Pilot Deployment
+        ↓
+Health Check
+        ↓
+Audit / Release Note
+
+Never patch production/pilot servers manually without source-control history.
+
+==================================================
+22. PILOT DATA PROTECTION
+==================================================
+
+Validate:
+
+School ownership of School data
+
+Authorized access
+
+Data export capability
+
+Backup
+
+Recovery
+
+Retention
+
+Account exit/deactivation
+
+Support access
+
+Third-party data exposure
+
+Do not use client school data to train external AI models unless there is a clearly approved and lawful arrangement.
+
+==================================================
+23. PILOT COMMERCIAL VALIDATION
+==================================================
+
+FutureSchool business model:
+
+approximately ₹30–₹50
+per billable Student per month
+
+Do not change final pricing automatically.
+
+During Pilot record:
+
+Student count
+
+Billable Student assumptions
+
+Modules actually used
+
+Support effort
+
+Infrastructure cost
+
+Payment cost
+
+AI cost
+
+Notification cost
+
+Onboarding effort
+
+These inputs will guide the final commercial offer.
+
+==================================================
+24. PILOT EXIT REVIEW
+==================================================
+
+At Pilot completion prepare:
+
+Pilot Summary
+
+Modules Tested
+
+User Groups
+
+Workflow Results
+
+Defects
+
+Security Results
+
+Financial Results
+
+Support Statistics
+
+Performance
+
+Availability
+
+Feedback
+
+Requested Changes
+
+Product Decisions
+
+Commercial Observations
+
+Open Risks
+
+==================================================
+25. FULL-SCHOOL ROLLOUT DECISION
+==================================================
+
+Classify:
+
+READY FOR FULL SCHOOL ROLLOUT
+
+READY WITH CONDITIONS
+
+NOT READY
+
+Do not proceed if:
+
+Critical security issue remains
+
+Cross-tenant concern remains
+
+Financial inconsistency exists
+
+Backup/recovery is unreliable
+
+Core academic workflow is unreliable
+
+Major user adoption blocker is unresolved
+
+==================================================
+26. OUTPUT REQUIRED
+==================================================
+
+Produce:
+
+1. Pilot Scope
+2. Pilot Agreement Inputs
+3. Tenant Onboarding Result
+4. Configuration Checklist
+5. Migration Result
+6. Migration Reconciliation
+7. Account Provisioning
+8. Training Material
+9. Day-0 Readiness
+10. Monitoring Summary
+11. Usage Summary
+12. Support Register
+13. Incident Register
+14. Academic Workflow Results
+15. Financial Workflow Results
+16. Tenant Security Results
+17. Feedback Summary
+18. Defect Register
+19. Pilot Releases
+20. Data Protection Review
+21. Commercial Validation Inputs
+22. Pilot Exit Review
+23. Open Risks
+24. FULL SCHOOL ROLLOUT DECISION
+25. DONE
+26. NOT DONE
+27. NEXT
+
+Do not start Phase 22 automatically.
+
+STOP after Phase 21.
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 PHASE 22
 ---------------------------------------------------------------------------------------------------------------------------------------------------
+Proceed with PHASE 22 ONLY:
+
+FUTURESCHOOL PRODUCTION LAUNCH,
+FULL SCHOOL ROLLOUT AND OPERATIONS
+
+Phase 21 Controlled Pilot is complete.
+
+The approved decision is:
+
+READY FOR FULL SCHOOL ROLLOUT
+
+IMPORTANT:
+
+This is the production-launch phase.
+
+Do not introduce large untested product features.
+
+Production launch must use the validated Release Candidate or an explicitly tested successor.
+
+Act as:
+
+- Senior SaaS Production Architect
+- Senior DevOps/SRE Lead
+- Senior Security Lead
+- Senior Release Manager
+- Senior Data Migration Lead
+- Senior Customer Success Lead
+- Senior Support Lead
+- Senior Product Owner
+- Senior Finance Operations Architect
+
+==================================================
+1. PRODUCTION READINESS GATE
+==================================================
+
+Revalidate before deployment:
+
+No Critical defects
+
+No unresolved High tenant-isolation defects
+
+No authorization bypass
+
+No financial-integrity issue
+
+No payment-security blocker
+
+No secret exposure
+
+Backup active
+
+Restore tested
+
+Monitoring active
+
+MFA active for privileged roles
+
+Sensitive exports protected
+
+Audit working
+
+Provider production credentials ready
+
+Production domain ready
+
+HTTPS ready
+
+Support process ready
+
+Incident-response process ready
+
+Do not proceed if any mandatory gate fails.
+
+==================================================
+2. PRODUCTION ENVIRONMENT
+==================================================
+
+Production must be isolated from:
+
+local
+
+test
+
+staging
+
+Use separate:
+
+Database
+
+Object storage
+
+Secrets
+
+Provider credentials
+
+Logs
+
+Monitoring
+
+Payment configuration
+
+Email configuration
+
+AI configuration
+
+Backups
+
+Do not reuse staging credentials.
+
+==================================================
+3. PRODUCTION DOMAIN AND HTTPS
+==================================================
+
+Configure approved production domains.
+
+Examples conceptually:
+
+app.<future-domain>
+
+api.<future-domain>
+
+Use valid TLS certificates.
+
+Force HTTPS.
+
+Apply production security headers.
+
+Restrict administrative infrastructure access.
+
+Do not expose PostgreSQL publicly.
+
+==================================================
+4. PRODUCTION SECRETS
+==================================================
+
+Store through approved secret-management infrastructure.
+
+Production secrets include:
+
+Database credentials
+
+Token-signing material
+
+Payment credentials
+
+Webhook secrets
+
+Email credentials
+
+Storage credentials
+
+AI provider credentials
+
+Monitoring credentials
+
+Never commit secrets.
+
+Rotate bootstrap/test credentials before go-live.
+
+==================================================
+5. CI/CD PRODUCTION PIPELINE
+==================================================
+
+Use controlled production deployment.
+
+Required gates:
+
+Git release tag
+        ↓
+Tests
+        ↓
+Security scans
+        ↓
+Frontend build
+        ↓
+Backend verify
+        ↓
+Container build/scan if used
+        ↓
+Migration validation
+        ↓
+Release approval
+        ↓
+Production deployment
+        ↓
+Health checks
+        ↓
+Smoke tests
+        ↓
+Critical E2E checks
+        ↓
+Release confirmation
+
+No direct developer laptop production deployment.
+
+==================================================
+6. PRODUCTION DATABASE MIGRATION
+==================================================
+
+Before migration:
+
+Backup
+
+Verify migration versions
+
+Review destructive changes
+
+Confirm release compatibility
+
+Apply Flyway
+
+Run health checks
+
+Verify data
+
+Do not use:
+
+drop schema
+
+create-drop
+
+manual table deletion
+
+or destructive ad-hoc SQL
+
+without approved migration/recovery procedure.
+
+==================================================
+7. FINAL SCHOOL MIGRATION
+==================================================
+
+Migrate complete approved School data.
+
+Use:
+
+Validated templates
+
+Reconciliation
+
+School approval
+
+Import batch audit
+
+Check:
+
+Students
+
+Staff
+
+Academic Enrollment
+
+Teacher Allocations
+
+Timetable
+
+Calendar
+
+Fees
+
+Opening Balances where approved
+
+Transport
+
+Accounts
+
+Do not silently skip invalid records.
+
+==================================================
+8. GO-LIVE ACCOUNT SECURITY
+==================================================
+
+Confirm:
+
+Principal MFA
+
+Admin MFA
+
+Platform Admin MFA
+
+Staff account assignments
+
+No shared privileged account
+
+No developer account left active unnecessarily
+
+Test/default accounts removed or disabled
+
+Sessions controlled
+
+Password/setup communications delivered safely
+
+==================================================
+9. FEATURE ENTITLEMENTS
+==================================================
+
+Activate only contracted features.
+
+Examples:
+
+Core Academics
+
+Finance
+
+Payments
+
+Transport
+
+AI
+
+Advanced Reports
+
+SMS
+
+WhatsApp
+
+GPS
+
+School Admin cannot enable premium features.
+
+Platform subscription controls entitlements.
+
+==================================================
+10. PER-STUDENT SUBSCRIPTION
+==================================================
+
+FutureSchool commercial model:
+
+Price per Billable Student per Month
+
+Maintain:
+
+Contracted Student Count
+
+Active Student Count
+
+Billable Student Count
+
+Rate
+
+Billing Period
+
+Subscription Start
+
+Renewal
+
+Entitlements
+
+Do not mix FutureSchool SaaS subscription billing with Parent school-fee billing.
+
+==================================================
+11. PRODUCTION PAYMENT ACTIVATION
+==================================================
+
+Before allowing all Parents to pay:
+
+Execute controlled production validation.
+
+Verify:
+
+Provider account
+
+Settlement destination
+
+Webhook endpoint
+
+Signature verification
+
+Small controlled payment
+
+Receipt
+
+Refund capability
+
+Settlement
+
+Reconciliation
+
+Finance Admin workflow
+
+Monitoring
+
+Only then enable Parent payment broadly.
+
+==================================================
+12. PRODUCTION EMAIL
+==================================================
+
+Verify:
+
+Sender identity
+
+Domain authentication according to provider requirements
+
+Templates
+
+School branding
+
+Password recovery
+
+Receipt
+
+Security alert
+
+Notice
+
+Report Card notification
+
+Bounce/failure monitoring
+
+Remove staging subject prefixes.
+
+Ensure test messages do not reach unintended users.
+
+==================================================
+13. OBJECT STORAGE
+==================================================
+
+Production storage must be:
+
+Private
+
+Encrypted according to approved architecture
+
+Tenant-scoped
+
+Authorization protected
+
+Backed up/versioned as designed
+
+Lifecycle controlled
+
+Monitored
+
+Test:
+
+Report Card access
+
+Receipt access
+
+Complaint attachment restrictions
+
+Safety attachment restrictions
+
+Cross-school denial
+
+==================================================
+14. AI PRODUCTION ACTIVATION
+==================================================
+
+If AI is included:
+
+Activate only for entitled schools.
+
+Monitor:
+
+Usage
+
+Cost
+
+Latency
+
+Errors
+
+Grounding
+
+Abuse
+
+Data scope
+
+Keep:
+
+Human review
+
+No consequential actions
+
+No cross-tenant context
+
+No sensitive unauthorized data
+
+Provide ability to disable AI quickly if provider/security/cost problems occur.
+
+==================================================
+15. FULL-SCHOOL TRAINING
+==================================================
+
+Train by role:
+
+Principal
+
+Admins
+
+Teachers
+
+Parents
+
+Students where appropriate
+
+Produce:
+
+Quick Start Guides
+
+Short Videos where possible
+
+FAQ
+
+Login Guide
+
+Password Recovery Guide
+
+Support Contact
+
+Do not train every role on unnecessary administrative functionality.
+
+==================================================
+16. PARENT ONBOARDING
+==================================================
+
+Roll out controlled Parent account setup.
+
+Provide:
+
+Student ID/login instructions
+
+Portal selection explanation
+
+Password setup
+
+Recovery email process
+
+Mobile/browser instructions
+
+Help/support guidance
+
+Avoid sending plaintext permanent passwords.
+
+==================================================
+17. GO-LIVE PLAN
+==================================================
+
+Use phased activation even in full school.
+
+Example:
+
+Day 1:
+Accounts + Notices
+
+Then:
+Attendance
+
+Then:
+Homework
+
+Then:
+Academic workflows
+
+Then:
+Fees/Payments
+
+Then:
+Additional modules
+
+Adapt to approved school plan.
+
+Do not force every module into the same go-live hour.
+
+==================================================
+18. HYPERCARE PERIOD
+==================================================
+
+Treat the initial post-launch period as Hypercare.
+
+Provide:
+
+Increased monitoring
+
+Daily support review
+
+Fast defect triage
+
+Daily payment reconciliation if Payments enabled
+
+Teacher onboarding support
+
+Parent login support
+
+Principal/Admin check-in
+
+Do not define permanent response-time guarantees unless commercially approved.
+
+==================================================
+19. PRODUCTION MONITORING
+==================================================
+
+Monitor:
+
+Availability
+
+API 5xx
+
+Latency
+
+Authentication failures
+
+Authorization failures
+
+Cross-tenant failures
+
+Database
+
+Storage
+
+Payment webhooks
+
+Refunds
+
+Settlements
+
+Email
+
+AI
+
+Backups
+
+Integration health
+
+Sensitive exports
+
+Platform Admin actions
+
+Alert on material problems.
+
+==================================================
+20. PRODUCTION PAYMENT OPERATIONS
+==================================================
+
+Daily Finance operations should include:
+
+Payment Verification
+
+Offline Verification
+
+Refund Queue
+
+Payment Issues
+
+Reconciliation
+
+Settlement
+
+Daily Finance Closing
+
+Exceptions
+
+Do not allow unresolved financial differences to accumulate silently.
+
+==================================================
+21. BACKUP AND RECOVERY
+==================================================
+
+Production requirements:
+
+Automated backups
+
+Encrypted backup storage
+
+Backup monitoring
+
+Retention
+
+Restore testing
+
+Recovery authorization
+
+Recovery audit
+
+Periodically perform controlled restore exercises.
+
+"Backup succeeded" alone is insufficient evidence.
+
+==================================================
+22. INCIDENT MANAGEMENT
+==================================================
+
+Maintain an Incident Register.
+
+For an incident:
+
+Detect
+
+Classify
+
+Contain
+
+Preserve evidence
+
+Investigate
+
+Recover
+
+Validate
+
+Communicate according to policy/legal obligations
+
+Root-cause analysis
+
+Corrective actions
+
+Do not hide incidents by deleting logs or records.
+
+==================================================
+23. SECURITY OPERATIONS
+==================================================
+
+Regularly review:
+
+Privileged users
+
+Admin permissions
+
+Principal recovery authority
+
+Platform Admin accounts
+
+Inactive users
+
+Exited Staff
+
+Sensitive exports
+
+Support-access grants
+
+Failed logins
+
+Cross-tenant denial events
+
+Secrets rotation
+
+Dependency vulnerabilities
+
+Do not create employee risk scores from security logs.
+
+==================================================
+24. VULNERABILITY MANAGEMENT
+==================================================
+
+Run regular:
+
+Dependency scans
+
+Container scans if applicable
+
+Secret scanning
+
+Static analysis
+
+Infrastructure configuration checks
+
+Prioritize:
+
+Critical
+
+High
+
+Medium
+
+Low
+
+Patch based on exploitability and system exposure.
+
+Do not blindly auto-upgrade production dependencies without compatibility testing.
+
+==================================================
+25. PRODUCTION RELEASE MANAGEMENT
+==================================================
+
+For every release:
+
+Version
+
+Release Notes
+
+Requirements/Issues
+
+Code Review
+
+Tests
+
+Security Check
+
+Migration Review
+
+Staging Validation
+
+Production Approval
+
+Deployment
+
+Health Check
+
+Rollback Plan
+
+Post-release Monitoring
+
+No silent production modifications outside source control.
+
+==================================================
+26. CHANGE MANAGEMENT
+==================================================
+
+School requests are classified:
+
+BUG
+
+CONFIGURATION
+
+TRAINING
+
+PRODUCT FEATURE
+
+CUSTOM DEVELOPMENT
+
+INTEGRATION
+
+SECURITY
+
+LEGAL/COMPLIANCE
+
+Do not allow one client's custom request to corrupt the core multi-school architecture.
+
+==================================================
+27. CUSTOMER SUPPORT
+==================================================
+
+Implement School Support workflow.
+
+School Admin
+        ↓
+Support Ticket
+        ↓
+Severity
+        ↓
+FutureSchool Support
+        ↓
+Investigation
+        ↓
+Resolution
+        ↓
+School Confirmation
+
+Support access to tenant data requires controlled authorization and audit.
+
+No unrestricted impersonation by default.
+
+==================================================
+28. CUSTOMER SUCCESS
+==================================================
+
+Track product/service health, not employee scoring.
+
+Monitor:
+
+Active School
+
+Active/Billable Students
+
+Login adoption
+
+Attendance workflow use
+
+Parent Portal adoption
+
+Finance usage
+
+Support issues
+
+Renewal date
+
+Enabled modules
+
+Training gaps
+
+Use this to support the school and improve the product.
+
+==================================================
+29. COMMERCIAL OPERATIONS
+==================================================
+
+For every school maintain:
+
+Contract
+
+Price per Billable Student
+
+Contracted Students
+
+Billable Students
+
+Subscription Period
+
+Invoice/Payment terms
+
+Enabled modules
+
+Add-ons
+
+Renewal date
+
+Implementation terms
+
+Do not hardcode ₹30/₹40/₹50 permanently in software.
+
+Rates are contract configuration.
+
+==================================================
+30. FUTURESCHOOL COMPANY METRICS
+==================================================
+
+Track company metrics such as:
+
+Active Schools
+
+Active Students
+
+Billable Students
+
+MRR
+
+ARR
+
+Average Revenue per Student
+
+Renewal Rate
+
+School Churn
+
+Billable Student Churn
+
+Infrastructure Cost per Student
+
+AI Cost per Student
+
+Notification Cost
+
+Support Cost
+
+Payment Cost
+
+Gross Margin
+
+Do not use these to evaluate individual School employees.
+
+==================================================
+31. RENEWAL
+==================================================
+
+Before renewal:
+
+Review Billable Student Count
+
+Usage
+
+Entitlements
+
+Support history
+
+Commercial terms
+
+Add-ons
+
+School feedback
+
+Renewal quotation
+
+Contract
+
+Do not surprise the school with unexplained billing changes.
+
+==================================================
+32. SUBSCRIPTION EXPIRY
+==================================================
+
+Implement the approved expiry/grace policy.
+
+Do not suddenly destroy school access or data.
+
+Use controlled states such as:
+
+ACTIVE
+
+RENEWAL_DUE
+
+GRACE_PERIOD
+
+RESTRICTED
+
+SUSPENDED
+
+CLOSED
+
+according to approved commercial policy.
+
+Preserve School data according to contractual/retention policy.
+
+==================================================
+33. DATA EXPORT / TERMINATION
+==================================================
+
+If a school leaves:
+
+Verify authority
+
+Prepare authorized data export
+
+Settle financial/commercial obligations according to contract
+
+Deactivate access
+
+Revoke sessions
+
+Preserve/retain data according to policy
+
+Eventually delete only through approved retention/termination process
+
+Audit actions
+
+School data exit must be documented.
+
+==================================================
+34. TRUST PACK
+==================================================
+
+Prepare a Client Trust Pack containing:
+
+Architecture overview
+
+Tenant isolation model
+
+Role/permission overview
+
+MFA
+
+Audit design
+
+Payment architecture
+
+Backup/recovery approach
+
+Incident response
+
+Data lifecycle
+
+Support model
+
+Security testing summary
+
+Do not expose secrets or internal exploit details.
+
+Do not claim certifications FutureSchool has not obtained.
+
+==================================================
+35. SLA / SERVICE COMMITMENTS
+==================================================
+
+Do not invent contractual uptime or response-time guarantees.
+
+Prepare measured operational statistics.
+
+Formal SLA terms require Product Owner/commercial approval.
+
+Clearly distinguish:
+
+Observed Availability
+
+Internal Target
+
+Contractual SLA
+
+==================================================
+36. PRIVACY / LEGAL REVIEW
+==================================================
+
+Before scaling commercially, flag for professional review:
+
+Terms of Service
+
+Privacy Notice
+
+School Data Processing Terms
+
+Data Ownership
+
+Data Retention
+
+Child/Student Data Handling
+
+Subprocessors
+
+Incident/Breach Obligations
+
+Payment Terms
+
+Subscription Terms
+
+Termination
+
+Do not make unsupported compliance claims.
+
+==================================================
+37. POST-LAUNCH PRODUCT PROCESS
+==================================================
+
+Maintain roadmap categories:
+
+V1 Stable
+
+V1 Improvements
+
+Customer-Validated Features
+
+Platform Scaling
+
+Security Hardening
+
+Cost Optimization
+
+Integrations
+
+AI Enhancements
+
+Do not return to uncontrolled feature generation.
+
+==================================================
+38. FIRST 90-DAY REVIEW
+==================================================
+
+After sufficient production operation, prepare review covering:
+
+Product Adoption
+
+Support Load
+
+Defects
+
+Performance
+
+Security Events
+
+Payment Accuracy
+
+Parent Adoption
+
+Teacher Adoption
+
+Infrastructure Cost
+
+AI Cost
+
+Commercial Performance
+
+Client Feedback
+
+Renewal Risk
+
+Prioritized Improvements
+
+Use actual measured data.
+
+==================================================
+39. SCALE READINESS
+==================================================
+
+Before expanding to many schools verify:
+
+Tenant Isolation
+
+Automated Onboarding
+
+Bulk Migration
+
+Support Scalability
+
+Monitoring
+
+Billing
+
+Subscription Reconciliation
+
+Payment Settlement
+
+Backups
+
+Security
+
+Infrastructure Capacity
+
+Deployment Automation
+
+Do not scale sales faster than the platform/support organization can safely support.
+
+==================================================
+40. FINAL OUTPUT
+==================================================
+
+Produce:
+
+1. Production Readiness Recheck
+2. Production Infrastructure Status
+3. Deployment Pipeline
+4. Migration Result
+5. Production Release Version
+6. Account Security Result
+7. Feature Entitlements
+8. Subscription Configuration
+9. Payment Production Validation
+10. Email Production Validation
+11. Object Storage Validation
+12. AI Production Validation
+13. Training Completion
+14. Parent Onboarding
+15. Go-Live Result
+16. Hypercare Summary
+17. Monitoring Status
+18. Backup/Restore Status
+19. Incident Process
+20. Security Operations
+21. Release Management Process
+22. Support Process
+23. Customer Success Plan
+24. Commercial Operations
+25. Company Metric Definitions
+26. Renewal Process
+27. Subscription Expiry Process
+28. Termination/Data Export Process
+29. Client Trust Pack
+30. Legal/Privacy Review Items
+31. First 90-Day Review Template
+32. Scale Readiness Checklist
+33. Open Risks
+34. PRODUCTION STATUS
+35. DONE
+36. NOT DONE
+37. NEXT PRODUCT PRIORITIES
+
+Do not claim SUCCESS unless production validation actually passes.
+
+Phase 22 ends the initial FutureSchool V1 build-and-launch program.
