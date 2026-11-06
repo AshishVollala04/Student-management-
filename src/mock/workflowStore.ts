@@ -239,10 +239,25 @@ class WorkflowStoreManager {
   }
 
   // Workflow Action 2: Marks Submission & Report Card Pipeline
-  public submitMarksForVerification(classId: string, subject: string): void {
+  public saveDraftMarks(classId: string, subject: string, updatedMarks: MarksEntryWorkflow['studentMarks']): void {
     this.state.marksEntries = this.state.marksEntries.map(m => {
       if (m.classId === classId && m.subject === subject) {
-        return { ...m, status: 'PENDING', principalApprovalStatus: 'PENDING' };
+        return { ...m, studentMarks: updatedMarks };
+      }
+      return m;
+    });
+    this.saveState();
+  }
+
+  public submitMarksForVerification(classId: string, subject: string, updatedMarks?: MarksEntryWorkflow['studentMarks']): void {
+    this.state.marksEntries = this.state.marksEntries.map(m => {
+      if (m.classId === classId && m.subject === subject) {
+        return { 
+          ...m, 
+          status: 'PENDING', 
+          principalApprovalStatus: 'PENDING',
+          studentMarks: updatedMarks || m.studentMarks
+        };
       }
       return m;
     });
@@ -356,6 +371,17 @@ class WorkflowStoreManager {
   }
 
   // Workflow Action 4: Transport Change Request
+  public submitTransportChange(req: Omit<TransportChangeWorkflow, 'id' | 'status' | 'appliedDate'>): void {
+    const newReq: TransportChangeWorkflow = {
+      ...req,
+      id: 'trans_' + Date.now(),
+      status: 'PENDING',
+      appliedDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+    };
+    this.state.transportRequests.unshift(newReq);
+    this.saveState();
+  }
+
   public approveTransportChange(requestId: string, adminNote?: string): void {
     this.state.transportRequests = this.state.transportRequests.map(tr => {
       if (tr.id === requestId) {
@@ -371,6 +397,19 @@ class WorkflowStoreManager {
   }
 
   // Workflow Action 5: Complaints & Resolution
+  public submitComplaint(complaint: Omit<ComplaintWorkflow, 'id' | 'status' | 'isEscalatedToPrincipal' | 'responses' | 'parentConfirmedResolved'>): void {
+    const newComplaint: ComplaintWorkflow = {
+      ...complaint,
+      id: 'cmp_' + Date.now(),
+      status: 'PENDING',
+      isEscalatedToPrincipal: false,
+      responses: [],
+      parentConfirmedResolved: false
+    };
+    this.state.complaints.unshift(newComplaint);
+    this.saveState();
+  }
+
   public escalateComplaintToPrincipal(complaintId: string): void {
     this.state.complaints = this.state.complaints.map(c => {
       if (c.id === complaintId) {

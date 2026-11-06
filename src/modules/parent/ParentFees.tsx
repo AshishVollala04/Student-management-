@@ -28,6 +28,9 @@ export const ParentFees: React.FC = () => {
     setIsProcessing(true);
     setTimeout(() => {
       store.processFeePayment(payAmount, paymentMethod);
+      if (payAmount >= workflow.fees.pendingAmount) {
+        store.classTeacherReleaseHallTicket('GVS-2027-0001');
+      }
       setIsProcessing(false);
       setShowPayModal(false);
       setRecentReceipt({

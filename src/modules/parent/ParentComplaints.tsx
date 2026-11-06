@@ -19,17 +19,12 @@ export const ParentComplaints: React.FC = () => {
     e.preventDefault();
     if (!subject.trim()) return;
 
-    workflow.complaints.unshift({
-      id: 'cmp_' + Date.now(),
+    store.submitComplaint({
       studentId: 'GVS-2027-0001',
       parentName: 'Dr. Rajesh Sharma',
       category,
       subject,
-      description: desc,
-      status: 'PENDING',
-      isEscalatedToPrincipal: false,
-      responses: [],
-      parentConfirmedResolved: false
+      description: desc
     });
 
     setShowNewModal(false);

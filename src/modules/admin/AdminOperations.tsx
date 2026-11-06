@@ -72,14 +72,14 @@ export const AdminExecutionQueue: React.FC = () => {
         />
         <StatCard
           title="Executed This Term"
-          value={String(configChanges.filter(c => c.status === 'EXECUTED').length)}
+          value={String(configChanges.filter(c => c.status === 'EXECUTED' || c.status === 'ACTIVE').length)}
           subtitle="Active in production"
           icon={ShieldCheck}
           color="emerald"
         />
         <StatCard
           title="Awaiting Principal Review"
-          value={String(configChanges.filter(c => c.status === 'PENDING_APPROVAL').length)}
+          value={String(configChanges.filter(c => c.status === 'PENDING' || c.status === 'PENDING_APPROVAL').length)}
           subtitle="Under executive desk"
           icon={Clock}
           color="amber"
@@ -128,7 +128,7 @@ export const AdminExecutionQueue: React.FC = () => {
                     <Play className="w-4 h-4 mr-1.5" />
                     Deploy & Execute Config
                   </Button>
-                ) : cfg.status === 'EXECUTED' ? (
+                ) : cfg.status === 'EXECUTED' || cfg.status === 'ACTIVE' ? (
                   <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-teal-50 text-teal-800 border border-teal-200 flex items-center gap-1.5">
                     <Check className="w-4 h-4 text-teal-600" />
                     Deployed in Production

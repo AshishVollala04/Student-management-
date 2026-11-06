@@ -16,8 +16,14 @@ import {
   AlertTriangle,
   ArrowRight,
   TrendingUp,
-  MapPin
+  MapPin,
+  CreditCard,
+  Bell,
+  User,
+  Paperclip,
+  CheckCircle2
 } from 'lucide-react';
+import { STUDENT_NOTICES, STUDENT_PROFILE } from '../../mock/academicData';
 
 export const StudentDashboard: React.FC = () => {
   const { currentUser } = useAuth();
@@ -26,19 +32,18 @@ export const StudentDashboard: React.FC = () => {
 
   const myHallTicket = workflow.hallTickets.find(h => h.studentId === currentUser?.id);
   const myPendingLeave = workflow.leaveRequests.find(l => l.studentId === currentUser?.id && l.status === 'PENDING');
-  const myMarks = workflow.marksEntries.find(m => m.classId === 'Grade 10-A');
-  const publishedMarksAvailable = myMarks?.isPublishedToStudents;
+  const fees = workflow.fees;
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title={`Welcome back, ${currentUser?.name}`}
-        subtitle="Grade 10 · Section A | Academic Year 2026-2027"
+        title={`Welcome back, ${currentUser?.name || STUDENT_PROFILE.name}`}
+        subtitle={`Grade ${STUDENT_PROFILE.grade} · Section ${STUDENT_PROFILE.section} | Roll #${STUDENT_PROFILE.rollNumber} | Academic Year 2026-2027`}
         badge={<StatusBadge status="ACTIVE" />}
         actions={
           <button
             onClick={() => navigate('/student/timetable')}
-            className="px-3.5 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+            className="px-3.5 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
           >
             <Clock className="w-3.5 h-3.5" />
             <span>Today's Schedule</span>
@@ -46,21 +51,26 @@ export const StudentDashboard: React.FC = () => {
         }
       />
 
-      {/* Action Required Banner (if any) */}
-      {myPendingLeave && (
-        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 dark:bg-amber-950/30 flex items-center justify-between">
+      {/* Action Required Banner (if any pending fee or leave) */}
+      {fees.pendingAmount > 0 && (
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
             <div>
               <div className="text-xs font-bold text-slate-900 dark:text-white">
-                Leave Sanction in Progress
+                Outstanding Term Fee Balance (${fees.pendingAmount})
               </div>
               <div className="text-[11px] text-slate-500 mt-0.5">
-                {myPendingLeave.leaveType} ({myPendingLeave.startDate} to {myPendingLeave.endDate}) awaiting mentor review.
+                Term 2 tuition instalment is pending payment. Pay to unlock your examination hall ticket.
               </div>
             </div>
           </div>
-          <StatusBadge status="PENDING" />
+          <button
+            onClick={() => navigate('/student/fees')}
+            className="px-3 py-1.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold transition-colors cursor-pointer"
+          >
+            Settle Fees
+          </button>
         </div>
       )}
 
@@ -69,32 +79,33 @@ export const StudentDashboard: React.FC = () => {
         <StatCard
           label="Attendance Rate"
           value="94.2%"
-          subtext="Satisfies 75% threshold"
+          subtext="Above 75% CBSE criteria"
           trend={{ value: '+1.4%', isPositive: true }}
           icon={<CalendarCheck className="w-5 h-5" />}
           accentColor="teal"
           onClick={() => navigate('/student/attendance')}
         />
         <StatCard
-          label="Pending Homework"
-          value="2 Tasks"
-          subtext="Math & Physics due soon"
+          label="Pending Tasks"
+          value="2 Assignments"
+          subtext="Math & Physics due this week"
           icon={<BookOpen className="w-5 h-5" />}
           accentColor="orange"
           onClick={() => navigate('/student/homework')}
         />
         <StatCard
-          label="Published Result"
-          value={publishedMarksAvailable ? '92.4% (A1)' : 'Pending'}
-          subtext={publishedMarksAvailable ? 'Term 1 Confirmed' : 'Results not yet published'}
+          label="Term 1 Result"
+          value="91.2% (A1)"
+          subtext="Rank #3 in Grade 10-A"
+          trend={{ value: '+2.7%', isPositive: true }}
           icon={<Award className="w-5 h-5" />}
           accentColor="emerald"
           onClick={() => navigate('/student/academics')}
         />
         <StatCard
           label="Exam Hall Ticket"
-          value={myHallTicket?.classTeacherReleased ? 'Released' : 'Locked'}
-          subtext={myHallTicket?.classTeacherReleased ? 'Cleared for entry' : 'Requires mentor release'}
+          value={myHallTicket?.classTeacherReleased ? 'Released' : fees.pendingAmount > 0 ? 'Fee Blocked' : 'Pending Mentor'}
+          subtext={myHallTicket?.classTeacherReleased ? 'Admit Card Cleared' : 'Action Required'}
           icon={<FileCheck className="w-5 h-5" />}
           accentColor={myHallTicket?.classTeacherReleased ? 'teal' : 'rose'}
           onClick={() => navigate('/student/hall-ticket')}
@@ -103,8 +114,10 @@ export const StudentDashboard: React.FC = () => {
 
       {/* Main Grid: Today's Schedule & Action Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
         {/* Left 2 Cols: Schedule & Recent Activity */}
         <div className="lg:col-span-2 space-y-6">
+          
           {/* Today's Schedule Card */}
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
@@ -116,9 +129,9 @@ export const StudentDashboard: React.FC = () => {
               </div>
               <button
                 onClick={() => navigate('/student/timetable')}
-                className="text-xs font-semibold text-teal-700 dark:text-teal-400 hover:underline"
+                className="text-xs font-semibold text-teal-700 dark:text-teal-400 hover:underline cursor-pointer"
               >
-                Full Week →
+                Full Week Timetable →
               </button>
             </div>
 
@@ -126,24 +139,24 @@ export const StudentDashboard: React.FC = () => {
               <div className="p-3 rounded-xl bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-900 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800 dark:text-teal-300">
-                    Period 1 · 08:00 - 08:45 AM
+                    Period 1 · 08:30 - 09:20 AM
                   </span>
                   <div className="text-xs font-bold text-slate-900 dark:text-white mt-0.5">
-                    Advanced Mathematics: Calculus & Quadratic Systems
+                    Advanced Mathematics: Quadratic Equations & Parabolas
                   </div>
                   <div className="text-[11px] text-slate-500">
                     Instructor: Mrs. Sarah Jenkins · Room 304
                   </div>
                 </div>
                 <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-200 dark:bg-teal-800 text-teal-900 dark:text-teal-100">
-                  Current
+                  Current Session
                 </span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Period 2 · 08:50 - 09:35 AM
+                    Period 2 · 09:25 - 10:15 AM
                   </span>
                   <div className="text-xs font-bold text-slate-900 dark:text-white mt-0.5">
                     Physics: Wave Optics & Snell's Law
@@ -157,87 +170,127 @@ export const StudentDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick Learning Actions */}
+          {/* Quick Learning Shortcuts */}
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-              Learning Shortcuts
+              Essential Student Portals
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <ActionCard
                 title="Homework Submissions"
-                description="Upload assignments or check review feedback"
+                description="Upload assignments or check graded feedback"
                 icon={<BookOpen className="w-5 h-5" />}
                 badge="2 Due"
                 accentColor="orange"
                 onClick={() => navigate('/student/homework')}
               />
               <ActionCard
-                title="Quiz Self-Assessment"
-                description="Practice multiple choice drills with immediate scoring"
-                icon={<CheckSquare className="w-5 h-5" />}
-                accentColor="teal"
-                onClick={() => navigate('/student/quiz')}
+                title="Fee Statement & Pay"
+                description="View instalment breakdown and digital receipts"
+                icon={<CreditCard className="w-5 h-5" />}
+                badge={fees.pendingAmount > 0 ? `$${fees.pendingAmount} Due` : 'Paid'}
+                accentColor={fees.pendingAmount > 0 ? 'rose' : 'emerald'}
+                onClick={() => navigate('/student/fees')}
               />
               <ActionCard
-                title="Study Materials"
-                description="Download teacher-provided slides, notes & question papers"
-                icon={<FileCheck className="w-5 h-5" />}
-                accentColor="emerald"
-                onClick={() => navigate('/student/materials')}
+                title="Examination Marksheet"
+                description="Subject marks, grades, and official report card"
+                icon={<Award className="w-5 h-5" />}
+                badge="Term 1 (91.2%)"
+                accentColor="teal"
+                onClick={() => navigate('/student/academics')}
               />
               <ActionCard
-                title="AI Study Tutor (Mock)"
-                description="Grounded explanation assistant citing approved textbooks"
-                icon={<Sparkles className="w-5 h-5" />}
-                badge="Safe Mock"
+                title="Official Circulars"
+                description="CBSE board announcements & holiday schedules"
+                icon={<Bell className="w-5 h-5" />}
+                badge="4 Notices"
                 accentColor="teal"
-                onClick={() => navigate('/student/ai-tutor')}
+                onClick={() => navigate('/student/notices')}
               />
             </div>
           </div>
         </div>
 
-        {/* Right Col: Academic Status & Hall Ticket Spotlight */}
+        {/* Right Col: School Notices & Admit Card Snapshot */}
         <div className="space-y-4">
+          
+          {/* Recent Notices Card */}
+          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <Bell className="w-4 h-4 text-teal-600" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  School Announcements
+                </h3>
+              </div>
+              <button
+                onClick={() => navigate('/student/notices')}
+                className="text-xs font-semibold text-teal-700 dark:text-teal-400 hover:underline cursor-pointer"
+              >
+                All →
+              </button>
+            </div>
+
+            <div className="mt-3 space-y-3">
+              {STUDENT_NOTICES.slice(0, 3).map((notice) => (
+                <div 
+                  key={notice.id}
+                  onClick={() => navigate('/student/notices')}
+                  className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-teal-50 dark:bg-teal-950 text-teal-700 dark:text-teal-300">
+                      {notice.category}
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-400">{notice.publishDate}</span>
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white mt-1 line-clamp-1">
+                    {notice.title}
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">
+                    {notice.content}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Examination Admit Card Snapshot */}
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
             <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-2">
               Examination Clearance Status
             </h3>
             <p className="text-xs text-slate-500 mb-3">
-              Mid-Year Comprehensive Examination 2026
+              Term 1 Comprehensive Assessment 2026
             </p>
 
             <div className="space-y-2 text-xs">
               <div className="flex items-center justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
-                <span className="text-slate-500">Attendance Minimum:</span>
+                <span className="text-slate-500">Attendance Minimum (75%):</span>
                 <span className="font-bold text-emerald-600">✓ Satisfied (94.2%)</span>
               </div>
               <div className="flex items-center justify-between py-1.5 border-b border-slate-100 dark:border-slate-800">
-                <span className="text-slate-500">Finance Dues Cleared:</span>
-                <span className={workflow.fees.hallTicketCleared ? 'font-bold text-emerald-600' : 'font-bold text-rose-600'}>
-                  {workflow.fees.hallTicketCleared ? '✓ Cleared' : '✗ $1,200 Pending'}
+                <span className="text-slate-500">Finance Clearance:</span>
+                <span className={fees.pendingAmount === 0 ? 'font-bold text-emerald-600' : 'font-bold text-rose-600'}>
+                  {fees.pendingAmount === 0 ? '✓ Cleared' : `✗ $${fees.pendingAmount} Pending`}
                 </span>
               </div>
               <div className="flex items-center justify-between py-1.5">
-                <span className="text-slate-500">Class Mentor Release:</span>
+                <span className="text-slate-500">Admit Card:</span>
                 <span className={myHallTicket?.classTeacherReleased ? 'font-bold text-emerald-600' : 'font-bold text-amber-600'}>
-                  {myHallTicket?.classTeacherReleased ? '✓ Released' : 'Awaiting Approval'}
+                  {myHallTicket?.classTeacherReleased ? '✓ Released' : 'Pending Clearance'}
                 </span>
               </div>
             </div>
 
             <button
               onClick={() => navigate('/student/hall-ticket')}
-              className="w-full mt-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+              className="w-full mt-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
             >
               <span>Inspect Hall Ticket</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800/60 text-xs text-slate-600 dark:text-slate-400">
-            <span className="font-bold text-slate-900 dark:text-white block mb-1">Notice to Students:</span>
-            According to school policy, fee settlement & payment controls are managed exclusively through the <strong>Parent Portal</strong>.
           </div>
         </div>
       </div>

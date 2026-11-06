@@ -31,7 +31,7 @@ export const AdminDashboard: React.FC = () => {
 
   const pendingTransportCount = transportRequests.filter(r => r.status === 'PENDING').length;
   const approvedConfigsCount = configChanges.filter(c => c.status === 'APPROVED').length;
-  const pendingPrincipalConfig = configChanges.filter(c => c.status === 'PENDING_APPROVAL').length;
+  const pendingPrincipalConfig = configChanges.filter(c => c.status === 'PENDING' || c.status === 'PENDING_APPROVAL').length;
 
   return (
     <div className="space-y-6">

@@ -23,10 +23,12 @@ export const ROLE_NAVIGATION: Record<UserRole, NavGroup[]> = {
       ]
     },
     {
-      title: 'Examinations & Profile',
+      title: 'Examinations & Finance',
       items: [
-        { id: 's_exam', label: 'Exams & Schedule', path: '/student/exams', iconName: 'Award' },
+        { id: 's_exam', label: 'Exams & Results', path: '/student/academics', iconName: 'Award' },
         { id: 's_ht', label: 'Hall Ticket', path: '/student/hall-ticket', iconName: 'FileCheck' },
+        { id: 's_fees', label: 'Fees & Receipts', path: '/student/fees', iconName: 'CreditCard' },
+        { id: 's_notices', label: 'School Notices', path: '/student/notices', iconName: 'Bell' },
         { id: 's_prof', label: 'Profile & Security', path: '/student/profile', iconName: 'User' }
       ]
     }
@@ -144,5 +146,33 @@ export const ROLE_NAVIGATION: Record<UserRole, NavGroup[]> = {
         { id: 'a_aud', label: 'Audit & Health Center', path: '/admin/audit', iconName: 'ShieldCheck', requiredPermission: 'REPORTS' }
       ]
     }
+  ],
+
+  PLATFORM_ADMIN: [
+    {
+      title: 'Platform Operations',
+      items: [
+        { id: 'pl_dash', label: 'Platform Overview', path: '/platform/dashboard', iconName: 'LayoutDashboard' },
+        { id: 'pl_tenants', label: 'School Tenants Directory', path: '/platform/schools', iconName: 'Building2', badge: '3 Schools', badgeColor: 'teal' },
+        { id: 'pl_verify', label: 'Verification Queue', path: '/platform/verification', iconName: 'ShieldCheck', badge: 1, badgeColor: 'orange' },
+        { id: 'pl_onboard', label: 'Tenant Onboarding', path: '/platform/onboarding', iconName: 'UserPlus' }
+      ]
+    },
+    {
+      title: 'Subscriptions & Tiers',
+      items: [
+        { id: 'pl_plans', label: 'Subscription Plans', path: '/platform/plans', iconName: 'CreditCard' },
+        { id: 'pl_limits', label: 'Student Capacity Entitlements', path: '/platform/capacity', iconName: 'Users' }
+      ]
+    },
+    {
+      title: 'Platform Governance',
+      items: [
+        { id: 'pl_health', label: 'System Health & Integrations', path: '/platform/health', iconName: 'Activity' },
+        { id: 'pl_audit', label: 'Platform Security Audit', path: '/platform/audit', iconName: 'FileCheck' },
+        { id: 'pl_support', label: 'School Support Cases', path: '/platform/support', iconName: 'HelpCircle' }
+      ]
+    }
   ]
 };
+

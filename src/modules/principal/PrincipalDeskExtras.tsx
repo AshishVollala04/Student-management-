@@ -9,6 +9,7 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { Modal } from '../../components/ui/Modal';
+import { useWorkflow } from '../../hooks/useWorkflow';
 import { 
   FileCheck2, 
   AlertCircle, 
@@ -17,22 +18,28 @@ import {
   X, 
   Calendar, 
   ShieldCheck, 
-  UserCheck,
-  CheckCircle2,
-  Clock
+  UserCheck, 
+  CheckCircle2, 
+  Clock 
 } from 'lucide-react';
 
 // ==========================================
 // 1. PRINCIPAL REPORT CARDS DESK
 // ==========================================
 export const PrincipalReportCards: React.FC = () => {
-  const [batches, setBatches] = useState([
+  const [workflow, store] = useWorkflow();
+  const [endorsedId, setEndorsedId] = useState<string | null>(null);
+
+  const marks10A = workflow.marksEntries.find(m => m.classId === 'Grade 10-A');
+  const is10AApproved = marks10A?.principalApprovalStatus === 'APPROVED' || workflow.reportCards.some(r => r.principalSignature);
+
+  const batches = [
     {
       id: 'rc-10a',
       class: 'Class 10-A',
-      mentor: 'Vikramaditya Sen (TCH0001)',
+      mentor: 'Mrs. Sarah Jenkins (TCH0001)',
       totalStudents: 38,
-      status: 'PENDING_APPROVAL',
+      status: is10AApproved ? 'APPROVED' : 'PENDING_APPROVAL',
       submittedDate: '2027-04-12',
       remarks: 'All 38 marks validated, moderation applied within CBSE guidelines.',
     },
@@ -54,12 +61,13 @@ export const PrincipalReportCards: React.FC = () => {
       submittedDate: '2027-04-09',
       remarks: 'Pre-board cumulative cards published.',
     },
-  ]);
-
-  const [endorsedId, setEndorsedId] = useState<string | null>(null);
+  ];
 
   const handleEndorse = (id: string) => {
-    setBatches(batches.map(b => b.id === id ? { ...b, status: 'APPROVED' } : b));
+    if (id === 'rc-10a') {
+      store.principalApproveMarks('Grade 10-A', 'Mathematics');
+      store.principalApproveReportCards();
+    }
     setEndorsedId(id);
     setTimeout(() => setEndorsedId(null), 3000);
   };
@@ -73,9 +81,21 @@ export const PrincipalReportCards: React.FC = () => {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatCard title="Batches Pending Sign-off" value="1" subtitle="Requires executive endorsement" icon={Clock} color="amber" />
+        <StatCard 
+          title="Batches Pending Sign-off" 
+          value={is10AApproved ? '0' : '1'} 
+          subtitle={is10AApproved ? 'All batches endorsed' : 'Class 10-A requires executive endorsement'} 
+          icon={Clock} 
+          color="amber" 
+        />
         <StatCard title="Total Students Evaluated" value="105" subtitle="Across 3 senior grades" icon={UserCheck} color="teal" />
-        <StatCard title="Endorsed Batches" value="2" subtitle="Active in parent & student app" icon={CheckCircle2} color="emerald" />
+        <StatCard 
+          title="Endorsed Batches" 
+          value={is10AApproved ? '3' : '2'} 
+          subtitle="Active in parent & student app" 
+          icon={CheckCircle2} 
+          color="emerald" 
+        />
       </div>
 
       <div className="space-y-4">

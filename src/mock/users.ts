@@ -1,9 +1,9 @@
-import { UserProfile } from '../types/roles';
+import { UserProfile, UserRole } from '../types/roles';
 
 export interface DemoAccount {
   id: string; // Identifier entered at login
   password: string;
-  role: 'STUDENT' | 'PARENT' | 'TEACHER' | 'PRINCIPAL' | 'ADMIN';
+  role: UserRole;
   email: string;
   user: UserProfile;
   mfaCode?: string;
@@ -26,6 +26,7 @@ export const DEMO_ACCOUNTS: DemoAccount[] = [
       role: 'STUDENT',
       avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Aarav&backgroundColor=c0aede',
       roleLabel: 'Student · Grade 10-A',
+      tenantId: 'GVS',
       studentId: 'GVS-2027-0001'
     }
   },
@@ -42,6 +43,7 @@ export const DEMO_ACCOUNTS: DemoAccount[] = [
       role: 'PARENT',
       avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Rajesh&backgroundColor=b6e3f4',
       roleLabel: 'Parent / Guardian',
+      tenantId: 'GVS',
       studentId: 'GVS-2027-0001'
     }
   },
@@ -58,6 +60,7 @@ export const DEMO_ACCOUNTS: DemoAccount[] = [
       role: 'TEACHER',
       avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Sarah&backgroundColor=ffd5dc',
       roleLabel: 'Faculty · Class 10-A Mentor',
+      tenantId: 'GVS',
       department: 'Mathematics & STEM',
       classTeacherOf: 'Grade 10-A'
     }
@@ -76,6 +79,7 @@ export const DEMO_ACCOUNTS: DemoAccount[] = [
       role: 'PRINCIPAL',
       avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Robert&backgroundColor=d1d4f9',
       roleLabel: 'Principal & Executive Director',
+      tenantId: 'GVS',
       requiresMfa: true
     }
   },
@@ -93,7 +97,25 @@ export const DEMO_ACCOUNTS: DemoAccount[] = [
       role: 'ADMIN',
       avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Arthur&backgroundColor=c4f1be',
       roleLabel: 'Operations & Campus Administrator',
+      tenantId: 'GVS',
       permissions: ['ADMISSIONS', 'FINANCE', 'ACADEMIC_OPERATIONS', 'TRANSPORT', 'SECURITY', 'REPORTS'],
+      requiresMfa: true
+    }
+  },
+  {
+    id: 'PLA0001',
+    password: DEMO_PASSWORD,
+    role: 'PLATFORM_ADMIN',
+    email: 'platform.director@futureschool.global',
+    description: 'Global SaaS Platform Administrator (MFA Step)',
+    mfaCode: '552109',
+    user: {
+      id: 'PLA0001',
+      name: 'Dr. Elizabeth Warren',
+      email: 'platform.director@futureschool.global',
+      role: 'PLATFORM_ADMIN',
+      avatar: 'https://api.dicebear.com/7.x/notionists/svg?seed=Elizabeth&backgroundColor=ffd5dc',
+      roleLabel: 'Global Platform Director',
       requiresMfa: true
     }
   }

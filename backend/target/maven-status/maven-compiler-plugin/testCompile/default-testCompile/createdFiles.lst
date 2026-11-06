@@ -1,0 +1,10 @@
+com/futureschool/GlobalExceptionHandlerTest$TestErrorController.class
+com/futureschool/identity/AuthorizationMatrixTest.class
+com/futureschool/FutureSchoolApplicationTests.class
+com/futureschool/identity/AuthenticationSecurityTest.class
+com/futureschool/DomainIdentifierTest.class
+com/futureschool/academic/AcademicFoundationTest.class
+com/futureschool/TenantIsolationRepositoryTest.class
+com/futureschool/AuditServiceIntegrationTest.class
+com/futureschool/GlobalExceptionHandlerTest.class
+com/futureschool/HealthControllerTest.class

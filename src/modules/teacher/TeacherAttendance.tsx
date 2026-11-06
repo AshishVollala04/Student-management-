@@ -29,7 +29,12 @@ export const TeacherAttendance: React.FC = () => {
 
   const handleMarkAllPresent = () => {
     setRoster(prev => prev.map(s => s.leaveContext ? s : { ...s, status: 'PRESENT' }));
-    setToast('All unexcused students marked Present for ' + session + ' session.');
+    setToast('All active students without sanctioned leave marked PRESENT.');
+    setTimeout(() => setToast(null), 2500);
+  };
+
+  const handleSaveRegister = () => {
+    setToast(`Class 10-A ${session} attendance register recorded and synced to School Portal.`);
     setTimeout(() => setToast(null), 2500);
   };
 
@@ -57,10 +62,17 @@ export const TeacherAttendance: React.FC = () => {
             </div>
             <button
               onClick={handleMarkAllPresent}
-              className="px-3.5 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+              className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Check className="w-3.5 h-3.5" />
               <span>Mark All Present</span>
+            </button>
+            <button
+              onClick={handleSaveRegister}
+              className="px-3.5 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Save Register</span>
             </button>
           </div>
         }

@@ -103,6 +103,8 @@ export interface TransportChangeWorkflow {
   reason: string;
   status: WorkflowStatus; // PENDING -> APPROVED
   adminNote?: string;
+  appliedDate?: string;
+  parentName?: string;
 }
 
 export interface ComplaintWorkflow {

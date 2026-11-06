@@ -1,4 +1,10 @@
-export type UserRole = 'STUDENT' | 'PARENT' | 'TEACHER' | 'PRINCIPAL' | 'ADMIN';
+export type UserRole = 
+  | 'STUDENT' 
+  | 'PARENT' 
+  | 'TEACHER' 
+  | 'PRINCIPAL' 
+  | 'ADMIN' 
+  | 'PLATFORM_ADMIN';
 
 export type AdminPermission = 
   | 'ADMISSIONS'
@@ -31,12 +37,13 @@ export type WorkflowStatus =
   | 'EXECUTED';
 
 export interface UserProfile {
-  id: string;             // e.g. GVS-2027-0001, TCH0001, PRN0001, ADM0001
+  id: string;             // e.g. GVS-2027-0001, TCH0001, PRN0001, ADM0001, PLA0001
   name: string;
   email: string;
   role: UserRole;
   avatar: string;
   roleLabel: string;
+  tenantId?: string;      // null or undefined for PLATFORM_ADMIN (cross-tenant)
   department?: string;
   studentId?: string;     // For Student and Parent
   classTeacherOf?: string; // For Teacher (e.g. "Grade 10-A")

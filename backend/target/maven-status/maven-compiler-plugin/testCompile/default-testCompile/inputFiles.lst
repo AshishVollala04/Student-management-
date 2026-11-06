@@ -1,0 +1,9 @@
+/app/applet/backend/src/test/java/com/futureschool/AuditServiceIntegrationTest.java
+/app/applet/backend/src/test/java/com/futureschool/DomainIdentifierTest.java
+/app/applet/backend/src/test/java/com/futureschool/FutureSchoolApplicationTests.java
+/app/applet/backend/src/test/java/com/futureschool/GlobalExceptionHandlerTest.java
+/app/applet/backend/src/test/java/com/futureschool/HealthControllerTest.java
+/app/applet/backend/src/test/java/com/futureschool/TenantIsolationRepositoryTest.java
+/app/applet/backend/src/test/java/com/futureschool/academic/AcademicFoundationTest.java
+/app/applet/backend/src/test/java/com/futureschool/identity/AuthenticationSecurityTest.java
+/app/applet/backend/src/test/java/com/futureschool/identity/AuthorizationMatrixTest.java

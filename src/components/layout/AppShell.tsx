@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useTenant } from '../../context/TenantContext';
 import { ROLE_NAVIGATION } from '../../app/navigationConfig';
+import { NavGroup, NavItem, UserRole } from '../../types/roles';
 import { NavIcon } from './NavIcon';
 import { DevControls } from './DevControls';
 import { Logo } from '../common/Logo';
@@ -16,14 +18,18 @@ import {
   ChevronDown,
   Globe,
   ShieldCheck,
-  Check
+  Check,
+  Building2,
+  Sparkles
 } from 'lucide-react';
 
 export const AppShell: React.FC = () => {
   const { currentUser, currentRole, logout } = useAuth();
+  const { currentTenant, allTenants, switchTenant } = useTenant();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [tenantMenuOpen, setTenantMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(() => {
     return document.documentElement.classList.contains('dark');
   });
@@ -43,7 +49,9 @@ export const AppShell: React.FC = () => {
     }
   };
 
-  const navGroups = currentRole ? ROLE_NAVIGATION[currentRole] || [] : [];
+  const navGroups: NavGroup[] = currentRole && ROLE_NAVIGATION[currentRole as UserRole] 
+    ? ROLE_NAVIGATION[currentRole as UserRole] 
+    : [];
 
   const handleLogout = () => {
     logout();
@@ -54,7 +62,7 @@ export const AppShell: React.FC = () => {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col antialiased">
       {/* 1. TopBar Navigation */}
       <header className="sticky top-0 z-40 h-16 w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800/80 px-4 sm:px-6 flex items-center justify-between gap-4 shadow-xs">
-        {/* Left: Mobile Drawer Trigger + Brand Wordmark */}
+        {/* Left: Mobile Drawer Trigger + Brand Wordmark + Tenant Badge */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setMobileDrawerOpen(true)}
@@ -67,9 +75,62 @@ export const AppShell: React.FC = () => {
           <div className="flex items-center gap-3">
             <Logo size="sm" />
             <div className="hidden sm:inline-block h-5 w-[1px] bg-slate-200 dark:bg-slate-700" />
-            <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-teal-50 dark:bg-teal-950 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800">
-              {currentRole} Workspace
-            </span>
+            
+            {/* Multi-Tenant School Indicator */}
+            {currentRole === 'PLATFORM_ADMIN' ? (
+              <div className="relative">
+                <button
+                  onClick={() => setTenantMenuOpen(!tenantMenuOpen)}
+                  className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 dark:bg-indigo-950/70 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 transition-colors"
+                >
+                  <Building2 className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Tenant: {currentTenant.name} ({currentTenant.id})</span>
+                  <ChevronDown className="w-3 h-3 text-indigo-500" />
+                </button>
+
+                {tenantMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setTenantMenuOpen(false)} />
+                    <div className="absolute left-0 mt-2 w-72 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-2 z-50">
+                      <div className="px-2 py-1.5 text-[10px] uppercase font-bold text-slate-400">
+                        Platform Tenant Switcher
+                      </div>
+                      <div className="space-y-1">
+                        {allTenants.map((t) => (
+                          <button
+                            key={t.id}
+                            onClick={() => {
+                              switchTenant(t.id);
+                              setTenantMenuOpen(false);
+                            }}
+                            className={`w-full text-left p-2 rounded-xl text-xs font-semibold flex items-center justify-between ${
+                              currentTenant.id === t.id
+                                ? 'bg-indigo-50 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-200 font-bold'
+                                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                            }`}
+                          >
+                            <div>
+                              <span className="block truncate">{t.name}</span>
+                              <span className="text-[10px] text-slate-400">{t.board} • {t.subscriptionTier}</span>
+                            </div>
+                            {currentTenant.id === t.id && <Check className="w-3.5 h-3.5 text-indigo-600 shrink-0" />}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="hidden sm:flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[180px]">
+                  {currentTenant.name}
+                </span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-teal-50 dark:bg-teal-950 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-800">
+                  {currentTenant.board}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -193,13 +254,13 @@ export const AppShell: React.FC = () => {
         {/* Desktop Sidebar (hidden on mobile, visible lg:) */}
         <aside className="hidden lg:flex flex-col w-64 xl:w-72 shrink-0 border-r border-slate-200 dark:border-slate-800/80 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md p-4 min-h-[calc(100vh-4rem)]">
           <div className="space-y-6 flex-1 overflow-y-auto pr-1">
-            {navGroups.map((group) => (
+            {navGroups.map((group: NavGroup) => (
               <div key={group.title}>
                 <h3 className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
                   {group.title}
                 </h3>
                 <div className="space-y-1">
-                  {group.items.map((item) => (
+                  {group.items.map((item: NavItem) => (
                     <NavLink
                       key={item.id}
                       to={item.path}
@@ -232,7 +293,15 @@ export const AppShell: React.FC = () => {
           </div>
 
           <div className="pt-4 border-t border-slate-200 dark:border-slate-800 mt-4 text-[11px] text-slate-400 text-center">
-            FutureSchool Enterprise SaaS · 600 Students Scale
+            {currentRole === 'PLATFORM_ADMIN' ? (
+              <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+                FutureSchool Multi-Tenant Platform Core
+              </span>
+            ) : (
+              <span>
+                {currentTenant.name} · {currentTenant.currentEnrolledStudents}/{currentTenant.capacityLimit} Students · {currentTenant.subscriptionTier}
+              </span>
+            )}
           </div>
         </aside>
 
@@ -255,13 +324,13 @@ export const AppShell: React.FC = () => {
               </div>
 
               <div className="space-y-5 mt-4 flex-1">
-                {navGroups.map((group) => (
+                {navGroups.map((group: NavGroup) => (
                   <div key={group.title}>
                     <h3 className="px-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
                       {group.title}
                     </h3>
                     <div className="space-y-1">
-                      {group.items.map((item) => (
+                      {group.items.map((item: NavItem) => (
                         <NavLink
                           key={item.id}
                           to={item.path}

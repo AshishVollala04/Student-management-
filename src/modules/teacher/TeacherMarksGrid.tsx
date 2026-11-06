@@ -24,12 +24,13 @@ export const TeacherMarksGrid: React.FC = () => {
   };
 
   const handleSaveDraft = () => {
+    store.saveDraftMarks('Grade 10-A', 'Mathematics', studentMarks);
     setToast('Marks grid saved to local draft.');
     setTimeout(() => setToast(null), 2500);
   };
 
   const handleSubmitToPrincipal = () => {
-    store.submitMarksForVerification('Grade 10-A', 'Mathematics');
+    store.submitMarksForVerification('Grade 10-A', 'Mathematics', studentMarks);
     setToast('Marksheet successfully submitted to Principal for institutional review.');
     setTimeout(() => setToast(null), 3000);
   };

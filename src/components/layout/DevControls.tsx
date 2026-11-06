@@ -16,7 +16,8 @@ export const DevControls: React.FC = () => {
     { role: 'PARENT', label: 'Parent', route: '/parent/dashboard', id: 'GVS-2027-0001' },
     { role: 'TEACHER', label: 'Teacher', route: '/teacher/dashboard', id: 'TCH0001' },
     { role: 'PRINCIPAL', label: 'Principal', route: '/principal/dashboard', id: 'PRN0001' },
-    { role: 'ADMIN', label: 'Admin', route: '/admin/dashboard', id: 'ADM0001' }
+    { role: 'ADMIN', label: 'Admin', route: '/admin/dashboard', id: 'ADM0001' },
+    { role: 'PLATFORM_ADMIN', label: 'Platform Admin', route: '/platform/dashboard', id: 'PLA0001' }
   ];
 
   const scenarios = [
