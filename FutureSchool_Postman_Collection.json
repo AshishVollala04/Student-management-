@@ -1,0 +1,683 @@
+{
+	"info": {
+		"_postman_id": "futureschool-management-api-v2",
+		"name": "FutureSchool Management System API (Complete Prototype Coverage)",
+		"description": "Complete production-ready REST API collection for FutureSchool High School ERP Backend. Covers 100% of all features created in the frontend prototype across all 5 user roles (Admin, Principal, Teacher, Parent, Student).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Authentication & Users",
+			"item": [
+				{
+					"name": "Login as Admin (ADM0001) - Auto Sets Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set('token', jsonData.token);",
+									"    console.log('JWT Token saved to collection variable: ' + jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"loginId\": \"ADM0001\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+					}
+				},
+				{
+					"name": "Login as Principal (PRN0001)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set('token', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"loginId\": \"PRN0001\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+					}
+				},
+				{
+					"name": "Get Current User Profile (/api/auth/me)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/auth/me", "host": ["{{baseUrl}}"], "path": ["api", "auth", "me"] }
+					}
+				},
+				{
+					"name": "List All User Accounts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/auth/users", "host": ["{{baseUrl}}"], "path": ["api", "auth", "users"] }
+					}
+				},
+				{
+					"name": "Register New User Account",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"loginId\": \"COORD01\",\n  \"name\": \"Academic Coordinator\",\n  \"email\": \"coordinator@futureschool.edu\",\n  \"role\": \"ADMIN\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+					}
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"oldPassword\": \"password123\",\n  \"newPassword\": \"newSecret456\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/auth/change-password", "host": ["{{baseUrl}}"], "path": ["api", "auth", "change-password"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Dashboards & Analytics",
+			"item": [
+				{
+					"name": "Get Dashboard KPI Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/dashboard/stats?role=admin", "host": ["{{baseUrl}}"], "path": ["api", "dashboard", "stats"], "query": [{"key": "role", "value": "admin"}] }
+					}
+				},
+				{
+					"name": "Get Academic Leaderboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/analytics/leaderboard", "host": ["{{baseUrl}}"], "path": ["api", "analytics", "leaderboard"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Classes & Sections",
+			"item": [
+				{
+					"name": "Get All Classes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/classes", "host": ["{{baseUrl}}"], "path": ["api", "classes"] }
+					}
+				},
+				{
+					"name": "Create Class / Section",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"class-11-sci\",\n  \"name\": \"Class 11\",\n  \"section\": \"Science\",\n  \"gradeNumber\": 11,\n  \"schoolLevel\": \"Senior\",\n  \"active\": true\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/classes", "host": ["{{baseUrl}}"], "path": ["api", "classes"] }
+					}
+				},
+				{
+					"name": "Assign Class Teacher",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Class 10\",\n  \"section\": \"A\",\n  \"gradeNumber\": 10,\n  \"schoolLevel\": \"Senior\",\n  \"classTeacherId\": \"TCH0001\",\n  \"classTeacherName\": \"Rajesh Kumar\",\n  \"active\": true\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/classes/class-10-a", "host": ["{{baseUrl}}"], "path": ["api", "classes", "class-10-a"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Teachers & Faculty",
+			"item": [
+				{
+					"name": "Create Real Teacher (Auto-creates login TCH0001)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"teacherId\": \"TCH0001\",\n  \"name\": \"Rajesh Kumar\",\n  \"email\": \"rajesh.kumar@futureschool.edu\",\n  \"phone\": \"+91 98111 22334\",\n  \"designation\": \"Senior Mathematics Teacher\",\n  \"qualification\": \"M.Sc. Mathematics, B.Ed.\",\n  \"primarySubject\": \"Mathematics\",\n  \"active\": true\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/teachers", "host": ["{{baseUrl}}"], "path": ["api", "teachers"] }
+					}
+				},
+				{
+					"name": "Get All Teachers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/teachers", "host": ["{{baseUrl}}"], "path": ["api", "teachers"] }
+					}
+				},
+				{
+					"name": "Get Teacher by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/teachers/TCH0001", "host": ["{{baseUrl}}"], "path": ["api", "teachers", "TCH0001"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Parents & Sibling Switcher",
+			"item": [
+				{
+					"name": "Create Real Parent (Auto-creates login PAR0001)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"loginId\": \"PAR0001\",\n  \"name\": \"Sanjay Verma\",\n  \"mobile\": \"+91 98765 00001\",\n  \"email\": \"sanjay.verma@example.com\",\n  \"occupation\": \"Software Architect\",\n  \"address\": \"Villa 42, Green Glen Layout, Bellandur, Bengaluru\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/parents", "host": ["{{baseUrl}}"], "path": ["api", "parents"] }
+					}
+				},
+				{
+					"name": "Get All Parents",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/parents", "host": ["{{baseUrl}}"], "path": ["api", "parents"] }
+					}
+				},
+				{
+					"name": "Link Student/Child to Parent (Multi-child)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/parents/PAR0001/link-student/STU0001", "host": ["{{baseUrl}}"], "path": ["api", "parents", "PAR0001", "link-student", "STU0001"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Students & Admissions",
+			"item": [
+				{
+					"name": "Admit Real Student 1 (Aarav Verma in 10-A)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"STU0001\",\n  \"admissionNumber\": \"ADM2026-10A-001\",\n  \"name\": \"Aarav Verma\",\n  \"dob\": \"2010-05-15\",\n  \"gender\": \"Male\",\n  \"classId\": \"class-10-a\",\n  \"className\": \"Class 10\",\n  \"section\": \"A\",\n  \"roll\": \"01\",\n  \"parentAccountId\": \"PAR0001\",\n  \"parentName\": \"Sanjay Verma\",\n  \"parentMobile\": \"+91 98765 00001\",\n  \"parentEmail\": \"sanjay.verma@example.com\",\n  \"address\": \"Villa 42, Green Glen Layout, Bellandur, Bengaluru\",\n  \"transportRouteId\": \"ROUTE-01\",\n  \"status\": \"Active\",\n  \"feeBalance\": 25000.0\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/students", "host": ["{{baseUrl}}"], "path": ["api", "students"] }
+					}
+				},
+				{
+					"name": "Admit Sibling 2 (Ananya Verma in 8-A - Same Parent PAR0001)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"STU0002\",\n  \"admissionNumber\": \"ADM2026-08A-001\",\n  \"name\": \"Ananya Verma\",\n  \"dob\": \"2012-08-20\",\n  \"gender\": \"Female\",\n  \"classId\": \"class-8-a\",\n  \"className\": \"Class 8\",\n  \"section\": \"A\",\n  \"roll\": \"01\",\n  \"parentAccountId\": \"PAR0001\",\n  \"parentName\": \"Sanjay Verma\",\n  \"parentMobile\": \"+91 98765 00001\",\n  \"parentEmail\": \"sanjay.verma@example.com\",\n  \"address\": \"Villa 42, Green Glen Layout, Bellandur, Bengaluru\",\n  \"transportRouteId\": \"ROUTE-01\",\n  \"status\": \"Active\",\n  \"feeBalance\": 20000.0\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/students", "host": ["{{baseUrl}}"], "path": ["api", "students"] }
+					}
+				},
+				{
+					"name": "Get All Students",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/students", "host": ["{{baseUrl}}"], "path": ["api", "students"] }
+					}
+				},
+				{
+					"name": "Get Students by Class (Class 10-A)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/students/class/class-10-a", "host": ["{{baseUrl}}"], "path": ["api", "students", "class", "class-10-a"] }
+					}
+				},
+				{
+					"name": "Get Wards of Parent (PAR0001 - Sibling Switcher)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/students/parent/PAR0001", "host": ["{{baseUrl}}"], "path": ["api", "students", "parent", "PAR0001"] }
+					}
+				},
+				{
+					"name": "Release / Approve Exam Hall Ticket",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"released\": true,\n  \"approved\": true\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/students/STU0001/hall-ticket", "host": ["{{baseUrl}}"], "path": ["api", "students", "STU0001", "hall-ticket"] }
+					}
+				},
+				{
+					"name": "Record Student Exit / TC",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"effectiveDate\": \"2026-10-21\",\n  \"reason\": \"Relocation to Delhi\",\n  \"destinationSchool\": \"Delhi Public School\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/students/STU0001/exit", "host": ["{{baseUrl}}"], "path": ["api", "students", "STU0001", "exit"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "7. Attendance (Students & Staff)",
+			"item": [
+				{
+					"name": "Mark Daily Student Attendance",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n  {\n    \"studentId\": \"STU0001\",\n    \"studentName\": \"Aarav Verma\",\n    \"roll\": \"01\",\n    \"status\": \"Present\",\n    \"remarks\": \"On time\"\n  }\n]"
+						},
+						"url": { "raw": "{{baseUrl}}/api/attendance/mark?classId=class-10-a&date=2026-10-21", "host": ["{{baseUrl}}"], "path": ["api", "attendance", "mark"], "query": [{"key": "classId", "value": "class-10-a"}, {"key": "date", "value": "2026-10-21"}] }
+					}
+				},
+				{
+					"name": "Get Student Attendance Summary",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/attendance/summary/STU0001", "host": ["{{baseUrl}}"], "path": ["api", "attendance", "summary", "STU0001"] }
+					}
+				},
+				{
+					"name": "Mark Daily Staff Attendance",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n  {\n    \"teacherId\": \"TCH0001\",\n    \"teacherName\": \"Rajesh Kumar\",\n    \"status\": \"Present\",\n    \"checkInTime\": \"08:45 AM\",\n    \"checkOutTime\": \"03:30 PM\"\n  }\n]"
+						},
+						"url": { "raw": "{{baseUrl}}/api/admin/staff-attendance?date=2026-10-21", "host": ["{{baseUrl}}"], "path": ["api", "admin", "staff-attendance"], "query": [{"key": "date", "value": "2026-10-21"}] }
+					}
+				},
+				{
+					"name": "Get Staff Attendance on Date",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/admin/staff-attendance?date=2026-10-21", "host": ["{{baseUrl}}"], "path": ["api", "admin", "staff-attendance"], "query": [{"key": "date", "value": "2026-10-21"}] }
+					}
+				}
+			]
+		},
+		{
+			"name": "8. Marks, Exams & Report Cards",
+			"item": [
+				{
+					"name": "Enter Exam Marks",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n  {\n    \"studentId\": \"STU0001\",\n    \"studentName\": \"Aarav Verma\",\n    \"classId\": \"class-10-a\",\n    \"subject\": \"Mathematics\",\n    \"exam\": \"Term 1\",\n    \"maximumMarks\": 100.0,\n    \"score\": 94.5,\n    \"remarks\": \"Outstanding\"\n  }\n]"
+						},
+						"url": { "raw": "{{baseUrl}}/api/marks/entry", "host": ["{{baseUrl}}"], "path": ["api", "marks", "entry"] }
+					}
+				},
+				{
+					"name": "Get Student Report Card",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/marks/student/STU0001", "host": ["{{baseUrl}}"], "path": ["api", "marks", "student", "STU0001"] }
+					}
+				},
+				{
+					"name": "Verify Marks (Principal)",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/marks/MRK-STU0001-Mathematics-Term1/verify", "host": ["{{baseUrl}}"], "path": ["api", "marks", "MRK-STU0001-Mathematics-Term1", "verify"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "9. Finance & Fees",
+			"item": [
+				{
+					"name": "Collect Fee Payment (Auto Receipt)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"STU0001\",\n  \"amount\": 15000.0,\n  \"paymentMethod\": \"UPI\",\n  \"feeHead\": \"Tuition Fee\",\n  \"transactionReference\": \"UPI-998877\",\n  \"remarks\": \"Term 1 payment\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/fees/collect", "host": ["{{baseUrl}}"], "path": ["api", "fees", "collect"] }
+					}
+				},
+				{
+					"name": "Get Fee Overdue / Defaulters Report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/fees/overdue", "host": ["{{baseUrl}}"], "path": ["api", "fees", "overdue"] }
+					}
+				},
+				{
+					"name": "Get All Fee Transactions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/fees/transactions", "host": ["{{baseUrl}}"], "path": ["api", "fees", "transactions"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "10. Homework & Assignments",
+			"item": [
+				{
+					"name": "Assign Homework to Class",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"classId\": \"class-10-a\",\n  \"subject\": \"Mathematics\",\n  \"title\": \"Quadratic Equations Exercise 4.2\",\n  \"description\": \"Complete questions 1 to 15 in notebook\",\n  \"dueDate\": \"2026-10-25\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/homework", "host": ["{{baseUrl}}"], "path": ["api", "homework"] }
+					}
+				},
+				{
+					"name": "Get Homework for Class 10-A",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/homework?classId=class-10-a", "host": ["{{baseUrl}}"], "path": ["api", "homework"], "query": [{"key": "classId", "value": "class-10-a"}] }
+					}
+				}
+			]
+		},
+		{
+			"name": "11. Study Materials & Documents",
+			"item": [
+				{
+					"name": "Upload Study Material",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"classId\": \"class-10-a\",\n  \"subject\": \"Physics\",\n  \"title\": \"Light - Reflection & Refraction Formula Sheet\",\n  \"description\": \"Quick revision formula guide for board exams\",\n  \"materialType\": \"PDF\",\n  \"fileUrl\": \"https://futureschool.edu/materials/physics-ch10.pdf\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/materials", "host": ["{{baseUrl}}"], "path": ["api", "materials"] }
+					}
+				},
+				{
+					"name": "Get Materials for Class 10-A",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/materials?classId=class-10-a", "host": ["{{baseUrl}}"], "path": ["api", "materials"], "query": [{"key": "classId", "value": "class-10-a"}] }
+					}
+				}
+			]
+		},
+		{
+			"name": "12. Library Management",
+			"item": [
+				{
+					"name": "Add Library Book",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"A Brief History of Time\",\n  \"author\": \"Stephen Hawking\",\n  \"isbn\": \"978-0553380163\",\n  \"category\": \"Science\",\n  \"shelfLocation\": \"Shelf S-04\",\n  \"totalCopies\": 5,\n  \"availableCopies\": 5\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/library/books", "host": ["{{baseUrl}}"], "path": ["api", "library", "books"] }
+					}
+				},
+				{
+					"name": "Issue Book to Student",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bookId\": \"BK-1001\",\n  \"studentId\": \"STU0001\",\n  \"loanDays\": 14\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/library/issue", "host": ["{{baseUrl}}"], "path": ["api", "library", "issue"] }
+					}
+				},
+				{
+					"name": "Get Student Borrowed Books",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/library/student/STU0001", "host": ["{{baseUrl}}"], "path": ["api", "library", "student", "STU0001"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "13. Transport & Fleet",
+			"item": [
+				{
+					"name": "Create Bus Route",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"ROUTE-01\",\n  \"routeName\": \"Indiranagar - Whitefield Route\",\n  \"vehicleNumber\": \"KA-01-AB-1234\",\n  \"driverName\": \"Suresh Babu\",\n  \"driverPhone\": \"+91 98888 77665\",\n  \"stops\": \"Indiranagar, Domlur, Marathahalli, Whitefield\",\n  \"capacity\": 45\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/transport/routes", "host": ["{{baseUrl}}"], "path": ["api", "transport", "routes"] }
+					}
+				},
+				{
+					"name": "Get All Bus Routes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/transport/routes", "host": ["{{baseUrl}}"], "path": ["api", "transport", "routes"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "14. Timetable & Schedule",
+			"item": [
+				{
+					"name": "Add Timetable Period Slot",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"classId\": \"class-10-a\",\n  \"dayOfWeek\": \"MONDAY\",\n  \"periodNumber\": 1,\n  \"startTime\": \"09:00 AM\",\n  \"endTime\": \"09:45 AM\",\n  \"subject\": \"Mathematics\",\n  \"teacherId\": \"TCH0001\",\n  \"teacherName\": \"Rajesh Kumar\",\n  \"roomNumber\": \"Room 101\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/timetable", "host": ["{{baseUrl}}"], "path": ["api", "timetable"] }
+					}
+				},
+				{
+					"name": "Get Class Timetable (Class 10-A)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/timetable/class/class-10-a", "host": ["{{baseUrl}}"], "path": ["api", "timetable", "class", "class-10-a"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "15. Communication, Calendar, PTM & Complaints",
+			"item": [
+				{
+					"name": "Publish School Notice",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Annual Sports Meet 2026\",\n  \"content\": \"Sports meet will be held on Nov 15. Registrations open.\",\n  \"category\": \"EVENT\",\n  \"audience\": \"ALL\",\n  \"priority\": \"HIGH\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/notices", "host": ["{{baseUrl}}"], "path": ["api", "notices"] }
+					}
+				},
+				{
+					"name": "Add Calendar Event / Holiday",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Diwali Break\",\n  \"description\": \"School closed for festive holidays\",\n  \"startDate\": \"2026-11-01\",\n  \"endDate\": \"2026-11-05\",\n  \"eventType\": \"HOLIDAY\",\n  \"audience\": \"ALL\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/communication/calendar/events", "host": ["{{baseUrl}}"], "path": ["api", "communication", "calendar", "events"] }
+					}
+				},
+				{
+					"name": "Schedule Parent-Teacher Meeting (PTM)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Term 1 Progress Discussion\",\n  \"meetingDate\": \"2026-10-28\",\n  \"meetingTime\": \"10:30 AM\",\n  \"teacherId\": \"TCH0001\",\n  \"teacherName\": \"Rajesh Kumar\",\n  \"parentId\": \"PAR0001\",\n  \"parentName\": \"Sanjay Verma\",\n  \"studentId\": \"STU0001\",\n  \"studentName\": \"Aarav Verma\",\n  \"mode\": \"IN_PERSON\",\n  \"agenda\": \"Review Mathematics score and project work\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/communication/meetings", "host": ["{{baseUrl}}"], "path": ["api", "communication", "meetings"] }
+					}
+				},
+				{
+					"name": "File Grievance / Complaint Ticket",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Bus 01 Arrival Delay at Domlur Stop\",\n  \"description\": \"Morning bus arrived 25 minutes late today at Domlur junction\",\n  \"category\": \"TRANSPORT\",\n  \"priority\": \"NORMAL\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/communication/complaints", "host": ["{{baseUrl}}"], "path": ["api", "communication", "complaints"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "16. Administration (Academic Years, Promotion, Certificates, Settings)",
+			"item": [
+				{
+					"name": "Create Academic Year",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"2026-2027\",\n  \"startDate\": \"2026-06-01\",\n  \"endDate\": \"2027-04-30\",\n  \"isCurrent\": true\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/admin/academic-years", "host": ["{{baseUrl}}"], "path": ["api", "admin", "academic-years"] }
+					}
+				},
+				{
+					"name": "Promote Students to Next Class",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fromClassId\": \"class-9-a\",\n  \"toClassId\": \"class-10-a\",\n  \"studentIds\": [\"STU0001\"]\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/admin/students/promote", "host": ["{{baseUrl}}"], "path": ["api", "admin", "students", "promote"] }
+					}
+				},
+				{
+					"name": "Issue Bonafide / Transfer Certificate",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"studentId\": \"STU0001\",\n  \"studentName\": \"Aarav Verma\",\n  \"className\": \"Class 10-A\",\n  \"certificateType\": \"BONAFIDE\",\n  \"purpose\": \"Passport Application Verification\"\n}"
+						},
+						"url": { "raw": "{{baseUrl}}/api/admin/certificates", "host": ["{{baseUrl}}"], "path": ["api", "admin", "certificates"] }
+					}
+				},
+				{
+					"name": "Get School Profile & Configuration Settings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "{{baseUrl}}/api/admin/settings", "host": ["{{baseUrl}}"], "path": ["api", "admin", "settings"] }
+					}
+				}
+			]
+		}
+	]
+}

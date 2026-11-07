@@ -1,0 +1,2033 @@
+Proceed with PHASE 13 ONLY:
+
+FUTURESCHOOL PRODUCTION API CONTRACT
+
+The following architecture phases are complete:
+
+Phase 10:
+Security Architecture
+
+Phase 11:
+Database + Multi-Tenant Architecture
+
+Phase 12:
+Authorization Matrix
+
+Do NOT implement Spring Boot controllers yet.
+
+Do NOT implement repositories, services, JPA entities, authentication code, payment integrations, or frontend API calls yet.
+
+This phase is for API CONTRACT DESIGN ONLY.
+
+Act as:
+
+- Senior REST API Architect
+- Senior Spring Boot Architect
+- Senior SaaS Architect
+- Senior Security Architect
+- Senior React Integration Architect
+- Senior API Governance Engineer
+- Senior QA Automation Architect
+
+The objective is to define a secure, consistent, versioned and production-oriented API contract for FutureSchool before backend implementation begins.
+
+==================================================
+1. API DESIGN PRINCIPLES
+==================================================
+
+Design the API using consistent REST conventions.
+
+Use a versioned API base path such as:
+
+/api/v1
+
+Recommend the final convention.
+
+Use resource-oriented endpoints.
+
+Avoid action-heavy URLs where a resource or state-transition endpoint is clearer.
+
+Examples:
+
+Preferred:
+
+GET /api/v1/students/me
+
+GET /api/v1/homework
+
+POST /api/v1/leave-requests
+
+POST /api/v1/report-cards/{reportCardId}/approvals
+
+Not preferred:
+
+GET /getStudentData
+
+POST /doApproveReportCard
+
+POST /updateEverything
+
+Use:
+
+- JSON request and response bodies
+- ISO-8601 date/time formats
+- Consistent pagination
+- Consistent sorting
+- Consistent filtering
+- Consistent errors
+- Consistent validation messages
+- Correlation/request identifiers
+- Idempotency where required
+
+==================================================
+2. MULTI-TENANT API RULE
+==================================================
+
+For normal school users, do NOT design APIs that trust arbitrary schoolId values supplied by the browser.
+
+Avoid normal endpoints such as:
+
+GET /api/v1/students?schoolId=123
+
+if the authenticated identity already determines the school.
+
+Preferred concept:
+
+GET /api/v1/students
+
+The backend determines:
+
+Authenticated User
+        ↓
+School/Tenant Context
+        ↓
+Role and Permission
+        ↓
+Authorized Resource Scope
+        ↓
+Response
+
+Platform Admin APIs may explicitly reference tenant/school identifiers when managing tenants.
+
+Clearly separate:
+
+School-scoped APIs
+
+from:
+
+Platform Admin APIs
+
+==================================================
+3. API NAMESPACES
+==================================================
+
+Recommend and define namespaces such as:
+
+/api/v1/auth
+
+/api/v1/me
+
+/api/v1/students
+
+/api/v1/parents
+
+/api/v1/staff
+
+/api/v1/academic-years
+
+/api/v1/classes
+
+/api/v1/sections
+
+/api/v1/subjects
+
+/api/v1/teacher-allocations
+
+/api/v1/attendance
+
+/api/v1/homework
+
+/api/v1/quizzes
+
+/api/v1/study-materials
+
+/api/v1/exams
+
+/api/v1/marks
+
+/api/v1/report-cards
+
+/api/v1/hall-tickets
+
+/api/v1/fees
+
+/api/v1/invoices
+
+/api/v1/payments
+
+/api/v1/refunds
+
+/api/v1/credits
+
+/api/v1/concessions
+
+/api/v1/transport
+
+/api/v1/leave-requests
+
+/api/v1/messages
+
+/api/v1/meetings
+
+/api/v1/complaints
+
+/api/v1/events
+
+/api/v1/consents
+
+/api/v1/pickup-authorizations
+
+/api/v1/incidents
+
+/api/v1/notifications
+
+/api/v1/reports
+
+/api/v1/files
+
+/api/v1/audit
+
+/api/v1/policies
+
+/api/v1/integrations
+
+/api/v1/platform
+
+Recommend improved grouping where necessary.
+
+Do not create excessively deep or inconsistent paths.
+
+==================================================
+4. AUTHENTICATION APIs
+==================================================
+
+Design API contracts for:
+
+Login
+
+Logout
+
+Refresh session/token if the selected architecture uses refresh tokens
+
+Current User Context
+
+Password recovery request
+
+Password recovery verification
+
+Password reset
+
+Change password
+
+MFA enrollment
+
+MFA verification
+
+MFA recovery/reset through authorized workflow
+
+Session list
+
+Revoke one session
+
+Revoke all sessions
+
+Account-lock response
+
+For Student and Parent login:
+
+Same Student ID
++
+Same Password
++
+Portal Context
+
+The portal context must be validated by the server.
+
+Example request concept:
+
+POST /api/v1/auth/login
+
+{
+  "loginId": "GVS-2027-0001",
+  "password": "...",
+  "portal": "STUDENT"
+}
+
+or:
+
+{
+  "loginId": "GVS-2027-0001",
+  "password": "...",
+  "portal": "PARENT"
+}
+
+Design the final request and response structure.
+
+Never return:
+
+- Password
+- Password hash
+- MFA secret
+- Reset token
+- Private signing key
+- Raw session secret
+
+==================================================
+5. CURRENT USER CONTEXT
+==================================================
+
+Design:
+
+GET /api/v1/me
+
+Response should provide only authorized frontend context such as:
+
+User identity
+
+Portal role/context
+
+School branding/context
+
+Permissions
+
+Feature entitlements
+
+Current Academic Year
+
+Account-security summary
+
+Actual Subject Allocations where applicable
+
+Class Teacher assignment where applicable
+
+Do not return unrestricted school data.
+
+Do not make the frontend decode authorization solely from a token if a secure current-user endpoint is more appropriate.
+
+==================================================
+6. SCHOOL CONTEXT
+==================================================
+
+Design the school-context response required by the frontend.
+
+Include appropriate fields such as:
+
+School internal/public reference
+
+School code
+
+School name
+
+Logo reference
+
+Brand colors
+
+Academic year
+
+Supported languages
+
+Enabled features
+
+Subscription/entitlement summary appropriate for the user
+
+Do not expose Platform subscription-commercial details to ordinary Students, Parents or Teachers unless required.
+
+==================================================
+7. STANDARD RESPONSE DESIGN
+==================================================
+
+Decide whether successful APIs return:
+
+Direct resources
+
+or:
+
+A consistent response envelope
+
+Recommend one approach and apply it consistently.
+
+Example envelope concept:
+
+{
+  "data": {},
+  "meta": {},
+  "requestId": "..."
+}
+
+For collections:
+
+{
+  "data": [],
+  "meta": {
+    "page": 0,
+    "size": 20,
+    "totalElements": 100,
+    "totalPages": 5
+  },
+  "requestId": "..."
+}
+
+Do not wrap responses unnecessarily if direct resources are cleaner.
+
+Explain the chosen convention.
+
+==================================================
+8. STANDARD ERROR CONTRACT
+==================================================
+
+Create a consistent error model.
+
+Example concept:
+
+{
+  "timestamp": "...",
+  "status": 422,
+  "code": "VALIDATION_FAILED",
+  "message": "The request contains invalid values.",
+  "fieldErrors": [
+    {
+      "field": "fromDate",
+      "code": "INVALID_DATE_RANGE",
+      "message": "From date must not be after the to date."
+    }
+  ],
+  "requestId": "..."
+}
+
+Define handling for:
+
+400
+Invalid request
+
+401
+Unauthenticated
+
+403
+Authenticated but unauthorized
+
+404
+Resource unavailable or not found
+
+409
+State conflict / duplicate / concurrency conflict
+
+422
+Business or validation failure
+
+429
+Rate limited
+
+500
+Unexpected internal failure
+
+502 / 503
+External provider unavailable where appropriate
+
+Avoid leaking:
+
+- SQL errors
+- Stack traces
+- Internal class names
+- Tenant existence
+- Student existence
+- Payment secrets
+- Security configuration
+
+==================================================
+9. PAGINATION, FILTERING AND SORTING
+==================================================
+
+Define one consistent convention.
+
+For example:
+
+page
+
+size
+
+sort
+
+status
+
+academicYear
+
+classId
+
+subjectId
+
+fromDate
+
+toDate
+
+search
+
+Define maximum page size.
+
+Define default page size.
+
+Define allowed sorting fields per endpoint.
+
+Do not allow arbitrary database-field sorting.
+
+Use cursor pagination where justified for logs or high-volume activity, but do not overcomplicate normal lists.
+
+==================================================
+10. IDENTIFIER RULES
+==================================================
+
+Define API identifier behavior.
+
+The frontend may use opaque UUID/public identifiers.
+
+Do not expose sequential database IDs where avoidable.
+
+Differentiate:
+
+Internal database identifier
+
+Human-readable Student ID
+
+Admission Number
+
+Staff ID
+
+Invoice Number
+
+Receipt Number
+
+Payment Reference
+
+Complaint Number
+
+Never use a business identifier as authorization proof.
+
+==================================================
+11. CONCURRENCY AND VERSION FIELDS
+==================================================
+
+For resources vulnerable to concurrent edits, design optimistic concurrency.
+
+Examples:
+
+Marks Draft
+
+Timetable Draft
+
+Fee Structure Draft
+
+Policy Draft
+
+Student Profile Change
+
+Teacher Allocation Draft
+
+Report Card Draft
+
+Use:
+
+version
+
+ETag / If-Match
+
+or another recommended strategy.
+
+Define expected conflict response:
+
+409 CONFLICT
+
+or:
+
+412 PRECONDITION_FAILED
+
+Recommend one consistent approach.
+
+==================================================
+12. IDEMPOTENCY
+==================================================
+
+Define endpoints requiring idempotency keys.
+
+Include at minimum:
+
+Payment order creation
+
+Payment webhook processing
+
+Refund processing
+
+Billing run
+
+Admission activation
+
+Promotion execution
+
+Student Exit execution
+
+Staff Exit execution
+
+Academic Year closure
+
+Bulk import execution
+
+Hall Ticket bulk release
+
+Notification batch execution where needed
+
+Recommend request header such as:
+
+Idempotency-Key
+
+Define:
+
+Scope
+
+Retention
+
+Duplicate response behavior
+
+Conflict behavior
+
+==================================================
+13. FILE UPLOAD CONTRACT
+==================================================
+
+Design APIs for:
+
+Student photos
+
+Homework attachments
+
+Homework submissions
+
+Study Materials
+
+Leave attachments
+
+Complaint evidence
+
+Report Card PDFs
+
+Receipts
+
+Certificates
+
+Recommend upload process:
+
+Direct multipart upload through backend
+
+or:
+
+Authorized pre-signed upload workflow
+
+Explain the recommended V1 approach.
+
+Define:
+
+Allowed MIME types
+
+Maximum size
+
+File metadata
+
+Tenant scope
+
+Upload status
+
+Future malware scanning status
+
+Download authorization
+
+Do not expose permanent unrestricted public URLs.
+
+==================================================
+14. STUDENT APIs
+==================================================
+
+Design contracts for:
+
+Student's own profile
+
+Student attendance
+
+Student homework
+
+Homework submission
+
+Quiz assignments
+
+Quiz attempts
+
+Study Materials
+
+Digital Library
+
+AI Tutor request contract
+
+Timetable
+
+Exam schedule
+
+Released Hall Tickets
+
+Published Marks
+
+Published Report Cards
+
+Progress summary
+
+Calendar
+
+Notifications
+
+Security summary
+
+All Student APIs must be scoped to the authenticated Student.
+
+Do not require the normal Student frontend to send another Student ID for own-resource APIs.
+
+Prefer:
+
+GET /api/v1/students/me/attendance
+
+or another clean convention.
+
+==================================================
+15. PARENT APIs
+==================================================
+
+Design APIs for the authenticated Parent context.
+
+Because Parent and Student share Student credentials, the Parent context still belongs to one Student.
+
+Design:
+
+Child overview
+
+Attendance
+
+Homework tracking
+
+Published Marks
+
+Published Report Cards
+
+Report Card acknowledgement
+
+Fees
+
+Invoices
+
+Payment orders
+
+Payment history
+
+Receipts
+
+Refund status
+
+Credits
+
+Transport
+
+Leave requests
+
+Teacher-message threads
+
+Meeting booking
+
+Complaints
+
+Events
+
+Consent
+
+Pickup contacts
+
+Temporary pickup authorization
+
+Early pickup
+
+Notifications
+
+Profile change requests
+
+Security
+
+The Parent frontend must never supply another Student ID to access a sibling or unrelated Student.
+
+==================================================
+16. TEACHER APIs
+==================================================
+
+Separate API authorization by actual relationship:
+
+Assigned Subject Teacher
+
+Assigned Class Teacher
+
+Design Subject Teacher contracts for:
+
+My allocations
+
+Homework
+
+Homework review
+
+Marks Draft
+
+Marks submission
+
+Marks import batch
+
+Quiz
+
+Question Bank
+
+Study Materials
+
+Material versions
+
+AI approval requests
+
+Student doubts
+
+Class FAQ
+
+Lesson Plans
+
+Syllabus progress
+
+Question Papers
+
+Teacher AI requests
+
+Design Class Teacher contracts for:
+
+Morning Attendance
+
+Afternoon Attendance
+
+Attendance correction
+
+Leave reviews
+
+Subject marks review
+
+Report Card preparation
+
+Conduct and remarks
+
+Principal submission
+
+Returned Report Cards
+
+Publication
+
+Hall Ticket release
+
+Parent messages
+
+Meeting availability
+
+Meeting summaries
+
+Classroom updates
+
+Promotion recommendations
+
+Early pickup awareness
+
+==================================================
+17. MARKS WORKFLOW API
+==================================================
+
+Design explicit state-transition APIs for:
+
+Create/edit Draft
+
+Save Draft
+
+Submit to Class Teacher
+
+Return with reason
+
+Correct
+
+Resubmit
+
+Accept
+
+Request reopening
+
+Import Excel staging
+
+Import validation
+
+Import rollback while Draft
+
+Published correction request
+
+Avoid one unrestricted endpoint such as:
+
+PATCH /marks/{id}
+
+that can perform every transition.
+
+Define the required permission and valid source state for every transition.
+
+==================================================
+18. REPORT CARD APIs
+==================================================
+
+Design contracts for:
+
+Class validation summary
+
+Report Card generation
+
+Conduct/remark update
+
+Submit class to Principal
+
+Principal class summary
+
+Attention items
+
+Approve selected Students
+
+Return selected Students with reason
+
+Check all-approved status
+
+Class Teacher final publication
+
+Report Card acknowledgement
+
+Published correction
+
+Report Card versions
+
+Do not allow Principal approval endpoint to publish automatically.
+
+==================================================
+19. PRINCIPAL APIs
+==================================================
+
+Design APIs for:
+
+Executive Dashboard
+
+Action Center
+
+Executive Calendar
+
+Report Card approvals
+
+Teacher Leave approvals
+
+Re-Exam approvals
+
+Published Mark Correction approvals
+
+Promotion approvals
+
+Fee Concession approvals
+
+Refund approvals
+
+Fee Structure approvals
+
+Marks reopening
+
+Academic results analytics
+
+Syllabus monitoring
+
+Student Attendance monitoring
+
+Teacher coverage
+
+Exam Control Center
+
+Hall Ticket monitoring
+
+Hall Ticket override
+
+Complaints/escalations
+
+Safety incidents
+
+Emergency notices
+
+Admissions approval
+
+Student Exit approval
+
+Teacher allocation approval
+
+Class Teacher assignment approval
+
+Timetable approval
+
+Exam Schedule approval
+
+School Calendar approval
+
+Major Event approval
+
+Policy approval
+
+Academic Year close approval
+
+Audit/history
+
+Leadership AI
+
+My Teaching
+
+Keep approval endpoints separate from Admin execution endpoints.
+
+==================================================
+20. ADMIN APIs
+==================================================
+
+Design permission-scoped APIs for:
+
+Dashboard / Work Center
+
+Admissions
+
+Student activation
+
+Student 360
+
+Profile change requests
+
+Family relationships
+
+Staff onboarding
+
+Teacher allocation proposals
+
+Academic Year
+
+Classes / Sections / Subjects
+
+Timetable Draft
+
+School Calendar Draft
+
+Exam configuration
+
+Exam Schedule Draft
+
+Attendance operations
+
+Staff Attendance
+
+Promotion execution
+
+Student Exit execution
+
+Staff Exit execution
+
+ID cards
+
+Certificates
+
+Finance
+
+Transport
+
+Communication
+
+Complaints
+
+Events
+
+PTM
+
+Accounts
+
+Permissions
+
+Policies
+
+Integrations
+
+Reports
+
+Imports
+
+Audit
+
+Data Protection
+
+Archive
+
+Approved-for-Execution Queue
+
+Administrative corrections
+
+Every Admin endpoint must identify required permission.
+
+==================================================
+21. PLATFORM ADMIN APIs
+==================================================
+
+Design a clearly separate Platform API namespace.
+
+For example:
+
+/api/v1/platform/schools
+
+/api/v1/platform/subscriptions
+
+/api/v1/platform/entitlements
+
+/api/v1/platform/support
+
+/api/v1/platform/audit
+
+Design:
+
+School application review
+
+Tenant creation
+
+Initial Principal/Admin provisioning
+
+Tenant activation
+
+Tenant suspension
+
+Subscription
+
+Billable Students
+
+Per-Student rate configuration
+
+Feature entitlements
+
+Renewal
+
+Platform integration health
+
+Support access
+
+Platform audit
+
+Do not expose these APIs to School Admin.
+
+Support access to school data must use an explicit controlled support workflow.
+
+==================================================
+22. ADMISSIONS API
+==================================================
+
+Design:
+
+Create Admission Draft
+
+Update Draft Step
+
+Validate Draft
+
+Submit for approval
+
+Principal approve / return / reject
+
+Fresh validation
+
+Admin activate
+
+Bulk activation where appropriate
+
+Admission activation must be idempotent and transactional.
+
+Draft must not create active login, invoices, attendance eligibility, Hall Ticket eligibility or active transport seat.
+
+==================================================
+23. ATTENDANCE APIs
+==================================================
+
+Design:
+
+Teacher attendance sheet
+
+Morning submission
+
+Afternoon submission
+
+Correction request/reason
+
+Late-entry reopening request
+
+Approve reopening
+
+Administrative exceptional correction
+
+Student attendance view
+
+Parent attendance view
+
+Principal monitoring
+
+Admin operations
+
+Use explicit attendance/session statuses.
+
+Preserve correction history.
+
+==================================================
+24. HOMEWORK APIs
+==================================================
+
+Design:
+
+Create Draft
+
+Update Draft
+
+Publish
+
+List assignments
+
+Student detail
+
+Student submission
+
+Teacher review
+
+Teacher feedback
+
+Close/Archive where appropriate
+
+Prevent Parent submission.
+
+==================================================
+25. QUIZ APIs
+==================================================
+
+Design:
+
+Question Bank
+
+Quiz Draft
+
+Question assignment
+
+Publish
+
+Start attempt
+
+Submit answer
+
+Complete attempt
+
+Score/result
+
+Attempt history
+
+Prevent answer leakage before valid review state.
+
+==================================================
+26. STUDY MATERIAL AND AI APIs
+==================================================
+
+Design:
+
+Material Draft
+
+Version Upload
+
+Student publication
+
+Parent publication
+
+AI approval request
+
+Principal/authorized approval
+
+Version retirement
+
+Student AI Tutor request
+
+Teacher AI draft request
+
+Principal AI summary request
+
+Admin AI summary request
+
+AI endpoints must not perform consequential workflow mutation.
+
+Include authorized context and source-reference structures.
+
+==================================================
+27. EXAM AND RE-EXAM APIs
+==================================================
+
+Design:
+
+Exam Configuration Draft
+
+Exam Schedule Draft
+
+Validation
+
+Principal approval
+
+Admin publication
+
+Re-Exam request
+
+Re-Exam validation
+
+Approval
+
+Schedule
+
+Teacher marks entry
+
+Exam incident
+
+Exam duty
+
+Control Center summary
+
+==================================================
+28. FEES AND INVOICE APIs
+==================================================
+
+Design:
+
+Fee Structure Draft
+
+Fee Structure validation
+
+Principal approval
+
+Admin publication
+
+Billing Run Draft
+
+Billing preview
+
+Billing execution
+
+Student invoices
+
+Parent invoices
+
+Late-fee review
+
+Late-fee application
+
+Waiver
+
+Due-date extension
+
+Financial adjustment
+
+Use explicit immutable financial events.
+
+==================================================
+29. PAYMENT APIs
+==================================================
+
+Design:
+
+Create Payment Order
+
+Get Payment Order Status
+
+Provider Webhook
+
+Payment Allocation
+
+Receipt
+
+Offline Payment Record
+
+Offline Payment Verify / Reject
+
+Cheque Clearance / Bounce
+
+Payment Issue
+
+Credit
+
+Do not allow the frontend to submit success state.
+
+Provider webhook should not use normal browser authentication.
+
+Define separate verification/security requirements.
+
+==================================================
+30. REFUND APIs
+==================================================
+
+Design:
+
+Refund request
+
+Eligibility preview
+
+Admin approval where permitted
+
+Principal approval where required
+
+Approved-refund queue
+
+Fresh validation
+
+Process online refund
+
+Record authorized offline refund
+
+Get refund status
+
+Refund receipt
+
+Provider refund webhook/result
+
+Reconciliation
+
+Never allow:
+
+PATCH /refund/{id}
+{
+  "status": "SUCCEEDED"
+}
+
+from ordinary frontend code.
+
+==================================================
+31. SETTLEMENT APIs
+==================================================
+
+Design:
+
+Expected settlement
+
+Provider settlement import/webhook
+
+Matching
+
+Exception
+
+Resolution
+
+Settlement reports
+
+Do not change verified Parent payments to force settlement reconciliation.
+
+==================================================
+32. TRANSPORT APIs
+==================================================
+
+Design:
+
+Routes
+
+Stops
+
+Vehicles
+
+Route capacity
+
+Student assignment
+
+Transport change request
+
+Approval/rejection
+
+Financial adjustment linkage
+
+Vehicle replacement
+
+Transport alert
+
+Transport incident
+
+Future vehicle location adapter
+
+No Student personal GPS endpoint.
+
+==================================================
+33. COMMUNICATION AND NOTIFICATION APIs
+==================================================
+
+Design:
+
+Notice Draft
+
+Approval
+
+Schedule
+
+Publish
+
+Cancel scheduled notice
+
+Notification preferences
+
+Notification list
+
+Mark read
+
+Delivery status
+
+Template
+
+Channel provider status
+
+Separate business event from delivery channel/provider.
+
+==================================================
+34. PTM APIs
+==================================================
+
+Design:
+
+Create PTM event
+
+Teacher availability
+
+Booking window
+
+Available slots
+
+Book slot
+
+Reschedule request
+
+Accept/reject reschedule
+
+Cancel
+
+Complete
+
+Parent-visible summary
+
+Restricted internal note
+
+School monitoring
+
+Prevent double booking transactionally.
+
+==================================================
+35. COMPLAINT APIs
+==================================================
+
+Design:
+
+Create complaint
+
+Assign
+
+Reassign
+
+Parent-visible response
+
+Internal note
+
+Escalate
+
+Resolve
+
+Parent confirm resolution
+
+Reopen
+
+Close
+
+History
+
+Original Parent complaint body must not be editable through later updates.
+
+==================================================
+36. EVENT AND CONSENT APIs
+==================================================
+
+Design:
+
+Event Draft
+
+Validation
+
+Approval
+
+Publish
+
+Participant list
+
+Parent consent
+
+Payment reference
+
+Transport requirement
+
+Reminder
+
+Cancel/reschedule
+
+Refund case generation
+
+Completion
+
+Admin cannot change Parent consent directly.
+
+==================================================
+37. STUDENT SAFETY APIs
+==================================================
+
+Design:
+
+Pickup contacts
+
+Pickup contact change request
+
+Temporary authorization
+
+Early pickup request
+
+School-initiated pickup
+
+Release validation
+
+Complete release
+
+Incident
+
+Principal escalation
+
+Release record must be immutable after completion except controlled correction.
+
+==================================================
+38. REPORT AND EXPORT APIs
+==================================================
+
+Design:
+
+Report catalog
+
+Report parameters
+
+Generate normal report
+
+Generate sensitive export
+
+Step-up challenge where required
+
+Download authorized result
+
+Export audit
+
+For V1, design synchronous generation for reasonably sized reports and define the safe limitation.
+
+Do not promise unsupported background processing.
+
+==================================================
+39. BULK IMPORT APIs
+==================================================
+
+Design:
+
+Download template metadata
+
+Create upload/staging batch
+
+Validate batch
+
+Get row errors
+
+Download error report
+
+Preview
+
+Execute valid rows
+
+Get batch result
+
+Controlled rollback where permitted
+
+Do not silently skip invalid rows.
+
+==================================================
+40. AUDIT APIs
+==================================================
+
+Design read-only operational APIs for authorized users.
+
+Support:
+
+Filter by actor
+
+Action
+
+Entity
+
+Date range
+
+Module
+
+School Scope
+
+Export when separately authorized
+
+Do not expose endpoints to edit/delete audit events.
+
+==================================================
+41. DASHBOARD API STRATEGY
+==================================================
+
+Design dashboard-summary endpoints carefully.
+
+Avoid requiring the frontend to make 50 requests for one dashboard.
+
+But do not create one enormous endpoint returning the whole database.
+
+Recommend role-specific aggregate endpoints such as:
+
+GET /api/v1/student-dashboard
+
+GET /api/v1/parent-dashboard
+
+GET /api/v1/teacher-dashboard
+
+GET /api/v1/principal-dashboard
+
+GET /api/v1/admin-dashboard
+
+or recommend a cleaner resource convention.
+
+Document what each summary contains and excludes.
+
+==================================================
+42. ANALYTICS API RULES
+==================================================
+
+Analytics must use:
+
+Authorized scope
+
+Published/final data where required
+
+Aggregated results
+
+No Teacher ranking
+
+No Student ranking
+
+No employee productivity score
+
+Define contracts for:
+
+Published academic trends
+
+Attendance summaries
+
+Syllabus status
+
+Finance summaries
+
+Operational exceptions
+
+==================================================
+43. DATE, TIME AND TIMEZONE
+==================================================
+
+Define:
+
+Date format
+
+Date-time format
+
+Timezone strategy
+
+School timezone
+
+Server storage recommendation
+
+Display conversion
+
+Avoid ambiguous local timestamps.
+
+==================================================
+44. CURRENCY AND MONEY
+==================================================
+
+Define money representation.
+
+Do not use floating-point types for money.
+
+Recommend:
+
+Minor-unit integer
+
+or:
+
+Decimal string/BigDecimal representation
+
+Define API format for:
+
+Amount
+
+Currency
+
+Tax
+
+Discount
+
+Concession
+
+Credit
+
+Refund
+
+Settlement
+
+==================================================
+45. ENUMS AND STATUSES
+==================================================
+
+Centralize API enums.
+
+Examples:
+
+AccountStatus
+
+AttendanceStatus
+
+MarksStatus
+
+ReportCardStatus
+
+PaymentStatus
+
+RefundStatus
+
+SettlementStatus
+
+ComplaintStatus
+
+ApprovalStatus
+
+DocumentStatus
+
+Do not use inconsistent values such as:
+
+APPROVED
+
+Approved
+
+approved
+
+across endpoints.
+
+==================================================
+46. API DOCUMENTATION
+==================================================
+
+Define OpenAPI requirements.
+
+Each endpoint should document:
+
+Summary
+
+Description
+
+Required role/permission
+
+Tenant scope
+
+Request schema
+
+Response schema
+
+Errors
+
+Idempotency requirement
+
+Step-up authentication requirement
+
+Audit requirement
+
+Example request/response
+
+Do not expose sensitive details in public API documentation.
+
+==================================================
+47. API TESTING STRATEGY
+==================================================
+
+For each critical endpoint, define:
+
+Happy-path test
+
+Validation failure
+
+Unauthenticated test
+
+Unauthorized role test
+
+Wrong tenant test
+
+Wrong relationship test
+
+Invalid workflow state test
+
+Concurrency test
+
+Idempotency test where applicable
+
+Audit-event test
+
+Example:
+
+Teacher submits marks:
+Assigned Subject + DRAFT
+→ success
+
+Unassigned Subject
+→ denied
+
+School B record
+→ denied
+
+Already ACCEPTED
+→ conflict/denied
+
+Duplicate submission key
+→ same safe result
+
+==================================================
+48. FRONTEND MIGRATION STRATEGY
+==================================================
+
+The frontend currently uses centralized mock data/services.
+
+Define how to replace mock services gradually.
+
+Example:
+
+MockAttendanceService
+
+        ↓
+
+AttendanceApiClient
+
+Keep UI components independent from transport implementation.
+
+Recommend:
+
+API client structure
+
+Auth interceptors
+
+Request ID handling
+
+Error mapping
+
+Schema/runtime validation if appropriate
+
+Caching strategy
+
+Loading/error state strategy
+
+Do not write the entire API client yet.
+
+==================================================
+49. OUTPUT REQUIRED
+==================================================
+
+Do NOT implement controllers or API client code yet.
+
+Produce:
+
+1. API Architecture Overview
+2. API Naming and Versioning Standard
+3. Authentication API Contract
+4. Current User / School Context Contract
+5. Standard Success Response
+6. Standard Error Contract
+7. Pagination / Filter / Sort Standard
+8. Identifier Standard
+9. Concurrency Standard
+10. Idempotency Standard
+11. File API Standard
+12. Student API Catalog
+13. Parent API Catalog
+14. Teacher API Catalog
+15. Principal API Catalog
+16. Admin API Catalog
+17. Platform Admin API Catalog
+18. Academic Workflow API Catalog
+19. Finance API Catalog
+20. Transport API Catalog
+21. Communication API Catalog
+22. Safety API Catalog
+23. Reports/Exports API Catalog
+24. Audit API Catalog
+25. Dashboard API Strategy
+26. Date/Time Standard
+27. Currency Standard
+28. Enum/Status Standard
+29. OpenAPI Documentation Standard
+30. API Test Matrix
+31. Frontend Mock-to-API Migration Plan
+32. Open Decisions Requiring Product Owner Approval
+33. Recommended API Implementation Order
+
+For every endpoint specify:
+
+HTTP METHOD
+
+PATH
+
+PURPOSE
+
+ACTOR
+
+REQUIRED PERMISSION
+
+TENANT SCOPE
+
+RELATIONSHIP SCOPE
+
+VALID SOURCE STATE
+
+REQUEST SCHEMA
+
+SUCCESS RESPONSE
+
+ERRORS
+
+IDEMPOTENCY REQUIRED?
+
+STEP-UP REQUIRED?
+
+AUDIT REQUIRED?
+
+Clearly label:
+
+DESIGN DECISION
+
+and:
+
+IMPLEMENTATION TODO
+
+Do not claim APIs are implemented.
+
+Stop after Phase 13 API Contract documentation.
