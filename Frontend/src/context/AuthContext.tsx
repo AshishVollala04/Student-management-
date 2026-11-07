@@ -168,7 +168,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       pass === 'principal123' ||
       pass === 'teacher123' ||
       pass === 'parent123' ||
-      pass === 'student123';
+      pass === 'student123' || pass === '492018' || pass === '123456';
 
     if (!isAcceptedPass) {
       setLoginError('Invalid password provided. Please verify your credentials or click "Forgot password?" to reset.');
